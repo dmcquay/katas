@@ -1,0 +1,27 @@
+{
+  "name": "2018-10-10-upvotes",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "test:unit": "jest \"[\\w]{2}\\.test\\.js\"",
+    "test:e2e": "jest \"\\.e2e\\.js\"",
+    "initdb": "node init-database.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "dotenv": "^6.1.0",
+    "express": "^4.16.3",
+    "isomorphic-fetch": "^2.2.1",
+    "jest": "^23.6.0",
+    "nodemon": "^1.18.4",
+    "pg": "^7.5.0",
+    "uuid": "^3.3.2"
+  },
+  "jest": {
+    "testRegex": "\\.(test|e2e)\\.js$",
+    "automock": false,
+    "testEnvironment": "node"
+  }
+}

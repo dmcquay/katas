@@ -28,24 +28,24 @@ The API should return a failable in `application/json` format and always use 200
 
 ### Setup
 
-You are provided with the following to get you started. You can rewrite this if you have
-time and want to practice this stuff or if you want to do it in another language (this setup
-is for JavaScript/Node).
+You are provided with the following to get you started. You can rewrite this if you have time and want to practice this stuff or if you want to do it in another language (this setup is for JavaScript/Node).
 
-1. A `.nvmrc` file containing the version of node you are expected to use. Run `nvm install` to make sure you have the right version.
-2. A docker-compose.yaml file that will provide you an instance of Postgres. Run `docker-compose up -d` to start it. (You must first install docker of course if you don't already haveit).
-3. `query` function that is tested and configured to use this Postgres instance.
-4. The beginning of an express server that can run, but doesn't have any routes yet.
+- A `.nvmrc` file containing the version of node you are expected to use. Run `nvm install` to make sure you have the right version.
+- `yarn install` to install dependencies.
+- Install docker if you don't already have it. Run `docker-compose up -d` which will start up Postgres for you.
+- Run `yarn initdb` to setup your database for this exercise.
+- `db.js` contains `query` for running database queries. It is pre-configured to connect with the provided postgres instance.
+- `index.js` contains the beginning of an express server that can run, but doesn't have any routes yet. Start the server with `yarn dev`.
 
 ### Instructions
 
-1. Write an e2e test that submits a POST request to `/upvote`. There is no body, headers, etc yet. Expect a 200 response.
+1. Create a file named `upvotes.e2e.js` and write a test that submits a POST request to `/upvote`. There is no body, headers, etc yet. Expect a 200 response. Execute the test using `yarn test:e2e`. The test should be failing because you're getting a 404 instead of 200 response.
 1. Create the route and make it simply always return 200 status. Set the `Content-type` header to `application/json`.
 1. Modify the e2e test to provide a userId, guestId and guideId and assert that the body of the response contains those fields, plus an id and createdAt. You can't know precisely what those new values will be so just assert that the id looks roughy like a uuid (v4) and createdAt looks like an ISO8601 formatted date.
 1. Create a file called `upvotes-coordinators.js` and in it create and export a function named `createUpvote` that takes a single props argument. For now, just return props wrapped in `success` (e.g. `return success(props)`).
 1. In your route, Grab `userId`, `guestId` and `guideId` from the request body and put them in a single object called `createUpvoteProps`.
 1. Import and call the `createUpvote` coordinator, passing it `createUpvoteProps`.
-1. If the resulting failable is successful, set the status code to 200, else 500. Set the body as the entire failable.
+1. If the resulting failable is successful, set the status code to 200, else 500. Set the body as the entire failable. You may want to use `prepFailableForSerialization` to make the failable display error stacks better.
 1. See that your e2e test is failing because the `id` and `createdAt` do not yet exist.
 1. Let's take an outside in approach with our coordinator by calling all the functions we intend to create before we create them. First call `validateCreateUpvoteCoordinatorProps`. It will return a failable. If it failed, return the failable.
 1. Call `buildNewUpvote` to create our upvote.
@@ -53,7 +53,7 @@ is for JavaScript/Node).
 1. Call `db.query`, passing it the insertCommand. Remember to await this function call because it is async. If it fails, return the failable.
 1. Finally, return the upvote, wrapped in a success Failable so that this function always returns a Failable instance.
 1. Now we're ready to start implementing these funcitons. Create a file called `upvotes-coordinators-utils.test.js`. All of these functions will live in this file and another file called `upvotes-coordinators-utils.js`.
-1. Import `validateCreateUpvoteCoordinatorProps` from `upvotes-coordinators-utils.js` and create your first test which calls this function with valid arguments. It should fail because the function doesn't exist.
+1. Import `validateCreateUpvoteCoordinatorProps` from `upvotes-coordinators-utils.js` and create your first test which calls this function with valid arguments. Start running your unit tests in watch mode with this command: `yarn test:unit --watchAll`. It should fail because the function doesn't exist.
 1. Create and export a function named `validateCreateUpvoteCoordinatorProps` from `upvotes-coordinators-utils.js`. Your tests should now pass.
 1. Change your test to assert that the result is a success Failable object back with no payload. Your test should be failing.
 1. Update `validateCreateUpvoteCoordinatorProps` to return a success Failable. Your tests should now pass.
