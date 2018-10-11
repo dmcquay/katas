@@ -1,0 +1,3 @@
+#!/bin/bash
+
+gcc -Wall -I /usr/local/Cellar/check/0.12.0/include tests/change.c src/change.c /usr/local/Cellar/check/0.12.0/lib/libcheck.dylib -o main && ./main && rm main
