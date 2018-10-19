@@ -1,6 +1,6 @@
 ## Fizz Buzz Plus Plus Kata
 
-https://github.com/UtahSC/FizzBuzzPlusPlus/tree/master/presenters
+https://github.com/UtahSC/FizzBuzzPlusPlus
 
 ## Create from scratch
 
