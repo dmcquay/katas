@@ -4,6 +4,12 @@ Written with Go 1.11
 
 ```
 export GOPATH=$(pwd)
-cd src/fizzbuzz
-go test
+go test ./...
+```
+
+## Run tests in watch mode
+
+```
+npm install -g nodemon
+nodemon -e go --exec 'go test ./... || exit 1'
 ```
