@@ -18,7 +18,7 @@ func FizzBuzz(n int) string {
 
 	if words == "" {
 		return strconv.Itoa(n)
-	} else {
-		return words
 	}
+
+	return words
 }
