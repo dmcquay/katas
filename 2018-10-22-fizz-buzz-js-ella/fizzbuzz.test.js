@@ -13,5 +13,9 @@ test("3 is fizz", () => {
 });
 
 test("4 is 4", () => {
-  expect(fizzBuzz(3)).toEqual("fizz");
+  expect(fizzBuzz(4)).toEqual(4);
+});
+
+test("5 is buzz", () => {
+  expect(fizzBuzz(5)).toEqual("buzz");
 });

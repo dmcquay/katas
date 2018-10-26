@@ -18,10 +18,5 @@ def fizzBuzz(n):
     for (num, word) in _NUMBER_WORD_PAIRS:
         if n % num == 0:
             s += word
-
-    # functional approach. ended up feeling much harder to read to me.
-    # words = map(lambda numberWordPair: numberWordPair[1] if n % numberWordPair[0] == 0 else None, _NUMBER_WORD_PAIRS)
-    # filtered_words = filter(lambda x: x, words)
-    # s = ''.join(filtered_words)
     
     return s or n
