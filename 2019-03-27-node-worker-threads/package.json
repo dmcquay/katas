@@ -1,0 +1,12 @@
+{
+  "name": "2019-03-27-node-worker-threads",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node --experimental-worker index.js"
+  },
+  "dependencies": {
+    "semaphore": "^1.1.0"
+  }
+}
