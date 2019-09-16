@@ -5,7 +5,7 @@ import akka.http.scaladsl.model._
 import akka.util.ByteString
 
 import scala.concurrent.{Await, Future}
-import scala.util.{Failure, Success} 
+import scala.util.{Failure, Success}
 
 object Server extends App {
     val host = "0.0.0.0"
@@ -24,11 +24,7 @@ object Server extends App {
     def route = pathPrefix("test") {
         path("hello") {
             get {
-                val f = Future {
-                    Thread.sleep(500)
-                    "Hello Future World"
-                }
-                val f2 = f.map(x => x.toUpperCase())
+                val f2 = Hello.getHello()
                 complete(f2)
             }
         } ~ path("swapi") {
