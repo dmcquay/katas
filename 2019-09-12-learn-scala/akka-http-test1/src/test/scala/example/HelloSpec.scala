@@ -1,9 +1,15 @@
-package example
+import org.scalatest.{AsyncFlatSpec, Matchers}
 
-//import org.scalatest._
+class HelloSpec extends AsyncFlatSpec with Matchers {
 
-//class HelloSpec extends FlatSpec with Matchers {
-//  "The Hello object" should "say hello" in {
-//    Hello.greeting shouldEqual "Hello, Dustin!"
-//  }
-//}
+  def getFakeMessage(): String = "the message"
+
+  "getFakeMessage" should "return the message" in {
+    assert(getFakeMessage == "the message")
+  }
+
+  "The Hello object" should "eventually return HELLO FUTURE WORLD" in {
+    val helloFuture = Hello.getHello()
+    helloFuture map { greeting => assert(greeting == "HELLO FUTURE WORLD") }
+  }
+}
