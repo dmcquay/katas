@@ -22,7 +22,7 @@ object Server extends App {
 
     val binding = Http().bindAndHandle(Routes.buildRoute, host, port)
     binding.onComplete {
-        case Success(_) => println("Success!")
+        case Success(_) => println("http://localhost:9000/test/hello")
         case Failure(error) => println(s"Failed: ${error.getMessage}")
     }
 
