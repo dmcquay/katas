@@ -15,7 +15,7 @@ class MemoryCacheSpec extends AsyncFlatSpec with Matchers {
   "when non-expired value exists" should "return the value indicating not expired" in {
     val cache = new MemoryCache()
     val resultFuture = cache.set("foo", "bar", 10000).flatMap(_ => cache.get("foo"))
-    resultFuture map { value => assert(value == Some(CacheResult("bar", false))) }
+    resultFuture map { value => value shouldBe Some(CacheResult("bar", false)) }
   }
 
   "when non-expired value exists (await)" should "return the value indicating not expired" in {

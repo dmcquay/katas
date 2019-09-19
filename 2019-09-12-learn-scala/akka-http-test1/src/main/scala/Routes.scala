@@ -1,19 +1,12 @@
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import akka.http.scaladsl.model._
-import akka.util.ByteString
-
-import scala.concurrent.{ExecutionContext, Future}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-
+import akka.stream.ActorMaterializer
 import swapi.SwapiClient.getPersonById
 
-object Routes {
-  def getResponseBodyAsString(response: HttpResponse)(implicit mat: ActorMaterializer, ec: ExecutionContext): Future[String] = {
-    response.entity.dataBytes.runFold(ByteString(""))(_ ++ _).map(_.utf8String)
-  }
+import scala.concurrent.ExecutionContext
 
+object Routes {
   def buildRoute(implicit mat: ActorMaterializer, ec: ExecutionContext, as: ActorSystem): Route = pathPrefix("test") {
     path("hello") {
       get {
