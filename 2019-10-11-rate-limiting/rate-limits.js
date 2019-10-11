@@ -1,21 +1,33 @@
-'use strict'
+"use strict";
 
-const rateLimit = (windowIntervalMillis, maxCount) => {
-    let count = 0
+const rateLimit = (windowIntervalMillis, maxCount, identifyClientFn) => {
+  let countsByClient = {};
 
-    setInterval(() => count = 0, windowIntervalMillis)
+  setInterval(() => (countsByClient = {}), windowIntervalMillis);
 
-    return (req, res, next) => {
-        if (count >= maxCount) {
-            res.status(429)
-            res.send('Too Many Requests')
-        } else {
-            count++
-            next()
-        }
+  return (req, res, next) => {
+    const clientIdentifier = identifyClientFn(req);
+
+    if (typeof clientIdentifier !== "string" || clientIdentifier.length === 0) {
+      res.status(400);
+      res.send("Cannot identify client");
     }
-}
+
+    countsByClient[clientIdentifier] = countsByClient[clientIdentifier] || 0;
+
+    if (countsByClient[clientIdentifier] >= maxCount) {
+      res.status(429);
+      res.send("Too Many Requests");
+    } else {
+      countsByClient[clientIdentifier]++;
+      next();
+    }
+  };
+};
+
+const identifyClientByToken = req => req.headers.token;
 
 module.exports = {
-    rateLimit
-}
+  rateLimit,
+  identifyClientByToken
+};
