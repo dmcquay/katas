@@ -1,5 +1,7 @@
 const express = require('express')
 
+const config = require('./config')
+
 const app = express()
 
 let count = 0
@@ -12,10 +14,12 @@ function resetRateLimits() {
 }
 resetRateLimits()
 
-app.get('/reset-rate-limits', (req, res) => {
-    resetRateLimits()
-    res.send()
-})
+if (config.exposeTestEndpoints) {
+    app.get('/reset-rate-limits', (req, res) => {
+        resetRateLimits()
+        res.send()
+    })
+}
 
 app.get('/', (req, res) => {
     if (count >= 5) {
