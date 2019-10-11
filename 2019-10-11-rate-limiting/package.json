@@ -1,0 +1,22 @@
+{
+  "name": "2019-10-11-rate-limiting",
+  "version": "1.0.0",
+  "description": "https://medium.com/@saisandeepmopuri/system-design-rate-limiter-and-data-modelling-9304b0d18250",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "e2e": "mocha *.e2e.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.1",
+    "node-fetch": "^2.6.0"
+  }
+}
