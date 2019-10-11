@@ -1,34 +1,18 @@
 const express = require('express')
 
 const config = require('./config')
+const {rateLimitMiddleware, resetRateLimitsRoute} = require('./rate-limits')
 
 const app = express()
 
-let count = 0
-
-let windowInterval = undefined;
-function resetRateLimits() {
-    if (windowInterval) clearInterval(windowInterval)
-    count = 0
-    windowInterval = setInterval(() => count = 0, 2000)
-}
-resetRateLimits()
+app.use(rateLimitMiddleware)
 
 if (config.exposeTestEndpoints) {
-    app.get('/reset-rate-limits', (req, res) => {
-        resetRateLimits()
-        res.send()
-    })
+    app.get('/reset-rate-limits', resetRateLimitsRoute)
 }
 
 app.get('/', (req, res) => {
-    if (count >= 5) {
-        res.status(429)
-        res.send('Too Many Requests in the last 10 seconds')
-    } else {
-        res.send('hello world')
-        count++
-    }
+    res.send('hello world')
 })
 
 app.listen('3000', () => { console.log('http://localhost:3000') })

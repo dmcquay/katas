@@ -6,3 +6,8 @@ Example: A device with a specific ip address can only make 10 ticket bookings pe
 My plan:
 Make a dummy api that just returns hello world.
 Limit all calls to 5 per 10 seconds, regardless of IP or any means of identifying the caller.
+
+questions/todods during implementation:
+- should errors count toward rate limit?
+- how to identify a client. token? ip?
+- windowing strategy. every x seconds? possible to exceed limit in overlapping windows. is that okay? maybe as long as windows are small.
