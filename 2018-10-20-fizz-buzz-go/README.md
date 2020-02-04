@@ -4,6 +4,7 @@ Written with Go 1.11
 
 ```
 export GOPATH=$(pwd)
+export GOBIN=$GOPATH/bin
 ```
 
 ## Run main
@@ -23,4 +24,11 @@ go test ./...
 ```
 npm install -g nodemon
 nodemon -e go --exec 'go test ./... || exit 1'
+```
+
+## Compile and run binary
+
+```
+go install fizbuzz.go
+./bin/fizzbuzz
 ```
