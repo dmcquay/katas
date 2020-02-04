@@ -1,6 +1,9 @@
-package fizzbuzz
+package main
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 // FizzBuzz returns a string based on what numbers the input is evenly divisible by.
 func FizzBuzz(n int) string {
@@ -21,4 +24,10 @@ func FizzBuzz(n int) string {
 	}
 
 	return words
+}
+
+func main() {
+	for i := 1; i < 20; i++ {
+		fmt.Printf("%d=%s\n", i, FizzBuzz(i))
+	}
 }

@@ -4,6 +4,17 @@ Written with Go 1.11
 
 ```
 export GOPATH=$(pwd)
+```
+
+## Run main
+
+```
+go run fizzbuzz.go
+```
+
+## Run tests
+
+```
 go test ./...
 ```
 
