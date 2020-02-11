@@ -1,7 +1,6 @@
-package main
+package fizzbuzz
 
 import (
-	"fmt"
 	"strconv"
 )
 
@@ -24,10 +23,4 @@ func FizzBuzz(n int) string {
 	}
 
 	return words
-}
-
-func main() {
-	for i := 1; i < 20; i++ {
-		fmt.Printf("%d=%s\n", i, FizzBuzz(i))
-	}
 }
