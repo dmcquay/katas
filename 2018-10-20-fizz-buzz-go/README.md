@@ -7,7 +7,11 @@ Go must be installed: `brew install go`
 ```
 export GOPATH=$(pwd)
 export GOBIN=$GOPATH/bin
+export PATH="$GOBIN:$PATH"
+go get -t ./...
 ```
+
+Note that the `-t` flag to `go get` will cause it to include test dependencies.
 
 Also, in VS Code project settings, I have set 
 
