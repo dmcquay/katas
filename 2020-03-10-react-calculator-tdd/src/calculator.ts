@@ -24,9 +24,18 @@ export function setOperator(
   state: CalculatorState
 ): CalculatorState {
   return {
+    ...state,
     currentValue: "",
     operand: state.currentValue,
-    operator,
-    ...state
+    operator
+  };
+}
+
+export function execute(state: CalculatorState): CalculatorState {
+  return {
+    ...state,
+    currentValue: parseInt(state.operand) + parseInt(state.currentValue) + "",
+    operand: "",
+    operator: Operator.None
   };
 }

@@ -1,5 +1,10 @@
 import { Operator } from "./types";
-import { INITIAL_STATE, appendToCurrentValue, setOperator } from "./calculator";
+import {
+  INITIAL_STATE,
+  appendToCurrentValue,
+  setOperator,
+  execute
+} from "./calculator";
 
 describe("appendToCurrentValue", () => {
   test("when a number is entered, that number is set as the current value", () => {
@@ -86,6 +91,25 @@ describe("setOperator", () => {
       currentValue: "",
       operator: Operator.Add,
       operand: "1"
+    };
+    expect(newState).toEqual(expectedState);
+  });
+});
+
+describe("execute", () => {
+  test("when operator, operand and currentValue are all valid, performs the operation, sets currentValue to the result and clears operator and operand", () => {
+    const initialState = {
+      ...INITIAL_STATE,
+      operand: "1",
+      currentValue: "2",
+      operator: Operator.Add
+    };
+    const newState = execute(initialState);
+    const expectedState = {
+      ...INITIAL_STATE,
+      currentValue: "3",
+      operator: Operator.None,
+      operand: ""
     };
     expect(newState).toEqual(expectedState);
   });
