@@ -11,7 +11,7 @@ export function appendToCurrentValue(
   state: CalculatorState
 ): CalculatorState {
   const validCharMessage = "Digit value must be 0-9";
-  if (!/^[0-9\.]$/.test(char)) throw new Error(validCharMessage);
+  if (!/^[0-9.]$/.test(char)) throw new Error(validCharMessage);
   if (char === "." && state.currentValue.includes(".")) return state;
   return {
     ...state,
