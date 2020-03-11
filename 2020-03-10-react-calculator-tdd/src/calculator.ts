@@ -34,6 +34,13 @@ export function setOperator(
   };
 }
 
+export function clear(state: CalculatorState): CalculatorState {
+  return {
+    ...state,
+    currentValue: ""
+  };
+}
+
 export function execute(state: CalculatorState): CalculatorState {
   const operand1 = parseFloat(state.operand);
   const operand2 = parseFloat(state.currentValue);
@@ -50,4 +57,9 @@ export function execute(state: CalculatorState): CalculatorState {
     operand: "",
     operator: Operator.None
   };
+}
+
+export function getDisplayText(state: CalculatorState): string {
+  if (state.currentValue === "") return state.operand;
+  return state.currentValue;
 }

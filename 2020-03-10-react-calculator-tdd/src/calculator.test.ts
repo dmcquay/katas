@@ -1,9 +1,11 @@
-import { Operator } from "./types";
+import { Operator, CalculatorState } from "./types";
 import {
   INITIAL_STATE,
   appendToCurrentValue,
   setOperator,
-  execute
+  clear,
+  execute,
+  getDisplayText
 } from "./calculator";
 
 describe("appendToCurrentValue", () => {
@@ -113,6 +115,25 @@ describe("setOperator", () => {
   });
 });
 
+describe("clear", () => {
+  test("clear should set currentValue to blank, but leave operator and operand alone", () => {
+    const state = {
+      ...INITIAL_STATE,
+      currentValue: "1",
+      operand: "2",
+      operator: Operator.Add
+    };
+    const newState = clear(state);
+    const expectedState = {
+      ...INITIAL_STATE,
+      currentValue: "",
+      operand: "2",
+      operator: Operator.Add
+    };
+    expect(newState).toEqual(expectedState);
+  });
+});
+
 describe("execute", () => {
   function happyPath(
     operator: Operator,
@@ -143,6 +164,27 @@ describe("execute", () => {
   happyPath(Operator.Multiply, "2", "3", "6");
   happyPath(Operator.Divide, "6", "2", "3");
   happyPath(Operator.Divide, "6.4", "2", "3.2");
+});
+
+describe("getDisplayText", () => {
+  test("generally displays currentValue", () => {
+    const state: CalculatorState = {
+      ...INITIAL_STATE,
+      currentValue: "6.2"
+    };
+    const displayText = getDisplayText(state);
+    expect(displayText).toEqual("6.2");
+  });
+
+  test("displays operand if currentValue is blank", () => {
+    const state: CalculatorState = {
+      ...INITIAL_STATE,
+      currentValue: "",
+      operand: "3"
+    };
+    const displayText = getDisplayText(state);
+    expect(displayText).toEqual("3");
+  });
 });
 
 export {};
