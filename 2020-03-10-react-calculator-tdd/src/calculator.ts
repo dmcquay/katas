@@ -23,6 +23,9 @@ export function setOperator(
   operator: Operator,
   state: CalculatorState
 ): CalculatorState {
+  if (state.operator !== Operator.None) {
+    state = execute(state);
+  }
   return {
     ...state,
     currentValue: "",
@@ -32,9 +35,18 @@ export function setOperator(
 }
 
 export function execute(state: CalculatorState): CalculatorState {
+  const operand1 = parseFloat(state.operand);
+  const operand2 = parseFloat(state.currentValue);
+  let result: number = 0;
+
+  if (state.operator === Operator.Add) result = operand1 + operand2;
+  else if (state.operator === Operator.Subtract) result = operand1 - operand2;
+  else if (state.operator === Operator.Multiply) result = operand1 * operand2;
+  else if (state.operator === Operator.Divide) result = operand1 / operand2;
+
   return {
     ...state,
-    currentValue: parseInt(state.operand) + parseInt(state.currentValue) + "",
+    currentValue: result.toString(),
     operand: "",
     operator: Operator.None
   };

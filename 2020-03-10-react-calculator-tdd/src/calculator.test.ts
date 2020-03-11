@@ -94,25 +94,55 @@ describe("setOperator", () => {
     };
     expect(newState).toEqual(expectedState);
   });
-});
 
-describe("execute", () => {
-  test("when operator, operand and currentValue are all valid, performs the operation, sets currentValue to the result and clears operator and operand", () => {
+  test("when operator is already set, execute current operation first", () => {
     const initialState = {
       ...INITIAL_STATE,
-      operand: "1",
+      operand: "4",
       currentValue: "2",
       operator: Operator.Add
     };
-    const newState = execute(initialState);
+    const newState = setOperator(Operator.Subtract, initialState);
     const expectedState = {
       ...INITIAL_STATE,
-      currentValue: "3",
-      operator: Operator.None,
-      operand: ""
+      currentValue: "",
+      operator: Operator.Subtract,
+      operand: "6"
     };
     expect(newState).toEqual(expectedState);
   });
+});
+
+describe("execute", () => {
+  function happyPath(
+    operator: Operator,
+    operand1: string,
+    operand2: string,
+    result: string
+  ) {
+    test(`happy path execute: ${operand1} ${operator} ${operand2} = ${result}`, () => {
+      const initialState = {
+        ...INITIAL_STATE,
+        operand: operand1,
+        currentValue: operand2,
+        operator
+      };
+      const newState = execute(initialState);
+      const expectedState = {
+        ...INITIAL_STATE,
+        currentValue: result,
+        operator: Operator.None,
+        operand: ""
+      };
+      expect(newState).toEqual(expectedState);
+    });
+  }
+
+  happyPath(Operator.Add, "1", "2", "3");
+  happyPath(Operator.Subtract, "5", "2", "3");
+  happyPath(Operator.Multiply, "2", "3", "6");
+  happyPath(Operator.Divide, "6", "2", "3");
+  happyPath(Operator.Divide, "6.4", "2", "3.2");
 });
 
 export {};
