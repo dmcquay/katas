@@ -38,39 +38,70 @@ export function Calculator(props: CalculatorProps) {
   const { state, onKeyPress, onSetOperator, onExecute, onClear } = props;
   const displayText = getDisplayText(state);
   return (
-    <div>
+    <div className="calculator-container">
       <div className="calculator-display">{displayText}</div>
-      <div className="calculator-numbers">
-        <AppendToValueButton char={"7"} onKeyPress={onKeyPress} />
-        <AppendToValueButton char={"8"} onKeyPress={onKeyPress} />
-        <AppendToValueButton char={"9"} onKeyPress={onKeyPress} />
-        <AppendToValueButton char={"4"} onKeyPress={onKeyPress} />
-        <AppendToValueButton char={"5"} onKeyPress={onKeyPress} />
-        <AppendToValueButton char={"6"} onKeyPress={onKeyPress} />
-        <AppendToValueButton char={"1"} onKeyPress={onKeyPress} />
-        <AppendToValueButton char={"2"} onKeyPress={onKeyPress} />
-        <AppendToValueButton char={"3"} onKeyPress={onKeyPress} />
-        <AppendToValueButton char={"0"} onKeyPress={onKeyPress} />
-        <AppendToValueButton char={"."} onKeyPress={onKeyPress} />
-        <button
-          className="calculator-operator-button"
-          onClick={() => onSetOperator(Operator.Add)}
-        >
-          +
-        </button>
-        <button
-          className="calculator-operator-button"
-          onClick={() => onExecute()}
-        >
-          =
-        </button>
-        <button
-          className="calculator-operator-button"
-          onClick={() => onClear()}
-        >
-          C
-        </button>
-      </div>
+
+      <button
+        className="calculator-button calculator-button-function"
+        onClick={() => onClear()}
+      >
+        C
+      </button>
+      <button className="calculator-button calculator-button-function">
+        +/-
+      </button>
+      <button className="calculator-button calculator-button-function">
+        %
+      </button>
+      <button
+        className="calculator-button calculator-button-operator"
+        onClick={() => onSetOperator(Operator.Divide)}
+      >
+        /
+      </button>
+
+      <AppendToValueButton char={"7"} onKeyPress={onKeyPress} />
+      <AppendToValueButton char={"8"} onKeyPress={onKeyPress} />
+      <AppendToValueButton char={"9"} onKeyPress={onKeyPress} />
+      <button
+        className="calculator-button calculator-button-operator"
+        onClick={() => onSetOperator(Operator.Multiply)}
+      >
+        X
+      </button>
+
+      <AppendToValueButton char={"4"} onKeyPress={onKeyPress} />
+      <AppendToValueButton char={"5"} onKeyPress={onKeyPress} />
+      <AppendToValueButton char={"6"} onKeyPress={onKeyPress} />
+      <button
+        className="calculator-button calculator-button-operator"
+        onClick={() => onSetOperator(Operator.Subtract)}
+      >
+        -
+      </button>
+
+      <AppendToValueButton char={"1"} onKeyPress={onKeyPress} />
+      <AppendToValueButton char={"2"} onKeyPress={onKeyPress} />
+      <AppendToValueButton char={"3"} onKeyPress={onKeyPress} />
+      <button
+        className="calculator-button calculator-button-operator"
+        onClick={() => onSetOperator(Operator.Add)}
+      >
+        +
+      </button>
+
+      <AppendToValueButton
+        className="calculator-button-zero"
+        char={"0"}
+        onKeyPress={onKeyPress}
+      />
+      <AppendToValueButton char={"."} onKeyPress={onKeyPress} />
+      <button
+        className="calculator-button calculator-button-operator"
+        onClick={() => onExecute()}
+      >
+        =
+      </button>
     </div>
   );
 }
@@ -78,13 +109,14 @@ export function Calculator(props: CalculatorProps) {
 interface AppendToValueButtonProps {
   char: string;
   onKeyPress: Function;
+  className?: string;
 }
 
 export function AppendToValueButton(props: AppendToValueButtonProps) {
-  const { char, onKeyPress } = props;
+  const { char, onKeyPress, className } = props;
   return (
     <button
-      className="calculator-number-button"
+      className={`calculator-button ${className}`}
       onClick={() => onKeyPress(char)}
     >
       {char}
