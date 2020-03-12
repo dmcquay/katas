@@ -1,7 +1,7 @@
 import { CalculatorState, Operator } from "./types";
 
 export const INITIAL_STATE: CalculatorState = {
-  currentValue: "34",
+  currentValue: "",
   operand: "",
   operator: Operator.None
 };
