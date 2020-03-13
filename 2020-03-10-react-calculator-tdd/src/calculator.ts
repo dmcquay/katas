@@ -59,7 +59,19 @@ export function execute(state: CalculatorState): CalculatorState {
   };
 }
 
-export function getDisplayText(state: CalculatorState): string {
-  if (state.currentValue === "") return state.operand;
-  return state.currentValue;
+export function getDisplayText(
+  maxLength: number,
+  state: CalculatorState
+): string {
+  if (state.currentValue === "" && state.operand === "") return "0";
+  const val = state.currentValue === "" ? state.operand : state.currentValue;
+
+  if (val.length <= maxLength) {
+    return val;
+  } else if (val.includes(".")) {
+    const factor = Math.pow(10, maxLength - val.indexOf(".") - 1);
+    return (Math.round(parseFloat(val) * factor) / factor).toString();
+  } else {
+    return "TOO BIG";
+  }
 }

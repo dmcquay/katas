@@ -172,7 +172,7 @@ describe("getDisplayText", () => {
       ...INITIAL_STATE,
       currentValue: "6.2"
     };
-    const displayText = getDisplayText(state);
+    const displayText = getDisplayText(9, state);
     expect(displayText).toEqual("6.2");
   });
 
@@ -182,8 +182,72 @@ describe("getDisplayText", () => {
       currentValue: "",
       operand: "3"
     };
-    const displayText = getDisplayText(state);
+    const displayText = getDisplayText(9, state);
     expect(displayText).toEqual("3");
+  });
+
+  test("when currentValue and operand are both blank, displays zero", () => {
+    expect(
+      getDisplayText(9, {
+        ...INITIAL_STATE,
+        currentValue: "",
+        operand: ""
+      })
+    ).toEqual("0");
+  });
+
+  test("when currentValue is a decimal that exceeds maxLength, it rounds the value as needed", () => {
+    expect(
+      getDisplayText(4, {
+        ...INITIAL_STATE,
+        currentValue: "6.234"
+      })
+    ).toEqual("6.23");
+    expect(
+      getDisplayText(4, {
+        ...INITIAL_STATE,
+        currentValue: "6.235"
+      })
+    ).toEqual("6.24");
+    expect(
+      getDisplayText(3, {
+        ...INITIAL_STATE,
+        currentValue: "6.235"
+      })
+    ).toEqual("6.2");
+    expect(
+      getDisplayText(5, {
+        ...INITIAL_STATE,
+        currentValue: "64.235"
+      })
+    ).toEqual("64.24");
+  });
+
+  test("when currentValue is a negative decimal that exceeds maxLength, it rounds the value as needed", () => {
+    expect(
+      getDisplayText(5, {
+        ...INITIAL_STATE,
+        currentValue: "-6.234"
+      })
+    ).toEqual("-6.23");
+  });
+
+  test("when currentValue is an negative decimal that exceeds maxLength, it rounds the value as needed", () => {
+    expect(
+      getDisplayText(5, {
+        ...INITIAL_STATE,
+        currentValue: "-6.234"
+      })
+    ).toEqual("-6.23");
+  });
+
+  test("when currentValue is an integer that exceeds maxLength, it returns TOO BIG", () => {
+    expect(
+      getDisplayText(6, {
+        ...INITIAL_STATE,
+        currentValue: "1234567"
+      })
+    ).toEqual("TOO BIG");
   });
 });
 

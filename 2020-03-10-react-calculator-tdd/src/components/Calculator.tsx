@@ -36,7 +36,7 @@ interface CalculatorProps {
 
 export function Calculator(props: CalculatorProps) {
   const { state, onKeyPress, onSetOperator, onExecute, onClear } = props;
-  const displayText = getDisplayText(state);
+  const displayText = getDisplayText(10, state);
   return (
     <div className="calculator-container">
       <div className="calculator-display">{displayText}</div>
