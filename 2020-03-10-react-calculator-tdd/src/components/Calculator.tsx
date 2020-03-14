@@ -7,6 +7,7 @@ import {
   getDisplayText,
   appendToCurrentValue,
   setOperator,
+  toggleSign,
   execute,
   clear
 } from "../calculator";
@@ -20,6 +21,7 @@ export function CalculatorContainer() {
       onSetOperator={(operator: Operator) =>
         setState(s => setOperator(operator, s))
       }
+      onToggleSign={() => setState(toggleSign)}
       onExecute={() => setState(execute)}
       onClear={() => setState(clear)}
     />
@@ -30,12 +32,20 @@ interface CalculatorProps {
   state: CalculatorState;
   onKeyPress: Function;
   onSetOperator: Function;
+  onToggleSign: Function;
   onExecute: Function;
   onClear: Function;
 }
 
 export function Calculator(props: CalculatorProps) {
-  const { state, onKeyPress, onSetOperator, onExecute, onClear } = props;
+  const {
+    state,
+    onKeyPress,
+    onSetOperator,
+    onToggleSign,
+    onExecute,
+    onClear
+  } = props;
   const displayText = getDisplayText(10, state);
   return (
     <div className="calculator-container">
@@ -47,7 +57,10 @@ export function Calculator(props: CalculatorProps) {
       >
         C
       </button>
-      <button className="calculator-button calculator-button-function">
+      <button
+        className="calculator-button calculator-button-function"
+        onClick={() => onToggleSign()}
+      >
         +/-
       </button>
       <button className="calculator-button calculator-button-function">

@@ -34,6 +34,13 @@ export function setOperator(
   };
 }
 
+export function toggleSign(state: CalculatorState): CalculatorState {
+  return {
+    ...state,
+    currentValue: (parseFloat(state.currentValue) * -1).toString()
+  };
+}
+
 export function clear(state: CalculatorState): CalculatorState {
   return {
     ...state,

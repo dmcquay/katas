@@ -3,6 +3,7 @@ import {
   INITIAL_STATE,
   appendToCurrentValue,
   setOperator,
+  toggleSign,
   clear,
   execute,
   getDisplayText
@@ -112,6 +113,32 @@ describe("setOperator", () => {
       operand: "6"
     };
     expect(newState).toEqual(expectedState);
+  });
+});
+
+describe("toggleSign", () => {
+  test("when currentValue is positive, makes it negative", () => {
+    expect(
+      toggleSign({
+        ...INITIAL_STATE,
+        currentValue: "123"
+      })
+    ).toEqual({
+      ...INITIAL_STATE,
+      currentValue: "-123"
+    });
+  });
+
+  test("when currentValue is negative, makes it positive", () => {
+    expect(
+      toggleSign({
+        ...INITIAL_STATE,
+        currentValue: "-123"
+      })
+    ).toEqual({
+      ...INITIAL_STATE,
+      currentValue: "123"
+    });
   });
 });
 
