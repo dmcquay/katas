@@ -1,0 +1,14 @@
+{
+  "name": "2020-04-09-testing-sql",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "mocha --file integration-test-setup.js test.js"
+  },
+  "dependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^7.1.1",
+    "pg": "^8.0.2"
+  }
+}

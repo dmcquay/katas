@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:10-alpine
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: test
+    volumes:
+      - /var/lib/postgresql/data
+      - "./initdb:/docker-entrypoint-initdb.d"
