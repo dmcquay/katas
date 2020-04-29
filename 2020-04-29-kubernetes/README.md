@@ -42,3 +42,7 @@ Probably just need to get the token and then login to that web UI with it.
 3. Run `kubectl apply -f hello-world-deployment.yaml`.
 
 You should be able to view the app at http://localhost:3000/.
+
+Note that in `hello-world-deployment.yaml` I set `imagePullPolicy: Never` in the
+container spec. This is so that I don't have to push the image to a remote repository
+just for learning purposes. Typically you'd want that set to Always.
