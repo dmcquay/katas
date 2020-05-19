@@ -46,3 +46,8 @@ You might consider using hardlinks to speed up the process. I believe symlinks w
 
 You can bypass this problem entirely by building a separate versioned package from your shared folder and installing it in your apps like any other package.
 Or you might also consider just duplicating the code if there's not that much.
+
+## Other learnings
+
+- Sending huge files is really quite fast. (Generated single 49M file in app1, took 4.7 seconds to send context and build.)
+- It seems that sending tons of small files is more impactful.
