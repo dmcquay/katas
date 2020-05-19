@@ -50,4 +50,10 @@ Or you might also consider just duplicating the code if there's not that much.
 ## Other learnings
 
 - Sending huge files is really quite fast. (Generated single 49M file in app1, took 4.7 seconds to send context and build.)
-- It seems that sending tons of small files is more impactful.
+- Installed Create React App (with node_modules). Total size is 233M. Context sent was 170M. Took around 10 seconds to send context. 8 seconds with tar. 25 seconds when copying into a tempdir. 23 seconds with hardlinks.
+
+## Conclusion
+
+- If possible, just ignore things like node_modules and otherwise send extra context. Only consider other options if it truly is slow after this. This is the only option that lets you use docker-compose (I think).
+- Next best option is to tar up exactly what you need and pipe into docker build. You can't use this with docker-compose, but other than that it works beautifully. Fastest and gives you full control with one simple command.
+- No other options are worth considering IMO.
