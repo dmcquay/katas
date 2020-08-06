@@ -6,10 +6,14 @@ The goal is to use the docker compose overrides feature to read in the dev compo
 
 Docs on overrides: https://docs.docker.com/compose/extends/#multiple-compose-files
 
-# Plan
+## Plan
 
 Create a docker compose file that does something really simple like hello world to the console.
 
 Create a second compose file that adds another really simple hello world like container.
 
 Try to boot them both up at once.
+
+## How to run
+
+`./run.sh`
