@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+    test1:
+        image: alpine
+        command: echo 'test1'
+    test2:
+        image: alpine
+        command: echo 'test2'

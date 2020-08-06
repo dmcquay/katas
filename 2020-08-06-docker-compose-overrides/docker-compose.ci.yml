@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+    test2:
+        image: alpine
+        command: echo 'test2 overridden'
+    test3:
+        image: alpine
+        command: echo 'test3 added'
