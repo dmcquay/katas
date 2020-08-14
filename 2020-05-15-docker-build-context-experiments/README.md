@@ -12,29 +12,61 @@ Sending build context to Docker daemon  40.45kB
 
 We're only wanting to build app1 and also include the shared folder. The should only be about 32 bytes.
 
+What I wish I could do is literally ignore everything except the folders I want for a given image.
+e.g. For app1, I want to include only app1 and shared. I want to ignore all of app2.
+
 ## Dockerignore strategy
 
-Create a .dockerignore file in the root of the build context. Ignore anything unnecessary. Hopefully everything impactful can be ignored. For example, you can
-generally ignore node_modules which tends to be the culprit of massive build contexts.
+Create a .dockerignore file in the root of the build context. Ignore anything unnecessary. 
 
-This should be your goto strategy. However, there's no way to have a different .dockerignore for each image.
+This doesn't allow me to ignore all of app2 because then when I want to build the app2 image, it would ignore
+all of app2 in that case too. You can only ignore things that are okay to ignore for all images. For
+example, `node_modules` typically falls in this category.
 
-## Separate Dockerignore per Image
+As limiting as that feels, your actual code is usually quite light and therefore this is typically sufficient.
+It should be your goto strategy unless you have legitimately huge source code or some large assets that must
+be included.
 
-I just said you can't do this. But you can. Sort of.
+## BuildKit
 
-There is an undocumented feature that doesn't work on Windows that allows you to create a file named `[dockerfilename].dockerignore`. To use this, you must set
-the environment variable `DOCKER_BUILDKIT=1` at build time. I believe this works with docker compose too.
+Docker has rehauled the build architecture recently. The new build architecture is called BuildKit.
 
-Run `./custom-dockerignore.sh` to see this stratey.
+BuildKit is faster and more secure out of the box. And it includes the ability to specify what dockerignore
+files to use per build. This allows you to do exactly what we want (completely ignore app2/* for the app1
+image build and visa versa).
 
-## Tar up the context
+- To use this option, you need Docker 18.09 or later.
+- BuildKit only supports buliding Linux containers.
+- You must set the environment variable `DOCKER_BUILDKIT=1` to enable BuildKit.
+- Alternatively you can permanently enable by adding this to your docker daemon configuration, typically
+  located at `/etc/docker/daemon.json`: `{ "features": { "buildkit": true } }`
+
+As you use BuildKit I think you will notice it is faster than the reduced context can account for. They've
+made some other great speed improvements!
+
+## Other strategies that give you full control
+
+If you do have legitimately large directories after ignoring what you can and you can't use BuildKit for
+some reason, then here are a few options that give you full control over what context is sent to the docker engine.
+These require scripting beyond a simple docker build command and don't work with Docker Compose.
+
+For the options below, I did a performance test with 233M of context spread across many files.
+
+- Sending this context normally took ~10 seconds.
+- With `tar` it took only ~8 seconds!
+- Copying to a tempdir took ~25 seconds. :(
+- Use of hardlinks with the tempdir option only reduced the time to ~23 seconds.
+
+So really `tar` is the way to go, but I'll explain the alternatives anyway.
+
+### Tar up the context
 
 You can have complete control over your build context by building a custom tarball and piping it into docker build.
+This option is superior to the options that follow both in it's simplicity and execution speed.
 
-Downside is I'm thinking this probably isn't possible to use with docker compose.
+For an example, run `tar.sh`.
 
-## Build a custom context directory at build time
+### Build a custom context directory at build time
 
 This will require some custom scripting so it also will not be compatible with docker compose.
 
@@ -44,8 +76,9 @@ You might consider using hardlinks to speed up the process. I believe symlinks w
 
 ## Distributed shared folder as a package
 
-You can bypass this problem entirely by building a separate versioned package from your shared folder and installing it in your apps like any other package.
-Or you might also consider just duplicating the code if there's not that much.
+You can bypass this problem entirely by building a separate versioned package from your shared folder and
+installing it in your apps like any other package. Or you might also consider just duplicating the code if
+there's not that much.
 
 ## Other learnings
 
