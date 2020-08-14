@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+    api:
+        image: agentejo/cockpit
+        ports:
+            - 8080:80
