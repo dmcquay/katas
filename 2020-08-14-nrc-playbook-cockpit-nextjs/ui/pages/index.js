@@ -1,42 +1,10 @@
-import Head from 'next/head'
 import fetch from 'isomorphic-fetch'
 
 export default function Home(props) {
   return (
-    <div className="container">
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main>
-        Hello {props.name}
-        <ul>
-          {props.playbooks.entries.map(playbook => <li id={playbook._id} key={playbook._id}>{playbook.title}. Number of people: {playbook.number_of_people}. Body: <div dangerouslySetInnerHTML={{__html: playbook.content}}/></li>)}
-        </ul>
-      </main>
-
-      <style jsx>{`
-        main {
-          color: red;
-        }
-      `}</style>
-
-      <style jsx global>{`
-        html,
-        body {
-          padding: 0;
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-            Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
-            sans-serif;
-        }
-
-        * {
-          box-sizing: border-box;
-        }
-      `}</style>
-    </div>
+      <ul>
+        {props.playbooks.entries.map(playbook => <li id={playbook._id} key={playbook._id}>{playbook.title}. Number of people: {playbook.number_of_people}. Body: <div dangerouslySetInnerHTML={{__html: playbook.content}}/></li>)}
+      </ul>
   )
 }
 
@@ -47,7 +15,6 @@ export async function getStaticProps() {
   const playbooks = await response.json()
   return {
     props: {
-      name: 'Dustin',
       playbooks
     }
   }
