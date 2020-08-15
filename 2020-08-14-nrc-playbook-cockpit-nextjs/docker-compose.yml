@@ -5,3 +5,6 @@ services:
         image: agentejo/cockpit
         ports:
             - 8080:80
+        volumes:
+            - ./cockpit/api.keys.php:/var/www/html/storage/api.keys.php
+            - ./cockpit/collections:/var/www/html/storage/collections
