@@ -22,4 +22,19 @@
     )
 
     React.renderToDOM(tree, root)
+
+    const tree2 = e(
+        'p',
+        null,
+        [
+            e(
+                'p',
+                null,
+                'hello world2'
+            ),
+            e(Clock)
+        ]
+    )
+
+    React.renderToDOM(tree2, root)
 })()

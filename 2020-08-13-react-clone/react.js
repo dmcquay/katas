@@ -12,6 +12,11 @@ let React;
     }
 
     function renderToDOM(vNode, domNode) {
+        domNode.innerHTML = ''
+        _renderToDOM(vNode, domNode)
+    }
+
+    function _renderToDOM(vNode, domNode) {
         if (typeof vNode === 'string') {
             domNode.append(doc.createTextNode(vNode))
             return
@@ -23,9 +28,9 @@ let React;
             const children = vNode.children instanceof Array ? vNode.children : [vNode.children]
             for (const child of children) {
                 if (typeof child.name === 'function') {
-                    renderToDOM(child.name(child.props), e)
+                    _renderToDOM(child.name(child.props), e)
                 } else {
-                    renderToDOM(child, e)
+                    _renderToDOM(child, e)
                 }
             }
         }
