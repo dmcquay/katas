@@ -26,10 +26,10 @@
     1 => 
     array (
       'name' => 'number_of_people',
-      'label' => '',
+      'label' => 'Number of People',
       'type' => 'rating',
       'default' => '',
-      'info' => '',
+      'info' => 'e.g. "1 - 5"',
       'group' => '',
       'localize' => false,
       'options' => 
@@ -47,7 +47,79 @@
     2 => 
     array (
       'name' => 'content',
-      'label' => '',
+      'label' => 'Introductory Content',
+      'type' => 'wysiwyg',
+      'default' => '',
+      'info' => '',
+      'group' => '',
+      'localize' => false,
+      'options' => 
+      array (
+      ),
+      'width' => '1-1',
+      'lst' => true,
+      'acl' => 
+      array (
+      ),
+    ),
+    3 => 
+    array (
+      'name' => 'steps',
+      'label' => 'Steps',
+      'type' => 'repeater',
+      'default' => '',
+      'info' => '',
+      'group' => '',
+      'localize' => false,
+      'options' => 
+      array (
+        'field' => 
+        array (
+          'type' => 'wysiwyg',
+          'label' => 'Content',
+        ),
+      ),
+      'width' => '1-1',
+      'lst' => true,
+      'acl' => 
+      array (
+      ),
+    ),
+    4 => 
+    array (
+      'name' => 'materials',
+      'label' => 'Materials',
+      'type' => 'repeater',
+      'default' => '',
+      'info' => '',
+      'group' => '',
+      'localize' => false,
+      'options' => 
+      array (
+        'fields' => 
+        array (
+          0 => 
+          array (
+            'type' => 'text',
+            'label' => 'Text Content',
+          ),
+          1 => 
+          array (
+            'type' => 'wysiwyg',
+            'label' => 'Rich Content',
+          ),
+        ),
+      ),
+      'width' => '1-1',
+      'lst' => true,
+      'acl' => 
+      array (
+      ),
+    ),
+    5 => 
+    array (
+      'name' => 'prep_content',
+      'label' => 'Preparation Content',
       'type' => 'wysiwyg',
       'default' => '',
       'info' => '',
@@ -66,7 +138,7 @@
   'sortable' => false,
   'in_menu' => false,
   '_created' => 1597417773,
-  '_modified' => 1597421512,
+  '_modified' => 1597469687,
   'color' => '',
   'acl' => 
   array (
