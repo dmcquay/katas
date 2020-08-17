@@ -21,3 +21,5 @@ Hello world
 - and
 - a
 - list
+
+{{< aside title="Aside Title" content="This is the content of the aside." >}}
