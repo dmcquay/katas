@@ -18,6 +18,11 @@ const schema = buildSchema(`
     rollThreeDice: [Int!]!
     rollDice(numDice: Int!, numSides: Int): [Int]
     getDie(numSides: Int!): RandomDie
+    getMessage: String!
+  }
+
+  type Mutation {
+    setMessage(message: String!): String!
   }
 `);
 
@@ -25,6 +30,10 @@ interface RollDiceArgs {
   numDice: number;
   numSides?: number;
 }
+
+const db = {
+  message: "",
+};
 
 const rootValue = {
   slow1: async () => {
@@ -69,6 +78,11 @@ const rootValue = {
       },
     };
   },
+  setMessage: ({ message }: { message: string }) => {
+    db.message = message;
+    return message;
+  },
+  getMessage: () => db.message,
 };
 
 const app = express();
