@@ -1,12 +1,18 @@
 import * as express from "express";
 import { graphqlHTTP } from "express-graphql";
 import { buildSchema } from "graphql";
+import { pick } from "ramda";
 
 const schema = buildSchema(`
   type RandomDie {
     numSides: Int!
     rollOnce: Int!
     rollNTimes(count: Int!): [Int]
+  }
+
+  type User {
+    id: Int!
+    name: String!
   }
 
   type Query {
@@ -19,6 +25,7 @@ const schema = buildSchema(`
     rollDice(numDice: Int!, numSides: Int): [Int]
     getDie(numSides: Int!): RandomDie
     getMessage: String!
+    user(id: Int!): User
   }
 
   type Mutation {
@@ -31,8 +38,24 @@ interface RollDiceArgs {
   numSides?: number;
 }
 
-const db = {
+interface User {
+  id: number;
+  name: string;
+}
+
+interface DB {
+  message: string;
+  users: { [key: number]: User };
+}
+
+const db: DB = {
   message: "",
+  users: {
+    1: {
+      id: 1,
+      name: "Dustin McQuay",
+    },
+  },
 };
 
 const rootValue = {
@@ -83,6 +106,17 @@ const rootValue = {
     return message;
   },
   getMessage: () => db.message,
+  user: ({ id }: { id: number }, req, foo) => {
+    // if you wanted to fetch only the requested fields from a large object,
+    // you could try this, though it seems possibly brittle.
+    // https://stackoverflow.com/questions/48004805/how-to-get-requested-fields-inside-graphql-resolver
+    const fields = foo.fieldNodes[0].selectionSet.selections.map(
+      (s) => s.name.value
+    );
+    const partial = pick(fields, db.users[id]);
+    console.log({ partial });
+    return partial;
+  },
 };
 
 const app = express();
