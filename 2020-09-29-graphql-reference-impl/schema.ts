@@ -29,6 +29,7 @@ export default buildSchema(`
     getDie(numSides: Int!): RandomDie
     getMessage: String!
     getMessages: [Message]
+    getMessagesWithLoader: [Message]
     user(id: Int!): User
   }
 

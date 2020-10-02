@@ -94,4 +94,10 @@ export default {
       user: () => db.users[message.userId],
     }));
   },
+  getMessagesWithLoader: () => {
+    return db.messages.map((message) => ({
+      ...message,
+      user: () => userLoader.load(message.userId),
+    }));
+  },
 };

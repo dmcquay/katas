@@ -68,3 +68,6 @@ message objects.
   }
 }
 ```
+
+Context: When doing the same thing, but with a Data Loader that returns an error object when the user is not found.
+Result: Same result.
