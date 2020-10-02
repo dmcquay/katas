@@ -1,0 +1,15 @@
+{
+  "name": "2020-10-02-apollo-graphql",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "ts-node-dev index.ts"
+  },
+  "dependencies": {
+    "apollo-server": "^2.18.1",
+    "graphql": "^15.3.0",
+    "ts-node-dev": "^1.0.0-pre.63",
+    "typescript": "^4.0.3"
+  }
+}
