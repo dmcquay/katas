@@ -1,9 +1,22 @@
 import { pick } from "ramda";
+import * as DataLoader from "dataloader";
 
-import { DB, RollDiceArgs } from "./domain";
+import { DB, RollDiceArgs, User } from "./domain";
 
 const db: DB = {
   message: "",
+  messages: [
+    {
+      id: 1,
+      userId: 1,
+      body: "Test message 1",
+    },
+    {
+      id: 2,
+      userId: 2,
+      body: "Test message 2",
+    },
+  ],
   users: {
     1: {
       id: 1,
@@ -11,6 +24,12 @@ const db: DB = {
     },
   },
 };
+
+const userLoader = new DataLoader(getUsersByKeys);
+
+async function getUsersByKeys(keys: number[]): Promise<(User | Error)[]> {
+  return keys.map((key) => db.users[key] ?? new Error(`No result for ${key}`));
+}
 
 export default {
   slow1: async () => {
@@ -68,5 +87,11 @@ export default {
       (s) => s.name.value
     );
     return pick(fields, db.users[id]);
+  },
+  getMessages: () => {
+    return db.messages.map((message) => ({
+      ...message,
+      user: () => db.users[message.userId],
+    }));
   },
 };

@@ -12,6 +12,12 @@ export default buildSchema(`
     name: String!
   }
 
+  type Message {
+      id: Int!
+      body: String!
+      user: User!
+  }
+
   type Query {
     slow1: String!
     slow2: String!
@@ -22,6 +28,7 @@ export default buildSchema(`
     rollDice(numDice: Int!, numSides: Int): [Int]
     getDie(numSides: Int!): RandomDie
     getMessage: String!
+    getMessages: [Message]
     user(id: Int!): User
   }
 

@@ -21,3 +21,50 @@ As I am new to GraphQL and DataLoader, I thought it wise to spend some time lear
 I get some familiarity with that, I'd like to explore this specific use case.
 
 https://github.com/graphql/dataloader
+
+### Findings
+
+Context: Fetching messages and the user that authored them. One of the message references a user that
+does not exist (in reality it returns null).
+
+```gql
+{
+  getMessages {
+    id
+    user {
+      id
+    }
+  }
+}
+```
+
+Result: Returns null for the entire message object where the user was not found, but returns other
+message objects.
+
+```json
+{
+  "errors": [
+    {
+      "message": "Cannot return null for non-nullable field Message.user.",
+      "locations": [
+        {
+          "line": 4,
+          "column": 5
+        }
+      ],
+      "path": ["getMessages", 1, "user"]
+    }
+  ],
+  "data": {
+    "getMessages": [
+      {
+        "id": 1,
+        "user": {
+          "id": 1
+        }
+      },
+      null
+    ]
+  }
+}
+```
