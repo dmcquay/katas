@@ -1,0 +1,9 @@
+{
+  "name": "2020-10-07-slonik",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "slonik": "^22.5.0"
+  }
+}

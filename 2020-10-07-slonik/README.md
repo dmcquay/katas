@@ -1,0 +1,2 @@
+Learnining slonik.
+Today we want to insert a bunch of records using slonik. Can't figure it out. Want to just build a big insert query, but slonik enforces that you prevent SQL injection. Trying to figure out best way to handle.
