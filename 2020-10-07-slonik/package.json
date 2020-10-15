@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "pg": "^8.4.0",
     "slonik": "^22.5.0"
   }
 }
