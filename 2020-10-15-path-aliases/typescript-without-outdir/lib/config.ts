@@ -1,0 +1,1 @@
+export const foo = 'bar changed in ts only'

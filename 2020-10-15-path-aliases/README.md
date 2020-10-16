@@ -3,6 +3,8 @@ Trying to understand path aliases better. Will try in node and typescript.
 module-alias intercepts all require calls
 there is another library that creates symlinks instead
 we use module-alias
+https://www.npmjs.com/package/link-module-alias to avoid having to register a loader.
+https://www.npmjs.com/package/tsconfig-paths looks interesting to avoid duplicating the path configs.
 
 ## module-alias with node
 
@@ -58,3 +60,27 @@ Possible solutions:
 - Don't specify an outDir. Just let build files be next to src files. Then everything *should* just work.
   However, that also makes it hard to not track these files. We'd have to not track any js files and then
   manually override that for any js files we do need.
+
+# TypeScript without module-alias
+
+Jake Wood said:
+
+> Don’t quote me, but this tsconfig option seems to be working for us in order to turn ../../../Hello/World.tsx into Hello/World.tsx. So maybe you can turn the * into @ and get the same effect:
+> "baseUrl": ".",
+> "paths": {
+>     "*": ["src/*"]
+> },
+> this is with pure tsc, we aren’t using module-alias
+> Repo: https://github.com/ps-dev/flow-fundamentals/
+
+I tried to replicate that, but it would not work. You can see, I left it in a broken state.
+
+# TypeScript without outDir
+
+As I mentioned above, everything works fine if you just don't sepcify outDir in tsconfig.json.
+Sort of.
+Remaining problem is that js files "win" over ts files. So if you have any compiled files, changes
+to your TS files will have no effect until you compile again.
+Possible solution: never have compiled files in your dev environment. (There really shouldn't be a need.)
+In theory, this problem would exist even witout paths/aliases if the compiled files are next to source files.
+Putting compiled files in a separate directory is what protects us from this.
