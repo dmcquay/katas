@@ -52,3 +52,9 @@ the compiled files, not the ts files you are editing.
 To see this in action, compile with `yarn build` and then edit the value of foo in lib/config.ts.
 Then run `yarn start:dev`. You will see the previous value written to console instead of the
 one you just typed.
+
+Possible solutions:
+
+- Don't specify an outDir. Just let build files be next to src files. Then everything *should* just work.
+  However, that also makes it hard to not track these files. We'd have to not track any js files and then
+  manually override that for any js files we do need.
