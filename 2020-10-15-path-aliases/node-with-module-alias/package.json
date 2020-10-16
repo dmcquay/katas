@@ -10,6 +10,6 @@
     "module-alias": "^2.2.2"
   },
   "_moduleAliases": {
-    "@db": "lib/"
+    "@lib": "lib/"
   }
 }
