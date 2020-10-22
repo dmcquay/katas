@@ -6,6 +6,20 @@ we use module-alias
 https://www.npmjs.com/package/link-module-alias to avoid having to register a loader.
 https://www.npmjs.com/package/tsconfig-paths looks interesting to avoid duplicating the path configs.
 
+## Summary
+
+I think I found the problem with trying to do paths with TypeScript.
+
+tsconfig.paths seems to be important for TypeScript to resolve types and such. But does not control
+the actual file that gets imported. That is controlled by something like module-alias.
+
+Because we want our built files to be in a separate directory, we have to point mdoule-alias at the
+build directory. That means that if the built files are not present, the code will not execute, even
+when using ts-node. Furthermore, if there are built files, but then you edit a source file and try
+to execute, the stale built file will be executed, not your updated source file.
+
+TODO: Run examples to verify those claims I just made.
+
 ## module-alias with node
 
 To make module-alias work with node, all you must do is create the alias in package.json like this:
