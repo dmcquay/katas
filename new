@@ -1,0 +1,5 @@
+#!/bin/bash
+
+dir=`date "+%Y-%m-%d"`-$1
+mkdir $dir
+code $dir
