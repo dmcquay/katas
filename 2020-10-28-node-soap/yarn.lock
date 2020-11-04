@@ -81,6 +81,13 @@
   resolved "https://registry.yarnpkg.com/@types/strip-json-comments/-/strip-json-comments-0.0.30.tgz#9aa30c04db212a9a0649d6ae6fd50accc40748a1"
   integrity sha512-7NQmHra/JILCd1QqpSzl8+mJRc8ZHz3uDm8YV1Ks9IhK0epEiTw8aIErbvH9PI+6XbqhyIQy3462nEsn7UVzjQ==
 
+"@types/xmlbuilder@^11.0.1":
+  version "11.0.1"
+  resolved "https://registry.yarnpkg.com/@types/xmlbuilder/-/xmlbuilder-11.0.1.tgz#44ea11b8b8b2294f4dcc721d774556aef9d9f16a"
+  integrity sha512-ScJDpWPSAyO7s2BO5eUQTqyhO7i8c4r7Waj5eEwQYGApaNXW6E0pb9l1llDZ1VKGiBdGLMtLmqAi4eaKbzJ0dQ==
+  dependencies:
+    xmlbuilder "*"
+
 accept-language@^3.0.18:
   version "3.0.18"
   resolved "https://registry.yarnpkg.com/accept-language/-/accept-language-3.0.18.tgz#f5025f17bf65a466a845838ccf98cdb877d83384"
@@ -415,6 +422,11 @@ diff@^4.0.1:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/diff/-/diff-4.0.2.tgz#60f3aecb89d5fae520c11aa19efc2bb982aade7d"
   integrity sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==
+
+dotenv@^8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.2.0.tgz#97e619259ada750eea3e4ea3e26bceea5424b16a"
+  integrity sha512-8sJ78ElpbDJBHNeBzUbUVLsqKdccaa/BXF1uPTw3GrvQTBgrQrtObr2mUrE38vzYd8cEv+m/JBfDLioYcfXoaw==
 
 dotsplit.js@^1.0.3:
   version "1.1.0"
@@ -1764,6 +1776,11 @@ xml-crypto@^2.0.0:
   dependencies:
     xmldom "0.1.27"
     xpath "0.0.27"
+
+xmlbuilder@*, xmlbuilder@^15.1.1:
+  version "15.1.1"
+  resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-15.1.1.tgz#9dcdce49eea66d8d10b42cae94a79c3c8d0c2ec5"
+  integrity sha512-yMqGBqtXyeN1e3TGYvgNgDVZ3j84W4cwkOXQswghol6APgZWaff9lnbvN7MHYJOiXsvGPXtjTYJEiC9J2wv9Eg==
 
 xmlbuilder@^10.1.1:
   version "10.1.1"
