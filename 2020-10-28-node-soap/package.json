@@ -7,21 +7,29 @@
     "server": "ts-node-dev strong-server.ts",
     "client": "ts-node strong-client.ts",
     "client2": "ts-node soap-client.ts",
-    "wd": "ts-node workday-client.ts"
+    "wd": "ts-node workday-client.ts",
+    "raw": "ts-node raw.ts"
   },
   "dependencies": {
     "@types/body-parser": "^1.19.0",
+    "@types/node-fetch": "^2.5.7",
+    "@types/xml2js": "^0.4.5",
     "@types/xmlbuilder": "^11.0.1",
+    "axios": "^0.21.0",
     "body-parser": "^1.19.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "node-fetch": "^2.6.1",
     "soap": "^0.33.0",
     "strong-soap": "^3.0.0",
     "ts-node-dev": "^1.0.0",
     "typescript": "^4.0.5",
+    "wsdl-to-ts": "^0.2.3",
+    "xml2js": "^0.4.23",
     "xmlbuilder": "^15.1.1"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/express": "^4.17.8",
     "@types/node": "^14.14.6",
     "@types/soap": "^0.21.0",
