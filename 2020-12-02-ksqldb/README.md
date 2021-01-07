@@ -6,8 +6,19 @@ Next I went through the [tutorial on materialized caches](https://docs.ksqldb.io
 
 I skipped the parts about Debezium because my data is already in Kafka. I merely need to read those, join them and form a materialized view.
 
+## Commands to try
+
+```sh
+dc up -d
+docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
+```
+
+_Note: To exit ksqlDB's interactive CLI, type `exit`._
+
 Need to run this to tell ksqlDB to start all queries from the earliest point in each topic:
-`SET 'auto.offset.reset' = 'earliest';`
+```sql
+SET 'auto.offset.reset' = 'earliest';
+```
 
 ```sql
 CREATE STREAM users (id INT, name VARCHAR)
@@ -17,10 +28,8 @@ CREATE STREAM users (id INT, name VARCHAR)
 or if you are creating a stream for an existing topic:
 
 ```sql
-CREATE STREAM users WITH (
-    kafka_topic = 'users',
-    value_format = 'json'
-);
+CREATE STREAM users (id INT, name VARCHAR)
+  WITH (kafka_topic = 'users', value_format = 'json');
 ```
 
 Read the data from that stream:
@@ -41,11 +50,14 @@ INSERT INTO users (id, name) VALUES (4, 'Scott');
 Now create a materialized view. Darn, this doesn't work. Says that my select query produces stream, not a table...
 
 ```sql
-CREATE TABLE some_users AS
+CREATE STREAM some_users AS
   SELECT u.id, u.name
   FROM users u
-  WHERE u.id > 2
-  EMIT CHANGES;
+  WHERE u.id > 2;
+
+DESCRIBE EXTENDED some_users;
+
+PRINT SOME_USERS FROM BEGINNING;
 ```
 
 ## Goal
@@ -69,3 +81,7 @@ Solution using native kafka consumers:
 - When a tag or course_tag message is received, store them raw.
 - When any of these topics are consumed, after writing the raw values, also call the helper function from step 1.
 - Optionally, publish records back to the DVS if derivative streams for this data are desired.
+
+## Misc Notes
+
+kafka-server and the broker each randomly died once while I was playing with this. Not sure why it is so unreliable. Hopefully it is specific to the dev setup provided in the docker-compose file.
