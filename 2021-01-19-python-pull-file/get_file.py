@@ -8,11 +8,6 @@ url = "https://paas-api-production.pluralsight.com/rest/course-progress"
 filename = r'c:\tsAdmin\psAccentureData.csv'
 logFilename = r'c:\tsAdmin\psAccentureData.log'
 
-# local testing values
-# url = "http://localhost:8000/test.csv"
-# filename = 'accenture_tq_course_progress.csv'
-# logFilename = 'log'
-
 logFile = open(logFilename, 'a')
 def log(msg):
   now = datetime.now()
