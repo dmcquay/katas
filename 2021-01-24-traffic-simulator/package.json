@@ -1,0 +1,18 @@
+{
+  "name": "2021-01-24-traffic-simulator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "ts-mocha src/**/*.unit.ts",
+    "test:watch": "ts-mocha src/**/*.unit.ts --watch --watch-files src"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.14",
+    "@types/mocha": "^8.2.0",
+    "chai": "^4.2.0",
+    "mocha": "^8.2.1",
+    "ts-mocha": "^8.0.0",
+    "typescript": "^4.1.3"
+  }
+}
