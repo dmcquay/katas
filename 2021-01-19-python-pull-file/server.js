@@ -7,14 +7,21 @@ Joey,66
 Susan,33`
 
 const requestHandler = (req, res) => {
-        console.log({
-                url: req.url,
-                headers: req.headers
-        });
-        res.writeHead(200, 'OK', {
-                'Content-type': 'text/csv'
-        });
-        res.end(data);
+        let body = ''
+        req.on('data', data => {
+                body += data
+        })
+        req.on('end', () => {
+                console.log({
+                        url: req.url,
+                        headers: req.headers,
+                        body
+                });
+                res.writeHead(200, 'OK', {
+                        'Content-type': 'text/csv'
+                });
+                res.end(data);
+        })
 }
 
 const server = http.createServer(requestHandler);
