@@ -15,8 +15,8 @@ const requestHandler = (req, res) => {
                 console.log({
                         url: req.url,
                         headers: req.headers,
-                        body
                 });
+		console.log(body)
                 res.writeHead(200, 'OK', {
                         'Content-type': 'text/csv'
                 });
