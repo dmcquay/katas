@@ -93,6 +93,11 @@ const getAnswer = async (user: string, question: Question) => {
     optionId: option.id,
     isCorrect: option.isCorrect,
   };
+  console.log(
+    option.isCorrect
+      ? "You are correct!"
+      : "Sorry, but that is not the correct answer."
+  );
   return answer;
 };
 
