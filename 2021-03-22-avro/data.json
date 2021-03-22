@@ -1,0 +1,21 @@
+{
+  "channelId": "d963d87a-d098-416d-bfb2-6a9caaf42826",
+  "structure": [
+    {
+      "id": "8568d559-a9b9-451e-a976-b7b2e2c6f88c",
+      "type": "system",
+      "data": {
+        "sectionName": "California",
+        "sectionDescription": "Computers task-force",
+        "sectionContent": [
+          {
+            "id": "92ebc760-8a97-45e8-928c-08505fda4ce1",
+            "type": "program"
+          }
+        ]
+      }
+    }
+  ],
+  "eventType": "bricks-and-clicks",
+  "eventDate": "2021-01-30T00:41:18.853Z"
+}

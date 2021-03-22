@@ -1,0 +1,9 @@
+{
+  "name": "2021-03-22-avro",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "avsc": "^5.5.3"
+  }
+}
