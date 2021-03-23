@@ -2,7 +2,20 @@
 # yarn lockfile v1
 
 
-avsc@^5.5.3:
+"@kafkajs/confluent-schema-registry@1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@kafkajs/confluent-schema-registry/-/confluent-schema-registry-1.0.6.tgz#e9b4d3ed63f139a4176e89484b7fd3359378f609"
+  integrity sha512-NrZL1peOIlmlLKvheQcJAx9PHdnc4kaW+9+Yt4jXUfbbYR9EFNCZt6yApI4SwlFilaiZieReM6XslWy1LZAvoQ==
+  dependencies:
+    avsc ">= 5.4.13 < 6"
+    mappersmith ">= 2.30.1 < 3"
+
+"avsc@>= 5.4.13 < 6", avsc@^5.5.3:
   version "5.5.3"
   resolved "https://registry.yarnpkg.com/avsc/-/avsc-5.5.3.tgz#40b4ce7aee9f4a5c4e48243114fed0977523e8e9"
   integrity sha512-LaBbmBsus1mpK+6i99AF57/tUP8/wAj9+ZZm/5HGNIWN0dUZWUEp4/o79pAiRz49Mdb3PskltbCFD3w115TdZQ==
+
+"mappersmith@>= 2.30.1 < 3":
+  version "2.34.0"
+  resolved "https://registry.yarnpkg.com/mappersmith/-/mappersmith-2.34.0.tgz#837bb8675acc0561e138ca9d9348be013da5abbf"
+  integrity sha512-OS6fHyP2iOcyAV9fcXZ/OCevqT+JLzLUbFp6WaypmlRihEIL4f9PVqg8/M7e3doGzbE7ot2R4Ca2bYys7ZX44g==

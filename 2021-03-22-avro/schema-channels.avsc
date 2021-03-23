@@ -1,0 +1,86 @@
+{
+  "type": "record",
+  "name": "ChannelStructure",
+  "namespace": "exp.channels.v1",
+  "fields": [
+    {
+      "name": "channelId",
+      "type": "string",
+      "doc": "The ID of the channel the content is on."
+    },
+    {
+      "name": "structure",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "ChannelContent",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string",
+              "doc": "The id of the content or section on the channel."
+            },
+            {
+              "name": "type",
+              "type": "string",
+              "doc": "The content or section type. Can be 'course', 'interactive-course', 'external-link', 'path', 'project', 'guide', 'skill-assessment', or 'section'."
+            },
+            {
+              "name": "data",
+              "type": [
+                "null",
+                {
+                  "type": "record",
+                  "name": "SectionData",
+                  "fields": [
+                    {
+                      "name": "sectionName",
+                      "type": "string",
+                      "doc": "The name of the section."
+                    },
+                    {
+                      "name": "sectionDescription",
+                      "type": ["null", "string"],
+                      "doc": "The description of the section.",
+                      "default": null
+                    },
+                    {
+                      "name": "sectionContent",
+                      "type": {
+                        "type": "array",
+                        "items": {
+                          "type": "record",
+                          "name": "SectionContent",
+                          "fields": [
+                            {
+                              "name": "id",
+                              "type": "string",
+                              "doc": "The ID of the content on the channel."
+                            },
+                            {
+                              "name": "type",
+                              "type": "string",
+                              "doc": "The content's type. Can be 'course', 'interactive-course', 'external-link', 'path', 'project', 'guide', or 'skill-assessment'."
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "doc": "The structure of the content on the channel."
+    },
+    { "name": "eventType", "type": ["null", "string"], "default": null },
+    {
+      "name": "eventDate",
+      "type": ["null", { "type": "string", "logicalType": "iso-datetime" }],
+      "default": null
+    }
+  ]
+}

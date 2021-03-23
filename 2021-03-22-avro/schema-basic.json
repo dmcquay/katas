@@ -1,5 +1,7 @@
 {
   "type": "record",
+  "namespace": "test-namespace",
+  "name": "test-name",
   "fields": [
     {"name": "kind", "type": {"type": "enum", "symbols": ["CAT", "DOG"]}},
     {"name": "name", "type": "string"}

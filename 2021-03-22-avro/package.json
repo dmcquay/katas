@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@kafkajs/confluent-schema-registry": "1.0.6",
     "avsc": "^5.5.3"
   }
 }
