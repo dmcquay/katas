@@ -17,5 +17,6 @@ const data = require("./data.json");
 const buf = type.toBuffer(data);
 const val = type.fromBuffer(buf);
 
-// console.log(JSON.stringify(val, null, 2));
-console.log(val)
+console.log(JSON.stringify(val, null, 2));
+// console.log(val)
+console.log(JSON.stringify(JSON.parse(val), null, 2))
