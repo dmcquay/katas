@@ -1,3 +1,5 @@
+[Watch me create this project on YouTube](https://www.youtube.com/watch?v=xqjYvbld1-E&t=1s)
+
 Read messages directly from Kafka:
 
 ```sh
