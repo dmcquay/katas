@@ -1,0 +1,10 @@
+{
+  "name": "2021-05-14-kafka-avsc",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "avsc": "^5.7.0",
+    "kafkajs": "^1.15.0"
+  }
+}
