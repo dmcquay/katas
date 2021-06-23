@@ -1,0 +1,12 @@
+{
+  "name": "2021-06-23-yarn2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "change-case": "^4.1.2"
+  }
+}
