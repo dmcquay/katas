@@ -1,6 +1,6 @@
 const { Kafka } = require("kafkajs");
 const { SchemaRegistry } = require("@kafkajs/confluent-schema-registry");
-const { upsertUser, closeDbConnections } = require("./db");
+const { upsertPost, closeDbConnections } = require("./db");
 const { updateUserSummary } = require("./user-summary-agg");
 
 const main = async () => {
@@ -11,10 +11,10 @@ const main = async () => {
     brokers: ["localhost:9092"],
   });
 
-  const consumer = kafka.consumer({ groupId: "test-users" });
+  const consumer = kafka.consumer({ groupId: "test-posts" });
 
   await consumer.connect();
-  await consumer.subscribe({ topic: "users", fromBeginning: true });
+  await consumer.subscribe({ topic: "posts", fromBeginning: true });
 
   const shutdown = async () => {
     await consumer.disconnect();
@@ -26,10 +26,10 @@ const main = async () => {
 
   await consumer.run({
     eachMessage: async ({ message }) => {
-      const user = await registry.decode(message.value);
-      await upsertUser(user);
-      await updateUserSummary(user.id);
-      console.log(user);
+      const post = await registry.decode(message.value);
+      await upsertPost(post);
+      await updateUserSummary(post.authorId);
+      console.log(post);
     },
   });
 };

@@ -7,6 +7,7 @@
     "@kafkajs/confluent-schema-registry": "^2.0.1",
     "avsc": "^5.7.0",
     "faker": "^5.5.3",
-    "kafkajs": "^1.15.0"
+    "kafkajs": "^1.15.0",
+    "pg": "^8.6.0"
   }
 }
