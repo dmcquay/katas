@@ -36,9 +36,21 @@ Also in this example, we have extracted the logic out into some middleware so it
 
 Note that there is a lot of temporal coupling in this solution that I can't figure out how to get around:
 
-- All your route handlers must call `next()` or else the afterMiddleware won't get called. Is that normal to expect?
+- All your route handlers must call `next()` or else the afterMiddleware won't get called. Libs like terminus don't require this
+  so there must be a way to avoid this.
 - Must `use` before and after middleware in the right places
 - Must call setServer at some point
+
+## Terminus
+
+Start the server: `node 04-terminus.js`
+In another tab, create a request: `curl http://localhost:3000/one`
+In another tab, send TERM signal to server: `lsof -n -i4TCP:3000 | grep LISTEN | awk -F\ '{print $2}' | xargs kill -TERM`
+In another tab, create a request: `curl http://localhost:3000/two`
+
+You'll get the same results as our previous (03-middleware.js) example. You'll also get a health check endpoint at `/healthcheck`.
+
+Overall this feels like it is accomplishing everything in our custom solution, but with more rigor and some bonus features.
 
 ## Resources:
 
