@@ -23,7 +23,22 @@ In another tab, send TERM signal to server: `lsof -n -i4TCP:3000 | grep LISTEN |
 
 This time you will see any in-flight requests fulfilled first, and then the process will exit.
 
-_Try other files for iterations on this solution._
+## Middleware and other improvements
+
+Start the server: `node 03-middleware.js`
+In another tab, create a request: `curl http://localhost:3000/one`
+In another tab, send TERM signal to server: `lsof -n -i4TCP:3000 | grep LISTEN | awk -F\ '{print $2}' | xargs kill -TERM`
+In another tab, create a request: `curl http://localhost:3000/two`
+
+In this example, we call server.close() immediately upon SIGTERM which is important because it causes the http server to stop accepting connections.
+We still have to wait for in-flight requests to complete as usual.
+Also in this example, we have extracted the logic out into some middleware so it doesn't pollute our code as much.
+
+Note that there is a lot of temporal coupling in this solution that I can't figure out how to get around:
+
+- All your route handlers must call `next()` or else the afterMiddleware won't get called. Is that normal to expect?
+- Must `use` before and after middleware in the right places
+- Must call setServer at some point
 
 ## Resources:
 
