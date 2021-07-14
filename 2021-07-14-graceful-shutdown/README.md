@@ -23,6 +23,8 @@ In another tab, send TERM signal to server: `lsof -n -i4TCP:3000 | grep LISTEN |
 
 This time you will see any in-flight requests fulfilled first, and then the process will exit.
 
+_Try other files for iterations on this solution._
+
 ## Resources:
 
 - [Health Checks and Graceful Shutdown](https://expressjs.com/en/advanced/healthcheck-graceful-shutdown.html)
