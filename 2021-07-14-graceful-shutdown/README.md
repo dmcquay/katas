@@ -45,7 +45,12 @@ Note that there is a lot of temporal coupling in this solution that I can't figu
 
 Start the server: `node 04-terminus.js`
 In another tab, create a request: `curl http://localhost:3000/one`
-In another tab, send TERM signal to server: `lsof -n -i4TCP:3000 | grep LISTEN | awk -F\ '{print $2}' | xargs kill -TERM`
+In another tab, send TERM signal to server:
+
+```
+lsof -n -i4TCP:3000 | grep LISTEN | awk -F\  '{print $2}' | xargs kill -TERM
+```
+
 In another tab, create a request: `curl http://localhost:3000/two`
 
 You'll get the same results as our previous (03-middleware.js) example. You'll also get a health check endpoint at `/healthcheck`.
