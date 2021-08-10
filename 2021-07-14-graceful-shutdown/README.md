@@ -61,3 +61,4 @@ Overall this feels like it is accomplishing everything in our custom solution, b
 
 - [Health Checks and Graceful Shutdown](https://expressjs.com/en/advanced/healthcheck-graceful-shutdown.html)
 - [Kubernetes best practices: terminating with grace](https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-terminating-with-grace)
+- [KeepAlive preventing shutdown](https://stackoverflow.com/questions/55478868/node-graceful-shutdown-destroy-inactive-keepalive-connections-but-complete-ong)
