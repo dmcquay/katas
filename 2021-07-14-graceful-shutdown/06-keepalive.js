@@ -11,7 +11,7 @@ app.get("/one", async (req, res) => {
 });
 
 const server = http.createServer(app);
-server.keepAliveTimeout = 10_000;
+server.keepAliveTimeout = 1000_000;
 
 server.listen(3000);
 
@@ -24,6 +24,7 @@ server.on("request", (req, res) => {
   res.on("finish", () => {
     console.log("response sent");
     inFlightRequestCount--;
+    // TODO: what happens when a response is not sent due to some server failure or perhaps the client disappearing?
     closeConnectionsIfNecessary();
   });
 });
