@@ -16,7 +16,7 @@ app.get("/one", async (req, res) => {
 });
 
 const server = http.createServer(app);
-server.keepAliveTimeout = 10_000;
+// server.keepAliveTimeout = 10_000;
 
 server.listen(3000);
 
