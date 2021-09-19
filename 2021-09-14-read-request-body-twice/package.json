@@ -1,0 +1,9 @@
+{
+  "name": "2021-09-14-read-request-body-twice",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
