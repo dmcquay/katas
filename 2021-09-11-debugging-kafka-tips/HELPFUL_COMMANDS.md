@@ -30,13 +30,13 @@ also, you can use kafka-avro-console-consumer from this image if your messages a
 ```sh
 docker run -it --rm confluentinc/cp-kafka-connect:5.4.1 \
     kafka-avro-console-consumer \
-    --bootstrap-server kafka1-broker-production.vnerd.com:9092 \
+    --bootstrap-server kafka-broker-1.mycorp.com:9092 \
     --key-deserializer org.apache.kafka.common.serialization.StringDeserializer \
     --value-deserializer io.confluent.kafka.serializers.KafkaAvroDeserializer \
-    --property schema.registry.url=http://dvs-schema-registry.vnerd.com:8081 \
+    --property schema.registry.url=http://my-schema-registry.mycorp.com:8081 \
     --property print.key=true \
     --max-messages 1 \
-    --topic skills.criterionRef.v1.UserCompletionReport \
+    --topic posts \
     --partition 1 \
-    --offset 3072980
+    --offset 1
 ```
