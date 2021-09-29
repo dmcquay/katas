@@ -127,3 +127,22 @@ that, it is probably only saving you a few lines of code.
 
 I think this is more specifically to create a readiness probe route to communicate with k8s when pods should not be sent any more requests.
 The README states that you don't even need this if the ingress controller you use route via the Service.
+
+## How to teach this
+
+1. No handling demo
+2. Add basic server.close() handling
+3. Demonstrate how keep-alive (with default 5 second timeout) delays the shutdown (via Insomnia, no coding)
+4. Briefly explain how a long keep-alive timeout can be problematic and start to skim on how one might solve this with custom code or
+   something like http-terminator, but keep it short and justify that this is almost never necessary to solve because keep alive timeouts
+   should be short anyway.
+5. Demo how hanging requests can cause the server to never shut down. Implement a timeout. Demo how this still results in an empty
+   reply from server, but allows us to close other open handles such as DB connections.
+6. Explain how a process manager should ultimately be capable of sending a SIGKILL if the application is for some reason unable to
+   complete a graceful shutdown for any reason. In a pinch, you could probably get away with not implementing a timeout in your app
+   and just lean on the process manager. This will mean that handles are closed unexpectedly, but depending on your context, the
+   consequences of this will likely be inconsequential (e.g. DB resources not freed up for some timeout period).
+7. Briefly touch on libraries that help with all of this. Generally explain my opinion that they are not doing much beyond what
+   has been demonstrated so far and may not justify adding a dependency. (because deps come with a cost: security upgrades, less
+   control, indirection, devs wondering about the magic they might be doing rather than seeing 10 lines of code and therefore
+   knowing exactly what is happening)
