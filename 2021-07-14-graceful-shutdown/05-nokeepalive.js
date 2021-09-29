@@ -3,16 +3,17 @@ const express = require("express");
 
 const app = express();
 
-const handle = setInterval(() => {}, 10000);
+const handle = setInterval(function () {}, 10000);
 
 app.use((req, res, next) => {
   res.set("Connection", "close");
   next();
 });
 
-app.get("/one", async (req, res) => {
-  await new Promise((r) => setTimeout(r, 5_000));
-  res.send("one");
+app.get("/one", function (req, res) {
+  new Promise((r) => setTimeout(r, 5000)).then(() => {
+    res.send("one");
+  })
 });
 
 const server = http.createServer(app);
@@ -34,3 +35,5 @@ const initiateGracefulShutdown = () => {
 
 process.on("SIGTERM", initiateGracefulShutdown);
 process.on("SIGINT", initiateGracefulShutdown);
+
+// tested with node 10
