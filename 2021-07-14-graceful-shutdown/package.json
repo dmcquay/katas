@@ -6,6 +6,7 @@
   "dependencies": {
     "@godaddy/terminus": "^4.9.0",
     "express": "^4.17.1",
+    "http-terminator": "^3.0.3",
     "uuid": "^8.3.2"
   }
 }

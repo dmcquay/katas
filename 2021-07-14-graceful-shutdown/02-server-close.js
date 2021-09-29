@@ -9,3 +9,10 @@ const server = http.createServer(async (req, res) => {
 server.listen(3000, () => {
   console.log('listening on port 3000')
 });
+
+const gracefulShutdown = () => {
+  server.close()
+}
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
