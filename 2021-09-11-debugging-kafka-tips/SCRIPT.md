@@ -1,71 +1,85 @@
-Audio: I will demonstrate how you can store kafka message addresses and use them
-to look up messages later. This can be helpful for debugging. First, let's take a look at a basic consumer.
+## Welcome
 
-## Screen recording: Show basic consumer, pre-written, publishing a message and consuming it.
+Debugging kafka consumers
+What is a message address?
+How can I get and store it?
+How can we use that to help us debug later?
 
-Audio (folders): I am providing a start folder and a final folder. The start folder contains a basic consumer that reads posts from kafka and stores them in a postgres table. The final folder contains the final state of the code that stores message addresses. During this video, we will be making the start folder look like the final folder.
+## Screen recording: Basic consumer, pre-written, publishing a message and consuming it
 
--- docker-compose.yaml
-First I want you to quickly understand the code that we are starting with. I have provided a link to another video that explains a similar setup in more detail. Docker compose provides us with kafka and postgres. You'll also notice we have zookeeper. This is just a dependency of kafka.
+Audio (folders): I am providing a start folder and a final folder. The start folder contains a basic consumer that reads posts from kafka and stores them in a postgres table. The final folder contains the final state of the code that stores message addresses. During this video, we will be making the start folder look like the final folder. I've also put any useful terminal commands in this HELPFUL_COMMANDS file for your reference. You can find a link to this project in the comments.
 
--- schema.sql
-Schema.sql will be applied when we start docker compose for the first time. So far, all we have is a very basic table to store posts.
+I will quickly review the code that we are starting with. I will also provide a link in the comments to a video that explains a similar setup in more detail.
 
--- publish.js
-In publish.js, we configure a producer and then publish two post objects to the posts topic. Note that both of these posts have the same id with different content.
+### docker-compose.yaml
+Docker compose provides us with kafka and postgres. Zookeeper is just a dependency of kafka.
 
--- command line: node publish.js
-Let's run our publisher. This error is benign. I happens because we just published to a topic that did not exist yet. Our kafka cluster is configured by default to allow publishing to topics that don't exist and they will simply be created on the fly. However, since kafka is distributed, there is a brief period here where the leader election process has not yet completed. Our publisher handles this scenario just fine despite the error.
+### schema.sql
+Schema.sql will be applied when docker compose creates the postgres container for the first time. Here I define a very basic table to store posts.
 
--- command line: console consumer
-I have provided a few helpful commands in this file. This first one will read all messages from our posts topic and print them to the console so we can see that they were published successfully.
+### publish.js
+In publish.js, we configure a producer and then publish two post objects to the posts topic. Note that both of these posts have the same id with different content. If consumed in the correct order, the final content of this post should be "Improved content"
 
--- consume.js
-Now let's take a look at the consumer. It simply reads each message, assumes it is a post with no validation and calls a function to upsert it into our database. You should validate what you are getting! But let's keep this example simple.
+### consume.js
+Our consumer reads each message, assumes it is a post and calls a function to upsert it into our database.
 
--- db.js
-And here you can see the query that is upserting our posts.
+### db.js
+And here you can the upsert query.
 
--- command line: node consume.js
-Time to run our consumer! We can see that both messages were processed.
+### command line
+Let's bring up postgres and kafka.
+And take a peek at the posts table.
+Next, we'll run our producer which will send two messages to kafka.
 
--- psql
-Let's see what our postgres table looks like now. I'm just going to make sure tuples only is off so that you can see the column names. And here we are. There is only one row because when we found a second record with the same id, it will update the existing row with that id. The content shown is from the second message.
+### quick note about the publish error
+This error is benign. It happens because we just published to a topic that did not exist yet. The kafka cluster is configured to allow publishing to topics that don't exist and they will simply be created on the fly. However, since kafka is distributed, there is a brief period here where the leader election process has not yet completed. Our publisher handles this scenario just fine despite the error.
+
+### more command line
+This helpful command runs the kafka console consumer so we can see that our two messages have been published successfully.
+Let's run our consumer.
+And finally, I'll verify that we only have one post in our database with the final content of "Improved content"
 
 ## Screen recording: Introduce a publishing order problem.
 
 The whole point of this video is to help you debug when something goes wrong so let's introduce an ordering problem. We'll pretend that somehow our initial content message was produced last.
 
-_Start video_
-
-Let's reset our database and kafka so we can have a fresh run.
+Let's start fresh by recreating the postgres and kafka containers.
 Now let's switch the order these two messages are published in.
+Run the publisher.
+And the consumer.
+Let's confirm our post's content is now incorrectly set to "Initial content".
 
+We can see there is a problem, but we can't reliably reconstruct which messages were processed in what order to produce this final state.
 
-Audio: Explain how we can't know for sure what happened. If we stored every message we processed and in what order, then we could fully reproduce the problem. Kafka already stores
-the messages for us so if we just kept the address of those messages, then we could look all of the messages up later.
-
+And here is the point of this video. Messages in kafka can be looked up later if we have their addresses.
 ## Slide: Kafka addresses
 
 A message address consists of the topic, the partition and the offset. Since our posts table is only associated with the posts topic, we won't bother to store that.
 
-Audio: Explain components of a kafka address
+## Screen recording: Store addresses, lookup messages, store last 10 only
 
-Screen recording:
-- Show in code how we can get the message address
-- Add table column to store addresses
-- Alter upsert code
-- Rerun the out of order problem
-- Run query to retrieve the message addresses
-- Show command to retrieve the two messages
-- Show how to modify the upsert query if too many messages per row causing perf issues
+We'll need a place to store these addresses. A text array will work.
+Let's reconstruct our database with this new schema.
+Partition is a property on the ConsumerRunConfig which is the first argument of our eachMessage function.
+Offset is a property on the message object.
+messageAddresses is an array, but we only have access to the current address, so we'll just create an array with one item.
+We'll format the address by separating the partition and offset with a colon.
+Here we modify our upsert query to include the new messagesArray property.
+If we are updating an existing post, we append to the array, which is what line 15 is doing.
+Let's publish and consume these messages again to see how these addresses are stored.
+And here we can see the two message addresses. They are offsets 0 and 1, both from parttion 0.
+Finally, I'll show you how to look up these individual messages by their addresses using the kafka console consumer.
+I've included the command in HELPFUL_COMMANDS.
+With this, you should be able to reproduce this exact scenario so you can troubleshoot.
 
-Explaining upsert code:
-When we pass in the partition and offset of a message to this upsertPost function we only have access to the partition and offset of the most recent message. If this is an insert, then we simple set the value of the message addresses array to a new array with this one address in it. But if we are updating an existing row, we must be sure to append to the array, which is what line 15 is doing.
+## Screen recording: too many messages per row
 
-## more complex update for offsets
+If you an an extremely high number of messages per row, the message_addresses array can get long enough to cause performance problems. I have solved this by keeping only the most recent messages.
+This syntax will get the job done.
 
-'(etl_channel.offsets || EXCLUDED.offsets)[array_length(etl_channel.offsets, 1)-9:]'
+## Screen recording: avro consumer
+
+In this video I serialized my messages using JSON in plain text to keep it simple. If you are using avro to serialize your messages, then you'll want to use this modified command, which is also available in the HELPFUL_COMMANDS file, to deserialize the key and/or value before printing. In this example, my value is avro serialized and my key is just a string so you can see an example of each.
 
 ## Outro
 
