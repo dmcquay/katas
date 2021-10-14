@@ -1,8 +1,27 @@
+## Intro
+
+Welcome to coding with Dustin. Today, I have a microphone! And seventeen subscribers! This is turning into a legitimate channel.
+
+Today we're going to explore how to gracefully shut down an http server in nodejs. Let's define what a graceful shutdown is. It means that we can shutdown our server without disrupting clients connected to the server.
+
+Now wait a minute, if we shut down the server, obviously clients won't be able to connecto the server anymore and that is very disruptive! What are you talking about, Dustin?
+
+We have to think about this in context of how servers are usually deployed in a production environment. There's usually a load balancer that distributes traffic one or more servers. Let's say we have only one server behind our load balancer. To deploy an update to this service, you might take the following steps:
+
+1. Create a new server which we'll call server B that has the new software on it
+2. Tell the load balancer to start sending traffic to server B
+3. Tell the load balancer to stop sending any traffic to server A
+4. Now we can shutdown server A
+
+But what happens if server A was in the middle of handling a request when this process began? Let's dive into our first example code to see.
 ## 01-no-handling.js
 
 The examples I will share today use the http module which is pare of the core modules provided by the nodejs. Other libraries such as koa and express generally build upon this module and therefore what you learn today should apply equally well to those other libraries and frameworks.
 
 This first example is about the most simple server we can create. No matter what route you request, you will get the same 200 status code and a body of "ok". The only interesting thing here is that we are delaying for 5 seconds before responding to simulate our route actually doing some I/O such as reading from a database, before responding. 5 seconds is a bit long for most cases, but slowing down the timeline will help us test and observe some things today.
+
+
+** TODO ** Go back to the deployment steps and explain how we need to wait for requests to be handled before shutting down server A.
 
 ## Table defining these three signals
 
@@ -65,7 +84,7 @@ Finally, let's wrap this up by examining a library that can help us implement al
 
 *TODO* - New screen recording showing the full http-terminator example. What I recorded only shows the top of the file.
 
-This time, instead of calling server.close, we create an instance of http terminator and as it to terminate for us. This will handle the timeout from our previous example. It will also handle keep alive connections, but more elegantly. Specifically, it will close any open conenctions as soon as they are idle. In past examples, with a keep alive timeout of 10 seconds, we would have wait up to 10 seconds for the process to close unless we closed Insomnia. In this example, http-terminator will wait for the in-flight request to complete, which should take 5 seconds, and then will immediately close the connection so that we don't have to wait for the full 10 second timeout. Furthermore, if there were no in-flight requests, it would be able to close the process immediately!
+This time, instead of calling server.close, we create an instance of http terminator and ask it to terminate for us. This will handle the timeout from our previous example. It will also handle keep alive connections, but more elegantly. Specifically, it will close any open conenctions as soon as they are idle. In past examples, with a keep alive timeout of 10 seconds, we would have waited up to 10 seconds for the process to close unless we closed Insomnia. In this example, http-terminator will wait for the in-flight request to complete, which should take 5 seconds, and then will immediately close the connection so that we don't have to wait for the full 10 second timeout. Furthermore, if there were no in-flight requests, it would be able to close the process immediately!
 
 Start the server
 Issue a request with Insomnia
