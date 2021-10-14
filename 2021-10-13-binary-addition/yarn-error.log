@@ -1,0 +1,32 @@
+Arguments: 
+  /Users/dmcquay/.nvm/versions/node/v12.20.1/bin/node /Users/dmcquay/.yarn/bin/yarn.js add chai lodash
+
+PATH: 
+  /Users/dmcquay/iCloud/bin:/Users/dmcquay/.yarn/bin:/Users/dmcquay/.config/yarn/global/node_modules/.bin:/Users/dmcquay/google-cloud-sdk/bin:/Users/dmcquay/.nvm/versions/node/v12.20.1/bin:/Users/dmcquay/bin:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Users/dmcquay/iCloud/bin:/Users/dmcquay/.yarn/bin:/Users/dmcquay/.config/yarn/global/node_modules/.bin:/Users/dmcquay/google-cloud-sdk/bin:/Users/dmcquay/.nvm/versions/node/v12.20.1/bin:/Users/dmcquay/bin:/Users/dmcquay/.cargo/bin
+
+Yarn version: 
+  1.22.5
+
+Node version: 
+  12.20.1
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: getaddrinfo ENOTFOUND repository.vnerd.com
+      at GetAddrInfoReqWrap.onlookup [as oncomplete] (dns.js:66:26)
+
+npm manifest: 
+  {
+    "name": "2021-10-13-binary-addition",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

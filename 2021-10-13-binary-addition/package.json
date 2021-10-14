@@ -1,0 +1,15 @@
+{
+  "name": "2021-10-13-binary-addition",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "chai": "^4.3.4",
+    "lodash": "^4.17.21",
+    "ts-node": "^10.3.0",
+    "typescript": "^4.4.4"
+  },
+  "scripts": {
+    "start": "ts-node index.ts"
+  }
+}
