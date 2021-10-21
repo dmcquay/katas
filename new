@@ -2,4 +2,30 @@
 
 dir=`date "+%Y-%m-%d"`-$1
 mkdir $dir
+cd $dir
+yarn init -y
+
+if [[ "$2" == "ts" ]]; then
+  yarn add -D typescript ts-mocha chai mocha @types/mocha @types/chai
+  node -e "
+    const p = require('./package.json')
+    p.scripts = {test: 'ts-mocha \"*.test.ts\"'}
+    require('fs').writeFileSync('package.json', JSON.stringify(p, null, 2))
+  "
+  
+  echo '{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2021"
+  }
+}' > tsconfig.json
+
+  echo "import {expect} from 'chai'
+
+it('works', () => {
+  expect(true).to.be.true
+})" > example.test.ts
+fi
+
+cd ..
 code $dir
