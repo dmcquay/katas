@@ -6,25 +6,34 @@ cd $dir
 yarn init -y
 
 if [[ "$2" == "ts" ]]; then
-  yarn add -D typescript ts-mocha chai mocha @types/mocha @types/chai
+  yarn add -D typescript ts-mocha chai mocha @types/mocha @types/chai @types/node
   node -e "
     const p = require('./package.json')
-    p.scripts = {test: 'ts-mocha \"*.test.ts\"'}
+    p.scripts = {
+      test: 'ts-mocha \"src/**/*.test.ts\"',
+      'test:watch': 'yarn test -w --watch-files src --reporter min'
+    }
     require('fs').writeFileSync('package.json', JSON.stringify(p, null, 2))
   "
+
+  mkdir .vscode
+  echo '{"editor.formatOnSave": true}' > .vscode/settings.json
   
   echo '{
   "compilerOptions": {
     "module": "CommonJS",
-    "target": "ES2021"
+    "target": "ES2021",
+    "strict": true
   }
 }' > tsconfig.json
+
+  mkdir src
 
   echo "import {expect} from 'chai'
 
 it('works', () => {
   expect(true).to.be.true
-})" > example.test.ts
+})" > src/example.test.ts
 fi
 
 cd ..
