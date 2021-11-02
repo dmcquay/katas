@@ -1,4 +1,5 @@
-import { stringify } from "querystring";
+import * as fs from "fs";
+import * as R from "ramda";
 
 export type Board = string[][];
 
@@ -93,3 +94,23 @@ export const solve = (dictionary: string[], board: Board): Solution[] => {
   const solutions = dictionary.flatMap(findWord(board)(allLocs));
   return solutions.filter(hasNoDuplicateLocs);
 };
+
+if (require.main === module) {
+  const board = process.argv[2].split(",").map((x) => x.split(""));
+  const dictionary = fs
+    .readFileSync("../data/words_alpha.txt")
+    .toString()
+    .split("\r\n");
+  const solutions = solve(dictionary, board);
+
+  const results = R.pipe(
+    R.map(R.prop("word")),
+    R.uniq,
+    R.sortBy(R.prop("length")),
+    R.slice(-50, Infinity)
+    // R.reverse (can't figure out how to do this without types being broken)
+  )(solutions);
+
+  results.reverse();
+  console.log(results);
+}

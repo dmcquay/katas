@@ -13,8 +13,13 @@
     "typescript": "^4.4.4"
   },
   "scripts": {
+    "solve": "ts-node src/boggle.ts",
     "test": "ts-mocha \"src/**/*.test.ts\"",
     "test:watch": "yarn test -w --watch-files src --reporter min"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@types/ramda": "^0.27.46",
+    "ramda": "^0.27.1",
+    "ts-node": "^10.4.0"
+  }
 }
