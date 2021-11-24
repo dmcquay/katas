@@ -1,5 +1,13 @@
 YouTube Video: I programmed some creatures. They evolved.
 
+## How to run
+
+```sh
+npx ts-node src/01-basic.ts
+```
+
+...etc
+
 ## Requirements for evolution:
 
 1. Self-replication

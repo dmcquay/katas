@@ -14,7 +14,6 @@
   },
   "scripts": {
     "test": "ts-mocha \"src/**/*.test.ts\"",
-    "test:watch": "yarn test -w --watch-files src --reporter min",
-    "start": "ts-node src/app.ts"
+    "test:watch": "yarn test -w --watch-files src --reporter min"
   }
 }
