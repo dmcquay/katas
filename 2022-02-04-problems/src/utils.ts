@@ -170,11 +170,16 @@ export const routeExists = (
 ): boolean => {
   const queue = new Queue<GraphNode<unknown>>();
   queue.enqueue(root);
+  root.visited = true;
 
   while (queue.hasNext()) {
     const n = queue.dequeue();
     if (n === candidate) return true;
-    n.adjacencies.forEach((adj) => queue.enqueue(adj));
+    n.adjacencies.forEach((adj) => {
+      if (adj.visited) return;
+      queue.enqueue(adj);
+      adj.visited = true;
+    });
   }
 
   return false;

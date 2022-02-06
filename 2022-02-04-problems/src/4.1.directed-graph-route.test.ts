@@ -2,17 +2,17 @@ import { expect } from "chai";
 import { GraphNode, routeExists } from "./utils";
 
 describe("4.1.directed-graph-route", () => {
-  const indirectRoute = {
+  const indirectRoute: GraphNode<string> = {
     value: "indirect",
     adjacencies: [],
     visited: false,
   };
-  const directRoute = {
+  const directRoute: GraphNode<string> = {
     value: "direct",
     adjacencies: [indirectRoute],
     visited: false,
   };
-  const noRoute = {
+  const noRoute: GraphNode<string> = {
     value: "disconnected",
     adjacencies: [],
     visited: false,
@@ -22,6 +22,11 @@ describe("4.1.directed-graph-route", () => {
     adjacencies: [directRoute],
     visited: false,
   };
+
+  // to test cycles. will hang indefinitely if we have not
+  // handles cycles correctly.
+  indirectRoute.adjacencies.push(root);
+
   const allNodes: GraphNode<string>[] = [
     indirectRoute,
     directRoute,
