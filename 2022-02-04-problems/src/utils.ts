@@ -184,3 +184,9 @@ export const routeExists = (
 
   return false;
 };
+
+export interface BSTNode {
+  value: number;
+  left?: BSTNode;
+  right?: BSTNode;
+}
