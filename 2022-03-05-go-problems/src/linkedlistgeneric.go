@@ -40,7 +40,7 @@ func (list *LinkedList[T]) pop() T {
 	return val
 }
 
-func (list LinkedList[T]) isEmpty() bool {
+func (list *LinkedList[T]) isEmpty() bool {
 	return list.first == nil
 }
 
