@@ -20,7 +20,7 @@ func makeList[T any]() *LinkedList[T] {
 	return &l
 }
 
-func push[T any](list *LinkedList[T], val T) {
+func (list *LinkedList[T]) push(val T) {
 	newNode := &LinkedListNode[T]{val, nil}
 	if list.first == nil {
 		list.first = newNode
@@ -31,7 +31,7 @@ func push[T any](list *LinkedList[T], val T) {
 	}
 }
 
-func pop[T any](list *LinkedList[T]) T {
+func (list *LinkedList[T]) pop() T {
 	val := list.first.val
 	list.first = list.first.next
 	if list.first == nil {
@@ -40,17 +40,17 @@ func pop[T any](list *LinkedList[T]) T {
 	return val
 }
 
-func isEmpty[T any](list *LinkedList[T]) bool {
+func (list *LinkedList[T]) isEmpty() bool {
 	return list.first == nil
 }
 
 func makeListAndPrintAll() {
 	list := makeList[string]()
-	push(list, "hello")
-	push(list, "world")
+	list.push("hello")
+	list.push("world")
 
-	for !isEmpty(list) {
-		fmt.Println(s.ToUpper(pop(list)))
+	for !list.isEmpty() {
+		fmt.Println(s.ToUpper(list.pop()))
 	}
 }
 
