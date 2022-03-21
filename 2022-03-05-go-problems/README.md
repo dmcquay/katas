@@ -8,8 +8,10 @@ https://go.dev/learn/
 
 ## Install/Update Go & Configure Environment
 
-install with `brew install go`
-update with `brew upgrade go`
+I originally installed with `brew install go`, but that gave me 1.17.8, while the latest stable
+version is actually 1.18 at the time of writing which is important to me because support for generics
+was added in 1.18. Therefore I recommend installing by going go.dev and following the installation
+instructions there.
 
 i like to isolate go to current project directory. setting these env vars does that.
 
