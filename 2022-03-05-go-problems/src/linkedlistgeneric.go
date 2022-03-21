@@ -15,9 +15,9 @@ type LinkedListNode[T any] struct {
 	next *LinkedListNode[T]
 }
 
-func makeList[T any]() *LinkedList[T] {
+func makeList[T any]() LinkedList[T] {
 	l := LinkedList[T]{nil, nil}
-	return &l
+	return l
 }
 
 func (list *LinkedList[T]) push(val T) {
@@ -40,7 +40,7 @@ func (list *LinkedList[T]) pop() T {
 	return val
 }
 
-func (list *LinkedList[T]) isEmpty() bool {
+func (list LinkedList[T]) isEmpty() bool {
 	return list.first == nil
 }
 
