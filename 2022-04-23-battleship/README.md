@@ -1,0 +1,1 @@
+It seems that looking at every third cell with a follow up of looking at every cell, with hit followup is the best strategy with an average of 62 shots fired to solve.
