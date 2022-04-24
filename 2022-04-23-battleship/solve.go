@@ -6,19 +6,16 @@ import (
 	"time"
 )
 
-// board
-// 2d array of Cells
-// Cell has properties: occupied (bool), attacked (bool)
-// Array of Ships. Each ship has a length (int) and an array of Cells.
-
 type Cell struct {
 	attacked bool
 	ship     *Ship
 }
 
 type Ship struct {
-	length int
-	label  rune
+	length     int
+	shortLabel rune
+	longLabel  string
+	cells      []*Cell
 }
 
 func buildGrid() [10][10]*Cell {
@@ -31,24 +28,23 @@ func buildGrid() [10][10]*Cell {
 	return grid
 }
 
+func buildShips() []*Ship {
+	return []*Ship{
+		{length: 5, shortLabel: 'C', longLabel: "Carrier"},
+		{length: 4, shortLabel: 'B', longLabel: "Battleship"},
+		{length: 3, shortLabel: 'D', longLabel: "Destroyer"},
+		{length: 3, shortLabel: 'S', longLabel: "Submarine"},
+		{length: 2, shortLabel: 'P', longLabel: "Patrol Boat"},
+	}
+}
+
 func main() {
 	rand.Seed(time.Now().UnixNano())
-
 	grid := buildGrid()
-
-	s1 := Ship{length: 5, label: 'C'}
-	s2 := Ship{length: 4, label: 'B'}
-	s3 := Ship{length: 3, label: 'c'}
-	s4 := Ship{length: 3, label: 'S'}
-	s5 := Ship{length: 2, label: 'D'}
-
-	placeShip(&s1, &grid)
-	placeShip(&s2, &grid)
-	placeShip(&s3, &grid)
-	placeShip(&s4, &grid)
-	placeShip(&s5, &grid)
-
+	ships := buildShips()
+	placeShips(ships, &grid)
 	printGrid(grid)
+	printShips(ships)
 }
 
 func isLocationEmpty(grid *[10][10]*Cell, shipLen int, isOnCol bool, randShort int, randFull int) bool {
@@ -70,6 +66,12 @@ func isLocationEmpty(grid *[10][10]*Cell, shipLen int, isOnCol bool, randShort i
 	return true
 }
 
+func placeShips(ships []*Ship, grid *[10][10]*Cell) {
+	for i := 0; i < len(ships); i++ {
+		placeShip(ships[i], grid)
+	}
+}
+
 func placeShip(s *Ship, grid *[10][10]*Cell) {
 	var isOnCol bool = rand.Intn(2) == 1
 	var randShort int = rand.Intn(10 - s.length)
@@ -85,11 +87,13 @@ func placeShip(s *Ship, grid *[10][10]*Cell) {
 		for r := randShort; r < (*s).length+randShort; r++ {
 			cell := (*grid)[r][randFull]
 			cell.ship = s
+			s.cells = append((*s).cells, cell)
 		}
 	} else {
 		for c := randShort; c < (*s).length+randShort; c++ {
 			cell := (*grid)[randFull][c]
 			cell.ship = s
+			s.cells = append((*s).cells, cell)
 		}
 	}
 }
@@ -118,8 +122,25 @@ func printCell(c *Cell) {
 	} else if c.attacked {
 		fmt.Print("O")
 	} else if c.ship != nil {
-		fmt.Print(string(c.ship.label))
+		fmt.Print(string(c.ship.shortLabel))
 	} else {
 		fmt.Print("_")
 	}
+}
+
+func printShips(ships []*Ship) {
+	for i := 0; i < len(ships); i++ {
+		printShip(ships[i])
+	}
+}
+
+func printShip(ship *Ship) {
+	placed := len(ship.cells) == ship.length
+	hitCount := 0
+	for i := 0; i < len(ship.cells); i++ {
+		if ship.cells[i].attacked == true {
+			hitCount++
+		}
+	}
+	fmt.Printf("%s (%d)\tPlaced: %t, Hits: %d/%d\n", ship.longLabel, ship.length, placed, hitCount, ship.length)
 }
