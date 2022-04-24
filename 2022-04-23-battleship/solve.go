@@ -41,16 +41,6 @@ func buildShips() []*Ship {
 	}
 }
 
-func main() {
-	rand.Seed(time.Now().UnixNano())
-	grid := buildGrid()
-	ships := buildShips()
-	placeShips(ships, grid)
-	printGrid(grid)
-	printShips(ships)
-	solveIncrementally(grid, ships)
-}
-
 func isLocationEmpty(grid Grid, shipLen int, isOnCol bool, randShort int, randFull int) bool {
 	if isOnCol {
 		for r := randShort; r < shipLen+randShort; r++ {
@@ -158,29 +148,79 @@ func allShipsAreSunk(ships []*Ship) bool {
 	return true
 }
 
-func solveIncrementally(grid Grid, ships []*Ship) {
+func solveIncrementally(grid Grid, ships []*Ship) int {
 	shotCount := 0
 	for row := 0; row < 10; row++ {
 		for col := 0; col < 10; col++ {
 			cell := grid[row][col]
-			cell.attacked = true
 			shotCount++
-			if cell.ship != nil && !cell.ship.isSunk {
-				fmt.Println("Hit a ship")
-				cell.ship.isSunk = true
-				for i := 0; i < len(cell.ship.cells); i++ {
-					if !cell.ship.cells[i].attacked {
-						cell.ship.isSunk = false
-					}
-				}
-				if cell.ship.isSunk {
-					fmt.Println("Sunk a ship")
-				}
-			}
+			attackCell(cell)
 			if allShipsAreSunk(ships) {
-				fmt.Printf("Solved in %d shots\n", shotCount)
-				return
+				return shotCount
 			}
 		}
 	}
+	panic("board was never solved. this is unexpected.")
+}
+
+func solveRandomly(grid Grid, ships []*Ship) int {
+	shotCount := 0
+	for !allShipsAreSunk(ships) {
+		row := rand.Intn(10)
+		col := rand.Intn(10)
+		cell := grid[row][col]
+		if cell.attacked {
+			continue
+		}
+		shotCount++
+		attackCell(cell)
+	}
+	return shotCount
+}
+
+func attackCell(cell *Cell) {
+	cell.attacked = true
+	if cell.ship != nil && !cell.ship.isSunk {
+		cell.ship.isSunk = true
+		for i := 0; i < len(cell.ship.cells); i++ {
+			if !cell.ship.cells[i].attacked {
+				cell.ship.isSunk = false
+			}
+		}
+	}
+}
+
+func reset(grid Grid, ships []*Ship) {
+	for i := 0; i < len(ships); i++ {
+		ships[i].isSunk = false
+	}
+	for row := 0; row < 10; row++ {
+		for col := 0; col < 10; col++ {
+			grid[row][col].attacked = false
+		}
+	}
+}
+
+func main() {
+	rand.Seed(time.Now().UnixNano())
+
+	totalShotsIncremental := 0
+	totalShotsRandom := 0
+
+	for i := 0; i < 1000; i++ {
+		grid := buildGrid()
+		ships := buildShips()
+		placeShips(ships, grid)
+		// printGrid(grid)
+		// printShips(ships)
+		totalShotsIncremental += solveIncrementally(grid, ships)
+		reset(grid, ships)
+		totalShotsRandom += solveRandomly(grid, ships)
+	}
+
+	avgShotsIncremental := totalShotsIncremental / 1000
+	avgShotsRandom := totalShotsRandom / 1000
+
+	fmt.Printf("Avg Shots Incremental: %d\n", avgShotsIncremental)
+	fmt.Printf("Avg Shots Random: %d\n", avgShotsRandom)
 }
