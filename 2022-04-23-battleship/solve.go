@@ -259,8 +259,84 @@ func solveEveryOther(grid Grid, ships []*Ship) int {
 			}
 		}
 	}
-	printGrid(grid)
-	printShips(ships)
+	panic("board was never solved. this is unexpected.")
+}
+
+func solveEveryThird(grid Grid, ships []*Ship) int {
+	shotCount := 0
+	for row := 0; row < 10; row++ {
+		for col := row % 3; col < 10; col += 3 {
+			cell := grid[row][col]
+			shotCount++
+			if attackCell(cell) {
+				shotCount += hitFollowUp(row, col, grid, ships)
+			}
+			if allShipsAreSunk(ships) {
+				return shotCount
+			}
+		}
+	}
+
+	// this is not guaranteed to solve the board so if it is not solved
+	// yet, let's follow up with another strategy that is guaranteed to
+	// solve it.
+	shotCount += solveEveryOther(grid, ships)
+	if allShipsAreSunk(ships) {
+		return shotCount
+	}
+
+	panic("board was never solved. this is unexpected.")
+}
+
+func solveEveryFourth(grid Grid, ships []*Ship) int {
+	shotCount := 0
+	for row := 0; row < 10; row++ {
+		for col := row % 4; col < 10; col += 4 {
+			cell := grid[row][col]
+			shotCount++
+			if attackCell(cell) {
+				shotCount += hitFollowUp(row, col, grid, ships)
+			}
+			if allShipsAreSunk(ships) {
+				return shotCount
+			}
+		}
+	}
+
+	// this is not guaranteed to solve the board so if it is not solved
+	// yet, let's follow up with another strategy that is guaranteed to
+	// solve it.
+	shotCount += solveEveryThird(grid, ships)
+	if allShipsAreSunk(ships) {
+		return shotCount
+	}
+
+	panic("board was never solved. this is unexpected.")
+}
+
+func solveEveryFifth(grid Grid, ships []*Ship) int {
+	shotCount := 0
+	for row := 0; row < 10; row++ {
+		for col := row % 5; col < 10; col += 5 {
+			cell := grid[row][col]
+			shotCount++
+			if attackCell(cell) {
+				shotCount += hitFollowUp(row, col, grid, ships)
+			}
+			if allShipsAreSunk(ships) {
+				return shotCount
+			}
+		}
+	}
+
+	// this is not guaranteed to solve the board so if it is not solved
+	// yet, let's follow up with another strategy that is guaranteed to
+	// solve it.
+	shotCount += solveEveryFourth(grid, ships)
+	if allShipsAreSunk(ships) {
+		return shotCount
+	}
+
 	panic("board was never solved. this is unexpected.")
 }
 
@@ -313,8 +389,11 @@ func main() {
 	totalShotsIncremental := 0
 	totalShotsRandom := 0
 	totalShotsEveryOther := 0
+	totalShotsEveryThird := 0
+	totalShotsEveryFourth := 0
+	totalShotsEveryFifth := 0
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10000; i++ {
 		grid := buildGrid()
 		ships := buildShips()
 		placeShips(ships, grid)
@@ -325,13 +404,18 @@ func main() {
 		totalShotsRandom += solveRandomly(grid, ships)
 		reset(grid, ships)
 		totalShotsEveryOther += solveEveryOther(grid, ships)
+		reset(grid, ships)
+		totalShotsEveryThird += solveEveryThird(grid, ships)
+		reset(grid, ships)
+		totalShotsEveryFourth += solveEveryFourth(grid, ships)
+		reset(grid, ships)
+		totalShotsEveryFifth += solveEveryFifth(grid, ships)
 	}
 
-	avgShotsIncremental := totalShotsIncremental / 1000
-	avgShotsRandom := totalShotsRandom / 1000
-	avgShotsEveryOther := totalShotsEveryOther / 1000
-
-	fmt.Printf("Avg Shots Incremental: %d\n", avgShotsIncremental)
-	fmt.Printf("Avg Shots Random: %d\n", avgShotsRandom)
-	fmt.Printf("Avg Shots Every Other: %d\n", avgShotsEveryOther)
+	fmt.Printf("Avg Shots Incremental: %d\n", totalShotsIncremental/10000)
+	fmt.Printf("Avg Shots Random: %d\n", totalShotsRandom/10000)
+	fmt.Printf("Avg Shots Every Other: %d\n", totalShotsEveryOther/10000)
+	fmt.Printf("Avg Shots Every Third: %d\n", totalShotsEveryThird/10000)
+	fmt.Printf("Avg Shots Every Fourth: %d\n", totalShotsEveryFourth/10000)
+	fmt.Printf("Avg Shots Every Fifth: %d\n", totalShotsEveryFifth/10000)
 }
