@@ -148,6 +148,88 @@ func allShipsAreSunk(ships []*Ship) bool {
 	return true
 }
 
+func hitFollowUp(row int, col int, grid Grid, ships []*Ship) int {
+	shotCount := 0
+
+	// up
+	for r2 := row - 1; r2 >= 0; r2-- {
+		if grid[r2][col].attacked {
+			continue
+		}
+
+		shotCount++
+
+		// go until we miss
+		if !attackCell(grid[r2][col]) {
+			break
+		}
+
+		// stop early if the game is over
+		if allShipsAreSunk(ships) {
+			return shotCount
+		}
+	}
+
+	// down
+	for r2 := row + 1; r2 < 10; r2++ {
+		if grid[r2][col].attacked {
+			continue
+		}
+
+		shotCount++
+
+		// go until we miss
+		if !attackCell(grid[r2][col]) {
+			break
+		}
+
+		// stop early if the game is over
+		if allShipsAreSunk(ships) {
+			return shotCount
+		}
+	}
+
+	// left
+	for c2 := col - 1; c2 >= 0; c2-- {
+		if grid[row][c2].attacked {
+			continue
+		}
+
+		shotCount++
+
+		// go until we miss
+		if !attackCell(grid[row][c2]) {
+			break
+		}
+
+		// stop early if the game is over
+		if allShipsAreSunk(ships) {
+			return shotCount
+		}
+	}
+
+	// down
+	for c2 := col + 1; c2 < 10; c2++ {
+		if grid[row][c2].attacked {
+			continue
+		}
+
+		shotCount++
+
+		// go until we miss
+		if !attackCell(grid[row][c2]) {
+			break
+		}
+
+		// stop early if the game is over
+		if allShipsAreSunk(ships) {
+			return shotCount
+		}
+	}
+
+	return shotCount
+}
+
 func solveIncrementally(grid Grid, ships []*Ship) int {
 	shotCount := 0
 	for row := 0; row < 10; row++ {
@@ -163,6 +245,25 @@ func solveIncrementally(grid Grid, ships []*Ship) int {
 	panic("board was never solved. this is unexpected.")
 }
 
+func solveEveryOther(grid Grid, ships []*Ship) int {
+	shotCount := 0
+	for row := 0; row < 10; row++ {
+		for col := row % 2; col < 10; col += 2 {
+			cell := grid[row][col]
+			shotCount++
+			if attackCell(cell) {
+				shotCount += hitFollowUp(row, col, grid, ships)
+			}
+			if allShipsAreSunk(ships) {
+				return shotCount
+			}
+		}
+	}
+	printGrid(grid)
+	printShips(ships)
+	panic("board was never solved. this is unexpected.")
+}
+
 func solveRandomly(grid Grid, ships []*Ship) int {
 	shotCount := 0
 	for !allShipsAreSunk(ships) {
@@ -173,14 +274,18 @@ func solveRandomly(grid Grid, ships []*Ship) int {
 			continue
 		}
 		shotCount++
-		attackCell(cell)
+		if attackCell(cell) {
+			shotCount += hitFollowUp(row, col, grid, ships)
+		}
 	}
 	return shotCount
 }
 
-func attackCell(cell *Cell) {
+func attackCell(cell *Cell) bool {
 	cell.attacked = true
+	isHit := false
 	if cell.ship != nil && !cell.ship.isSunk {
+		isHit = true
 		cell.ship.isSunk = true
 		for i := 0; i < len(cell.ship.cells); i++ {
 			if !cell.ship.cells[i].attacked {
@@ -188,6 +293,7 @@ func attackCell(cell *Cell) {
 			}
 		}
 	}
+	return isHit
 }
 
 func reset(grid Grid, ships []*Ship) {
@@ -206,6 +312,7 @@ func main() {
 
 	totalShotsIncremental := 0
 	totalShotsRandom := 0
+	totalShotsEveryOther := 0
 
 	for i := 0; i < 1000; i++ {
 		grid := buildGrid()
@@ -216,11 +323,15 @@ func main() {
 		totalShotsIncremental += solveIncrementally(grid, ships)
 		reset(grid, ships)
 		totalShotsRandom += solveRandomly(grid, ships)
+		reset(grid, ships)
+		totalShotsEveryOther += solveEveryOther(grid, ships)
 	}
 
 	avgShotsIncremental := totalShotsIncremental / 1000
 	avgShotsRandom := totalShotsRandom / 1000
+	avgShotsEveryOther := totalShotsEveryOther / 1000
 
 	fmt.Printf("Avg Shots Incremental: %d\n", avgShotsIncremental)
 	fmt.Printf("Avg Shots Random: %d\n", avgShotsRandom)
+	fmt.Printf("Avg Shots Every Other: %d\n", avgShotsEveryOther)
 }
