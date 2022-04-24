@@ -42,13 +42,26 @@ func main() {
 }
 
 func placeShip(s *Ship, grid *[10][10]*Cell) {
-	row := rand.Intn(10 - s.length)
-	col := rand.Intn(10)
+	isOnCol := rand.Intn(2) == 1
 
-	for r := row; r < (*s).length+row; r++ {
-		cell := (*grid)[r][col]
-		cell.ship = s
+	if isOnCol {
+		row := rand.Intn(10 - s.length)
+		col := rand.Intn(10)
+
+		for r := row; r < (*s).length+row; r++ {
+			cell := (*grid)[r][col]
+			cell.ship = s
+		}
+	} else {
+		col := rand.Intn(10 - s.length)
+		row := rand.Intn(10)
+
+		for c := col; c < (*s).length+col; c++ {
+			cell := (*grid)[row][c]
+			cell.ship = s
+		}
 	}
+
 }
 
 func printGrid(grid [10][10]*Cell) {
