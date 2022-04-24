@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 )
 
 // board
@@ -30,6 +32,8 @@ func buildGrid() [10][10]*Cell {
 }
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	grid := buildGrid()
 	s1 := Ship{length: 5, label: 'A'}
 
@@ -38,8 +42,8 @@ func main() {
 }
 
 func placeShip(s *Ship, grid *[10][10]*Cell) {
-	row := 3
-	col := 4
+	row := rand.Intn(10 - s.length)
+	col := rand.Intn(10)
 
 	for r := row; r < (*s).length+row; r++ {
 		cell := (*grid)[r][col]
@@ -64,7 +68,6 @@ func printCells(cells [10]*Cell) {
 }
 
 func printCell(c *Cell) {
-	// fmt.Printf("%s: occupied=%t, attacked=%t\n", label, c.occupied, c.attacked)
 	if c == nil {
 		fmt.Print("N")
 	} else if c.attacked && c.ship != nil {
