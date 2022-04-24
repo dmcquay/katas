@@ -75,10 +75,10 @@ func placeShip(s *Ship, grid *[10][10]*Cell) {
 	var randShort int = rand.Intn(10 - s.length)
 	var randFull int = rand.Intn(10)
 
-	for isLocationEmpty(grid, (*s).length, isOnCol, randShort, randFull) {
-		isOnCol := rand.Intn(2) == 1
-		randShort := rand.Intn(10 - s.length)
-		randFull := rand.Intn(10)
+	for !isLocationEmpty(grid, (*s).length, isOnCol, randShort, randFull) {
+		isOnCol = rand.Intn(2) == 1
+		randShort = rand.Intn(10 - s.length)
+		randFull = rand.Intn(10)
 	}
 
 	if isOnCol {
