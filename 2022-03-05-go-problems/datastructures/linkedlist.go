@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	s "strings"
+	// s "strings"
 )
 
 type LinkedList struct {
