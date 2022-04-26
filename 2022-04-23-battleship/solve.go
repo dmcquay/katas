@@ -393,7 +393,9 @@ func main() {
 	totalShotsEveryFourth := 0
 	totalShotsEveryFifth := 0
 
-	for i := 0; i < 10000; i++ {
+	iterations := 10000
+
+	for i := 0; i < iterations; i++ {
 		grid := buildGrid()
 		ships := buildShips()
 		placeShips(ships, grid)
@@ -412,10 +414,10 @@ func main() {
 		totalShotsEveryFifth += solveEveryFifth(grid, ships)
 	}
 
-	fmt.Printf("Avg Shots Incremental: %d\n", totalShotsIncremental/10000)
-	fmt.Printf("Avg Shots Random: %d\n", totalShotsRandom/10000)
-	fmt.Printf("Avg Shots Every Other: %d\n", totalShotsEveryOther/10000)
-	fmt.Printf("Avg Shots Every Third: %d\n", totalShotsEveryThird/10000)
-	fmt.Printf("Avg Shots Every Fourth: %d\n", totalShotsEveryFourth/10000)
-	fmt.Printf("Avg Shots Every Fifth: %d\n", totalShotsEveryFifth/10000)
+	fmt.Printf("Avg Shots Incremental: %d\n", totalShotsIncremental/iterations)
+	fmt.Printf("Avg Shots Random: %d\n", totalShotsRandom/iterations)
+	fmt.Printf("Avg Shots Every Other: %d\n", totalShotsEveryOther/iterations)
+	fmt.Printf("Avg Shots Every Third: %d\n", totalShotsEveryThird/iterations)
+	fmt.Printf("Avg Shots Every Fourth: %d\n", totalShotsEveryFourth/iterations)
+	fmt.Printf("Avg Shots Every Fifth: %d\n", totalShotsEveryFifth/iterations)
 }
