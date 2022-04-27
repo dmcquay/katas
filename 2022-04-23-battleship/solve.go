@@ -383,41 +383,54 @@ func reset(grid Grid, ships []*Ship) {
 	}
 }
 
-func main() {
-	rand.Seed(time.Now().UnixNano())
+type Result struct {
+	solver string
+	shots  int
+}
 
-	totalShotsIncremental := 0
-	totalShotsRandom := 0
-	totalShotsEveryOther := 0
-	totalShotsEveryThird := 0
-	totalShotsEveryFourth := 0
-	totalShotsEveryFifth := 0
-
-	iterations := 10000
-
+func solve(ch chan Result, iterations int) {
 	for i := 0; i < iterations; i++ {
 		grid := buildGrid()
 		ships := buildShips()
 		placeShips(ships, grid)
 		// printGrid(grid)
 		// printShips(ships)
-		totalShotsIncremental += solveIncrementally(grid, ships)
+		ch <- Result{solver: "Incremental", shots: solveIncrementally(grid, ships)}
 		reset(grid, ships)
-		totalShotsRandom += solveRandomly(grid, ships)
+		ch <- Result{solver: "Random", shots: solveRandomly(grid, ships)}
 		reset(grid, ships)
-		totalShotsEveryOther += solveEveryOther(grid, ships)
+		ch <- Result{solver: "EveryOther", shots: solveEveryOther(grid, ships)}
 		reset(grid, ships)
-		totalShotsEveryThird += solveEveryThird(grid, ships)
+		ch <- Result{solver: "EveryThird", shots: solveEveryThird(grid, ships)}
 		reset(grid, ships)
-		totalShotsEveryFourth += solveEveryFourth(grid, ships)
+		ch <- Result{solver: "EveryFourth", shots: solveEveryFourth(grid, ships)}
 		reset(grid, ships)
-		totalShotsEveryFifth += solveEveryFifth(grid, ships)
+		ch <- Result{solver: "EveryFifth", shots: solveEveryFifth(grid, ships)}
+	}
+}
+
+func main() {
+	rand.Seed(time.Now().UnixNano())
+
+	iterations := 1000000
+	workers := 5
+	ch := make(chan Result, 1)
+	results := make(map[string]int)
+
+	for i := 0; i < workers; i++ {
+		go solve(ch, iterations/workers+1)
 	}
 
-	fmt.Printf("Avg Shots Incremental: %d\n", totalShotsIncremental/iterations)
-	fmt.Printf("Avg Shots Random: %d\n", totalShotsRandom/iterations)
-	fmt.Printf("Avg Shots Every Other: %d\n", totalShotsEveryOther/iterations)
-	fmt.Printf("Avg Shots Every Third: %d\n", totalShotsEveryThird/iterations)
-	fmt.Printf("Avg Shots Every Fourth: %d\n", totalShotsEveryFourth/iterations)
-	fmt.Printf("Avg Shots Every Fifth: %d\n", totalShotsEveryFifth/iterations)
+	resultCount := 0
+	for result := range ch {
+		results[result.solver] += result.shots
+		resultCount++
+		if resultCount == (iterations * 6) {
+			break
+		}
+	}
+
+	for k, v := range results {
+		fmt.Printf("Avg Shots %s: %d\n", k, v/iterations)
+	}
 }
