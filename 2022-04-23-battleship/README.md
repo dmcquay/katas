@@ -10,3 +10,11 @@ I tried to solve this by creating a larger buffer in the channel (as large as 10
 change the execution time at all. Setting the buffer size to 1 actually marginally improved performance
 (43 seconds with 5 goroutines).
 
+Next I tried dramatically reducing the chatter across the channel by making each goroutine aggregate
+its own results so only N results were sent back over the channel where N is the number of workers.
+This produced better results for 1 goroutine (12 seconds). 5 goroutines remained at around 44 seconds.
+
+Nice explanation about how goroutines might slow you down here:
+https://appliedgo.net/concurrencyslower/
+
+But, I *think* I'm already doing what they suggest as the correct solution. So...?

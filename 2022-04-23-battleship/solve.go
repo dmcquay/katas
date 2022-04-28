@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"runtime"
 	"time"
 )
 
@@ -388,45 +389,48 @@ type Result struct {
 	shots  int
 }
 
-func solve(ch chan Result, iterations int) {
+func solve(ch chan map[string]int, iterations int) {
+	results := make(map[string]int)
 	for i := 0; i < iterations; i++ {
 		grid := buildGrid()
 		ships := buildShips()
 		placeShips(ships, grid)
 		// printGrid(grid)
 		// printShips(ships)
-		ch <- Result{solver: "Incremental", shots: solveIncrementally(grid, ships)}
+		results["Incremental"] += solveIncrementally(grid, ships)
 		reset(grid, ships)
-		ch <- Result{solver: "Random", shots: solveRandomly(grid, ships)}
+		results["Random"] += solveRandomly(grid, ships)
 		reset(grid, ships)
-		ch <- Result{solver: "EveryOther", shots: solveEveryOther(grid, ships)}
+		results["EveryOther"] += solveEveryOther(grid, ships)
 		reset(grid, ships)
-		ch <- Result{solver: "EveryThird", shots: solveEveryThird(grid, ships)}
+		results["EveryThird"] += solveEveryThird(grid, ships)
 		reset(grid, ships)
-		ch <- Result{solver: "EveryFourth", shots: solveEveryFourth(grid, ships)}
+		results["EveryFourth"] += solveEveryFourth(grid, ships)
 		reset(grid, ships)
-		ch <- Result{solver: "EveryFifth", shots: solveEveryFifth(grid, ships)}
+		results["EveryFifth"] += solveEveryFifth(grid, ships)
 	}
+	ch <- results
 }
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	iterations := 1000000
-	workers := 5
-	ch := make(chan Result, 1)
+	workers := runtime.GOMAXPROCS(0)
+
+	fmt.Println("Worker Count: ", workers)
+
+	ch := make(chan map[string]int)
 	results := make(map[string]int)
 
 	for i := 0; i < workers; i++ {
 		go solve(ch, iterations/workers+1)
 	}
 
-	resultCount := 0
-	for result := range ch {
-		results[result.solver] += result.shots
-		resultCount++
-		if resultCount == (iterations * 6) {
-			break
+	for i := 0; i < workers; i++ {
+		result := <-ch
+		for k, v := range result {
+			results[k] += v
 		}
 	}
 
