@@ -389,29 +389,6 @@ type Result struct {
 	shots  int
 }
 
-func solve(ch chan map[string]int, iterations int) {
-	results := make(map[string]int)
-	for i := 0; i < iterations; i++ {
-		grid := buildGrid()
-		ships := buildShips()
-		placeShips(ships, grid)
-		// printGrid(grid)
-		// printShips(ships)
-		results["Incremental"] += solveIncrementally(grid, ships)
-		reset(grid, ships)
-		results["Random"] += solveRandomly(grid, ships)
-		reset(grid, ships)
-		results["EveryOther"] += solveEveryOther(grid, ships)
-		reset(grid, ships)
-		results["EveryThird"] += solveEveryThird(grid, ships)
-		reset(grid, ships)
-		results["EveryFourth"] += solveEveryFourth(grid, ships)
-		reset(grid, ships)
-		results["EveryFifth"] += solveEveryFifth(grid, ships)
-	}
-	ch <- results
-}
-
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
@@ -424,7 +401,28 @@ func main() {
 	results := make(map[string]int)
 
 	for i := 0; i < workers; i++ {
-		go solve(ch, iterations/workers+1)
+		go func(ch chan map[string]int, iterations int) {
+			results := make(map[string]int)
+			for i := 0; i < iterations; i++ {
+				grid := buildGrid()
+				ships := buildShips()
+				placeShips(ships, grid)
+				// printGrid(grid)
+				// printShips(ships)
+				results["Incremental"] += solveIncrementally(grid, ships)
+				reset(grid, ships)
+				results["Random"] += solveRandomly(grid, ships)
+				reset(grid, ships)
+				results["EveryOther"] += solveEveryOther(grid, ships)
+				reset(grid, ships)
+				results["EveryThird"] += solveEveryThird(grid, ships)
+				reset(grid, ships)
+				results["EveryFourth"] += solveEveryFourth(grid, ships)
+				reset(grid, ships)
+				results["EveryFifth"] += solveEveryFifth(grid, ships)
+			}
+			ch <- results
+		}(ch, iterations/workers)
 	}
 
 	for i := 0; i < workers; i++ {
