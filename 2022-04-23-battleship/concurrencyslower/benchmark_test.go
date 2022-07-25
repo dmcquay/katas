@@ -52,25 +52,27 @@ func ConcurrentSum() int {
 func ChannelSum() int {
 	n := runtime.GOMAXPROCS(0)
 
-	res := make(chan int)
+	res := make(chan map[int]int)
 
 	for i := 0; i < n; i++ {
-		go func(i int, r chan<- int) {
+		go func(i int, r chan<- map[int]int) {
+			results := make(map[int]int)
 			sum := 0
 			start := (limit / n) * i
 			end := start + (limit / n)
 			for j := start; j < end; j += 1 {
 				sum += j
+				results[j%5]++
 			}
-			r <- sum
+			r <- results
 		}(i, res)
 	}
 
-	sum := 0
-	for i := 0; i < n; i++ {
-		sum += <-res
-	}
-	return sum
+	// sum := 0
+	// for i := 0; i < n; i++ {
+	// 	sum += <-res
+	// }
+	return 0
 }
 
 func BenchmarkSerialSum(b *testing.B) {
