@@ -3,11 +3,9 @@
 dir=`date "+%Y-%m-%d"`-$1
 mkdir $dir
 cd $dir
-yarn init -y -2
 
 if [[ "$2" == "ts" ]]; then
-  yarn add -D typescript ts-mocha chai mocha @types/mocha @types/chai @types/node
-  yarn dlx @yarnpkg/sdks vscode
+  npm i -D typescript ts-mocha chai mocha @types/mocha @types/chai @types/node
   node -e "
     const p = require('./package.json')
     p.scripts = {
@@ -32,12 +30,6 @@ if [[ "$2" == "ts" ]]; then
 it('works', () => {
   expect(true).to.be.true
 })" > src/example.test.ts
-
-  echo 'For safety reason VSCode requires you to explicitly activate the custom TS settings:'
-  echo ' - Press ctrl+shift+p in a TypeScript file'
-  echo ' - Choose "Select TypeScript Version'
-  echo ' - Pick "Use Workspace Version"'
-  echo 'See also: https://yarnpkg.com/getting-started/editor-sdks#vscode'
 
 fi
 
