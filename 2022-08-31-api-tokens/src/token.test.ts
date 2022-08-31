@@ -6,7 +6,7 @@ import { createToken, verifyToken } from "./token";
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
-const invalidPrivateKey = fs.readFileSync("private.pem");
+const invalidPrivateKey = fs.readFileSync("private-invalid.pem");
 
 it("when token is valid", async () => {
   const token = await createToken("test-client-name");
@@ -16,5 +16,6 @@ it("when token is valid", async () => {
 
 it("when token is not valid", async () => {
   const token = await createToken("test-client-name", invalidPrivateKey);
-  await expect(verifyToken(token)).to.be.rejected;
+
+  await expect(verifyToken(token)).to.be.rejectedWith(/invalid signature/);
 });
