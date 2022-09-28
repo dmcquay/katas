@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "TestTopic2V1",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "quadrant",
+      "type": "int"
+    }
+  ]
+}

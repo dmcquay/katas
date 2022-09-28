@@ -3,6 +3,7 @@
     "@types/chai": "^4.3.3",
     "@types/mocha": "^9.1.1",
     "@types/node": "^18.7.2",
+    "avro-typescript": "^1.1.0",
     "chai": "^4.3.6",
     "mocha": "^10.0.0",
     "ts-mocha": "^10.0.0",
@@ -14,9 +15,13 @@
     "test:watch": "yarn test -w --watch-files src --reporter min",
     "create-topic": "ts-node src/create-topic.ts",
     "publisher": "ts-node src/publisher.ts",
-    "subscriber": "ts-node src/subscriber.ts"
+    "subscriber": "ts-node src/subscriber.ts",
+    "dump": "ts-node src/dump.ts",
+    "generate-schema-types": "ts-node src/generate-schema-types.ts",
+    "create-topics-and-schemas": "ts-node src/create-topics-and-schemas.ts"
   },
   "dependencies": {
-    "@google-cloud/pubsub": "^3.1.0"
+    "@google-cloud/pubsub": "^3.1.0",
+    "avro-js": "^1.11.1"
   }
 }
