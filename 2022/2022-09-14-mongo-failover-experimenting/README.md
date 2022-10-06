@@ -1,6 +1,7 @@
 The point of this project is to test connecting to mongodb atlas, performing an intentional failover, and seeing how the client behaves/recovers.
 Therefore, you need to create an atlas cluster w/ failover support (minimum M10).
 You also need to create a user that has access. I suggest creating a temporary user with username/password method.
+dbAdmin not useful. You need readWrite.
 You also need network access.
 
 Then provide the connection URI via the `MONGO_URI` env var (or put it in `.env` file) and run `npm start`.
