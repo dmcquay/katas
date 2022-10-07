@@ -1,7 +1,7 @@
 #!/bin/bash
 
-dir=`date "+%Y-%m-%d"`-$1
-mkdir $dir
+dir=`date "+%Y"`/`date "+%Y-%m-%d"`-$1
+mkdir -p $dir
 cd $dir
 
 if [[ "$2" == "ts" ]]; then
@@ -10,7 +10,7 @@ if [[ "$2" == "ts" ]]; then
     const p = require('./package.json')
     p.scripts = {
       test: 'ts-mocha \"src/**/*.test.ts\"',
-      'test:watch': 'yarn test -w --watch-files src --reporter min'
+      'test:watch': 'npm test -- -w --watch-files src --reporter min'
     }
     require('fs').writeFileSync('package.json', JSON.stringify(p, null, 2))
   "
@@ -33,5 +33,5 @@ it('works', () => {
 
 fi
 
-cd ..
+cd -
 code $dir
