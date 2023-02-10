@@ -1,0 +1,7 @@
+This project was used to provide a minimal reproduction of an error I was experiencing at work and demonstrates an anti-pattern.
+
+The anti-pattern is a form of inappropriate coupling between a library and clients of that library. The pattern is when the client and the library both depend on another library and versions of those two libraries must be synchronized.
+
+If it were a public library, this would be completely impractical. Clients would likely find the version clash immediately an avoid the library. In our case, this was an internal library only used by us, so it was easy to align the versions when initially created. However, it has left us in a state where we must upgrade the library across all libs and all clients at once in a coordinated manner. Since the purpose of the libraries being extracted from other code bases in the first place was to allow the projects to be developed independently, this coupling and the resulting coordinated upgrades and deployments, is terribly undesirable.
+
+Recommendation instead: Data passed between libs and clients should be in portable types. Native JavaScript types are recommended. Where this is not possible, the client should support a range of versions. It should test across that range to ensure compatibility and it should report those supported versions via package.json. But, even when done well, this still requires coordination and portable data formats should be preferred.
