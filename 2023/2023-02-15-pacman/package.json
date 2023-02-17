@@ -1,0 +1,26 @@
+{
+  "devDependencies": {
+    "@types/chai": "^4.3.4",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.13.0",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "parcel": "^2.8.3",
+    "process": "^0.11.10",
+    "ts-mocha": "^10.0.0",
+    "typescript": "^4.9.5"
+  },
+  "source": "src/index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build",
+    "test": "ts-mocha \"src/**/*.test.ts\"",
+    "test:watch": "npm test -- -w --watch-files src --reporter min"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
