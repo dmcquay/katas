@@ -161,5 +161,5 @@ export const createPlayerMovement = (
       ...state,
       players,
     });
-  }, 50);
+  }, 20);
 };

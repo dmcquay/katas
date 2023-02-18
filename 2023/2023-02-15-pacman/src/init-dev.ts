@@ -3,6 +3,7 @@ import { GameState, Heading, GhostColor } from "./types";
 import { createStateStore } from "./state-store";
 import { cycleVariations } from "./cycle-variations";
 import { createPlayerMovement } from "./movement";
+import { start } from "repl";
 
 export const initDev = () => {
   const canvas = document.getElementById(
@@ -38,7 +39,7 @@ export const initDev = () => {
       },
       {
         label: "5",
-        start: { x: 6, y: 9 },
+        start: { x: 6, y: 1 },
         end: { x: 6, y: 26 },
       },
       {
@@ -50,6 +51,26 @@ export const initDev = () => {
         label: "7",
         start: { x: 1, y: 26 },
         end: { x: 6, y: 26 },
+      },
+      {
+        label: "8",
+        start: { x: 1, y: 1 },
+        end: { x: 1, y: 8 },
+      },
+      {
+        label: "9",
+        start: { x: 1, y: 1 },
+        end: { x: 12, y: 1 },
+      },
+      {
+        label: "10",
+        start: { x: 1, y: 5 },
+        end: { x: 26, y: 5 },
+      },
+      {
+        label: "11",
+        start: { x: 1, y: 8 },
+        end: { x: 6, y: 8 },
       },
     ],
   };
@@ -69,29 +90,29 @@ export const initDev = () => {
   });
 
   // pacman in all headings
-  let y = 1;
-  for (let heading of headings) {
-    state.players.push({
-      heading,
-      position: { x: 1, y },
-    });
-    y += 2;
-  }
+  // let y = 1;
+  // for (let heading of headings) {
+  //   state.players.push({
+  //     heading,
+  //     position: { x: 1, y },
+  //   });
+  //   y += 2;
+  // }
 
-  // all ghosts in all headings
-  let x = 3;
-  for (let color of ghostColors) {
-    y = 1;
-    for (let heading of headings) {
-      state.ghosts.push({
-        heading,
-        color,
-        position: { x, y },
-      });
-      y += 2;
-    }
-    x += 2;
-  }
+  // // all ghosts in all headings
+  // let x = 3;
+  // for (let color of ghostColors) {
+  //   y = 1;
+  //   for (let heading of headings) {
+  //     state.ghosts.push({
+  //       heading,
+  //       color,
+  //       position: { x, y },
+  //     });
+  //     y += 2;
+  //   }
+  //   x += 2;
+  // }
 
   const store = createStateStore(state);
   const renderer = createCanvasRenderer({ canvas, displayPaths: true });
