@@ -1,10 +1,15 @@
-import { renderGameState } from "./draw";
+import { createCanvasRenderer } from "./draw";
 import { GameState, Heading, GhostColor } from "./types";
 import { createStateStore } from "./state-store";
 import { cycleVariations } from "./cycle-variations";
-import { createMovement } from "./movement";
+import { createPlayerMovement } from "./movement";
 
 export const initDev = () => {
+  const canvas = document.getElementById(
+    "game-canvas"
+  ) as HTMLCanvasElement | null;
+  if (canvas == null) throw new Error("cannot find canvas element");
+
   const state: GameState = {
     players: [],
     ghosts: [],
@@ -20,6 +25,13 @@ export const initDev = () => {
     GhostColor.ORANGE,
   ];
 
+  // pacman to test movement
+  state.players.push({
+    heading: Heading.RIGHT,
+    position: { x: 1, y: 20 },
+  });
+
+  // pacman in all headings
   let y = 1;
   for (let heading of headings) {
     state.players.push({
@@ -29,6 +41,7 @@ export const initDev = () => {
     y += 2;
   }
 
+  // all ghosts in all headings
   let x = 3;
   for (let color of ghostColors) {
     y = 1;
@@ -44,7 +57,8 @@ export const initDev = () => {
   }
 
   const store = createStateStore(state);
-  store.subscribe(renderGameState);
+  const renderer = createCanvasRenderer(canvas);
+  store.subscribe(renderer.renderGameState);
   cycleVariations(store);
-  createMovement(store);
+  createPlayerMovement(store, 0, canvas);
 };

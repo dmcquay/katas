@@ -1,25 +1,76 @@
 import { StateStore } from "./state-store";
-import { Ghost, Player } from "./types";
+import { GameState, Ghost, Player, Heading } from "./types";
 
-const movePlayerOrGhost = <T extends Player | Ghost>(obj: T): T => {
+const INC = 0.1;
+
+const movePlayerOrGhost = (player: Player): Player => {
+  const xInc =
+    player.heading === Heading.RIGHT
+      ? INC
+      : player.heading === Heading.LEFT
+      ? INC * -1
+      : 0;
+  const yInc =
+    player.heading === Heading.DOWN
+      ? INC
+      : player.heading === Heading.UP
+      ? INC * -1
+      : 0;
   return {
-    ...obj,
+    ...player,
     position: {
-      x: obj.position.x + 0.1,
-      y: obj.position.y,
+      x: player.position.x + xInc,
+      y: player.position.y + yInc,
     },
   };
 };
 
-export const createMovement = (store: StateStore) => {
+const KEY_TO_HEADING_MAP: Record<string, Heading> = {
+  ArrowUp: Heading.UP,
+  ArrowDown: Heading.DOWN,
+  ArrowLeft: Heading.LEFT,
+  ArrowRight: Heading.RIGHT,
+};
+
+export const createPlayerMovement = (
+  store: StateStore,
+  playerIndex: number
+) => {
+  window.addEventListener(
+    "keyup",
+    (e) => {
+      const heading = KEY_TO_HEADING_MAP[e.code];
+      if (heading == null) return;
+
+      const state = store.getState();
+      const players = state.players.map((player, idx) => {
+        if (idx === playerIndex) {
+          return {
+            ...player,
+            heading,
+          };
+        }
+        return player;
+      });
+      store.setState({
+        ...state,
+        players,
+      });
+    },
+    false
+  );
+
   setInterval(() => {
     const state = store.getState();
-    const players = state.players.map(movePlayerOrGhost);
-    const ghosts = state.ghosts.map(movePlayerOrGhost);
+    const players = state.players.map((player, idx) => {
+      if (idx === playerIndex) {
+        return movePlayerOrGhost(player);
+      }
+      return player;
+    });
     store.setState({
       ...state,
       players,
-      ghosts,
     });
-  }, 100);
+  }, 50);
 };
