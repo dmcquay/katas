@@ -1,4 +1,12 @@
-import { Heading, Point, GhostColor, GameState, Player, Ghost } from "./types";
+import {
+  Heading,
+  Point,
+  GhostColor,
+  GameState,
+  Path,
+  Player,
+  Ghost,
+} from "./types";
 
 const CELL_SIZE = 8;
 const ROW_COUNT = 31;
@@ -53,7 +61,13 @@ const SPRITE_GHOSTS_HEADING_TO_COLS_MAP: Record<Heading, number[]> = {
   [Heading.DOWN]: [6, 7],
 };
 
-export const createCanvasRenderer = (canvas: HTMLCanvasElement) => {
+type RendererOptions = {
+  canvas: HTMLCanvasElement;
+  displayPaths: boolean;
+};
+
+export const createCanvasRenderer = (opts: RendererOptions) => {
+  const { canvas } = opts;
   const ctx = canvas.getContext("2d");
   if (ctx == null) throw new Error("failed to get 2d canvas context");
   ctx.canvas.width = BOARD_WIDTH * SCALE_FACTOR;
@@ -120,10 +134,40 @@ export const createCanvasRenderer = (canvas: HTMLCanvasElement) => {
     );
   };
 
+  const drawPath = (path: Path) => {
+    // compute
+    const startX =
+      path.start.x * CELL_SIZE * SCALE_FACTOR + (CELL_SIZE * SCALE_FACTOR) / 2;
+    const startY =
+      path.start.y * CELL_SIZE * SCALE_FACTOR + (CELL_SIZE * SCALE_FACTOR) / 2;
+    const endX =
+      path.end.x * CELL_SIZE * SCALE_FACTOR + (CELL_SIZE * SCALE_FACTOR) / 2;
+    const endY =
+      path.end.y * CELL_SIZE * SCALE_FACTOR + (CELL_SIZE * SCALE_FACTOR) / 2;
+
+    // draw line
+    ctx.strokeStyle = "white";
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+
+    // draw path id text
+    ctx.font = "12px sans-serif";
+    ctx.fillStyle = "white";
+    ctx.fillText(path.label, (startX + endX) / 2, (startY + endY) / 2);
+  };
+
   const renderGameState = (state: GameState) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     drawBoard();
+
+    if (opts.displayPaths) {
+      for (let path of state.paths) {
+        drawPath(path);
+      }
+    }
 
     for (let player of state.players) {
       drawPacMan(player, state.pacManVariation);

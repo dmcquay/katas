@@ -33,9 +33,16 @@ export interface Player {
   heading: Heading;
 }
 
+export interface Path {
+  label: string;
+  start: Point;
+  end: Point;
+}
+
 export interface GameState {
   players: Player[];
   ghosts: Ghost[];
   pacManVariation: number;
   ghostVariation: number;
+  paths: Path[];
 }

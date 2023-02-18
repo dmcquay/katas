@@ -15,6 +15,43 @@ export const initDev = () => {
     ghosts: [],
     pacManVariation: 0,
     ghostVariation: 0,
+    paths: [
+      {
+        label: "1",
+        start: { x: 1, y: 20 },
+        end: { x: 12, y: 20 },
+      },
+      {
+        label: "2",
+        start: { x: 1, y: 20 },
+        end: { x: 1, y: 23 },
+      },
+      {
+        label: "3",
+        start: { x: 1, y: 23 },
+        end: { x: 3, y: 23 },
+      },
+      {
+        label: "4",
+        start: { x: 12, y: 20 },
+        end: { x: 12, y: 23 },
+      },
+      {
+        label: "5",
+        start: { x: 6, y: 9 },
+        end: { x: 6, y: 26 },
+      },
+      {
+        label: "6",
+        start: { x: 3, y: 23 },
+        end: { x: 3, y: 26 },
+      },
+      {
+        label: "7",
+        start: { x: 1, y: 26 },
+        end: { x: 6, y: 26 },
+      },
+    ],
   };
 
   const headings = [Heading.RIGHT, Heading.LEFT, Heading.UP, Heading.DOWN];
@@ -57,8 +94,8 @@ export const initDev = () => {
   }
 
   const store = createStateStore(state);
-  const renderer = createCanvasRenderer(canvas);
+  const renderer = createCanvasRenderer({ canvas, displayPaths: true });
   store.subscribe(renderer.renderGameState);
   cycleVariations(store);
-  createPlayerMovement(store, 0, canvas);
+  createPlayerMovement(store, 0);
 };
