@@ -20,7 +20,7 @@ export const initDev = () => {
         position: { x: 1, y: 20 },
       },
     ],
-    ghosts: createRandomGhosts(paths, 3),
+    ghosts: createRandomGhosts(paths, 4),
     pacManVariation: 0,
     ghostVariation: 0,
     paths,

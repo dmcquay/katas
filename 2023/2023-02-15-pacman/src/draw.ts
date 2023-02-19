@@ -172,10 +172,21 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
     ctx.fillText(path.label, (startX + endX) / 2, (startY + endY) / 2);
   };
 
+  const drawWin = () => {
+    ctx.font = "160px sans-serif";
+    ctx.fillStyle = "yellow";
+    ctx.fillText("You Win!", 130, 500);
+  };
+
   const renderGameState = (state: GameState) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     drawBoard();
+
+    if (state.crumbs.filter((c) => !c.consumed).length === 0) {
+      drawWin();
+      return;
+    }
 
     if (opts.displayPaths) {
       for (let path of state.paths) {
@@ -187,12 +198,12 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
       drawCrumb(crumb);
     }
 
-    for (let player of state.players) {
-      drawPacMan(player, state.pacManVariation);
-    }
-
     for (let ghost of state.ghosts) {
       drawGhost(ghost, state.ghostVariation);
+    }
+
+    for (let player of state.players) {
+      drawPacMan(player, state.pacManVariation);
     }
   };
 
