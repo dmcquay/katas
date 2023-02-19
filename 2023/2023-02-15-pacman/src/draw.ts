@@ -7,6 +7,7 @@ import {
   Player,
   Ghost,
   Crumb,
+  GameStatus,
 } from "./types";
 
 const CELL_SIZE = 8;
@@ -178,13 +179,22 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
     ctx.fillText("You Win!", 130, 500);
   };
 
+  const drawLose = () => {
+    ctx.font = "160px sans-serif";
+    ctx.fillStyle = "yellow";
+    ctx.fillText("You Lose!", 120, 500);
+  };
+
   const renderGameState = (state: GameState) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     drawBoard();
 
-    if (state.crumbs.filter((c) => !c.consumed).length === 0) {
+    if (state.status === GameStatus.Win) {
       drawWin();
+      return;
+    } else if (state.status === GameStatus.Lose) {
+      drawLose();
       return;
     }
 

@@ -1,8 +1,12 @@
 import { createCanvasRenderer } from "./draw";
-import { GameState, Heading, GhostColor } from "./types";
+import { GameState, Heading, GameStatus } from "./types";
 import { createStateStore } from "./state-store";
 import { cycleVariations } from "./cycle-variations";
-import { createPlayerMovement, createGhostMovement } from "./movement";
+import {
+  createPlayerMovement,
+  createGhostMovement,
+  detectCollisions,
+} from "./movement";
 import { paths } from "./paths";
 import { createStandardCrumbs, eatCrumbs } from "./crumbs";
 import { createRandomGhosts } from "./ghosts";
@@ -14,6 +18,7 @@ export const initDev = () => {
   if (canvas == null) throw new Error("cannot find canvas element");
 
   const state: GameState = {
+    status: GameStatus.Playing,
     players: [
       {
         heading: Heading.RIGHT,
@@ -34,4 +39,5 @@ export const initDev = () => {
   createPlayerMovement(store, 0);
   createGhostMovement(store);
   eatCrumbs(store);
+  detectCollisions(store);
 };

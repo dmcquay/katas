@@ -55,7 +55,14 @@ export interface Crumb {
   consumed: boolean;
 }
 
+export enum GameStatus {
+  Playing,
+  Win,
+  Lose,
+}
+
 export interface GameState {
+  status: GameStatus;
   players: Player[];
   ghosts: Ghost[];
   pacManVariation: number;

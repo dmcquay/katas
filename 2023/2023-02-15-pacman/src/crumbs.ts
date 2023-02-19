@@ -1,8 +1,9 @@
-import { Crumb, Path, Axis, GameState, Point } from "./types";
+import { Crumb, Path, Axis, Point, GameStatus } from "./types";
 import { getPathAxis } from "./path-utils";
 import { paths } from "./paths";
 import * as R from "ramda";
 import { StateStore } from "./state-store";
+import { pointsAreClose } from "./utils";
 
 const PATHS_WITH_CRUMBS: string[] = [
   "H1A",
@@ -79,11 +80,7 @@ export const createStandardCrumbs = (): Crumb[] => {
 const crumbIsCloseToPoint =
   (point: Point) =>
   (crumb: Crumb): boolean => {
-    const INC = 0.1;
-    return (
-      Math.abs(point.x - crumb.position.x) < INC &&
-      Math.abs(point.y - crumb.position.y) < INC
-    );
+    return pointsAreClose(point)(crumb.position);
   };
 
 export const eatCrumbs = (store: StateStore) => {
@@ -101,9 +98,14 @@ export const eatCrumbs = (store: StateStore) => {
           return crumb;
         }
       });
+      const status =
+        crumbs.filter((c) => !c.consumed).length === 0
+          ? GameStatus.Win
+          : state.status;
       store.setState({
         ...state,
         crumbs,
+        status,
       });
     }
   });

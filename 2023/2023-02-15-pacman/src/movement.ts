@@ -1,7 +1,7 @@
 import { getHeadingsByAxis, getPathAxis } from "./path-utils";
 import { StateStore } from "./state-store";
-import { Path, Player, Heading, Ghost, Point, Axis } from "./types";
-import { getRandomListItem } from "./utils";
+import { Path, Player, Heading, Ghost, Point, Axis, GameStatus } from "./types";
+import { getRandomListItem, pointsAreClose } from "./utils";
 
 const INC = 0.1;
 
@@ -260,4 +260,18 @@ export const createGhostMovement = (store: StateStore) => {
       ghosts,
     });
   }, 20);
+};
+
+export const detectCollisions = (store: StateStore) => {
+  store.subscribe((state) => {
+    if (state.status !== GameStatus.Playing) return;
+    const isClose = pointsAreClose(state.players[0].position, 0.5);
+    const closeGhost = state.ghosts.find((ghost) => isClose(ghost.position));
+    if (closeGhost != null) {
+      store.setState({
+        ...state,
+        status: GameStatus.Lose,
+      });
+    }
+  });
 };
