@@ -36,7 +36,7 @@ export const initDev = () => {
   };
 
   const store = createStateStore(state);
-  const renderer = createCanvasRenderer({ canvas, displayPaths: false });
+  const renderer = createCanvasRenderer({ canvas, displayPaths: true });
   store.subscribe(renderer.renderGameState);
   cycleVariations(store);
   createPlayerMovement(store, 0);

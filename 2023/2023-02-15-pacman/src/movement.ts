@@ -52,61 +52,109 @@ const moveForward = <T extends Player | Ghost>(obj: T): T => {
   };
 };
 
-const reverseHeadingIfAtEndOfPath = <T extends Player | Ghost>(
-  obj: T,
-  path: Path
-): T | undefined => {
-  if (
-    obj.heading === Heading.RIGHT &&
-    obj.position.x === Math.max(path.start.x, path.end.x)
-  ) {
-    return { ...obj, heading: Heading.LEFT };
-  } else if (
-    obj.heading === Heading.LEFT &&
-    obj.position.x === Math.min(path.start.x, path.end.x)
-  ) {
-    return { ...obj, heading: Heading.RIGHT };
-  } else if (
-    obj.heading === Heading.UP &&
-    obj.position.y === Math.min(path.start.y, path.end.y)
-  ) {
-    return { ...obj, heading: Heading.DOWN };
-  } else if (
-    obj.heading === Heading.DOWN &&
-    obj.position.y === Math.max(path.start.y, path.end.y)
-  ) {
-    return { ...obj, heading: Heading.UP };
-  } else {
-    return undefined;
-  }
+const atEndOfPath = (
+  path: Path,
+  heading: Heading,
+  position: Point
+): boolean => {
+  return (
+    (heading === Heading.RIGHT &&
+      position.x === Math.max(path.start.x, path.end.x)) ||
+    (heading === Heading.LEFT &&
+      position.x === Math.min(path.start.x, path.end.x)) ||
+    (heading === Heading.UP &&
+      position.y === Math.min(path.start.y, path.end.y)) ||
+    (heading === Heading.DOWN &&
+      position.y === Math.max(path.start.y, path.end.y))
+  );
 };
 
-const reverseHeadingIfRequested = (
-  player: Player,
+const OPPOSITE_HEADINGS: Record<Heading, Heading> = {
+  [Heading.UP]: Heading.DOWN,
+  [Heading.DOWN]: Heading.UP,
+  [Heading.LEFT]: Heading.RIGHT,
+  [Heading.RIGHT]: Heading.LEFT,
+};
+
+const reverseHeading = <T extends Player | Ghost>(obj: T): T => {
+  return {
+    ...obj,
+    heading: OPPOSITE_HEADINGS[obj.heading],
+  };
+};
+
+const reverseHeadingRequested = (
+  currentHeading: Heading,
   requestedHeading?: Heading
-): Player | undefined => {
-  if (requestedHeading == null) return;
-  if (
-    (player.heading === Heading.RIGHT && requestedHeading === Heading.LEFT) ||
-    (player.heading === Heading.LEFT && requestedHeading === Heading.RIGHT) ||
-    (player.heading === Heading.UP && requestedHeading === Heading.DOWN) ||
-    (player.heading === Heading.DOWN && requestedHeading === Heading.UP)
-  ) {
-    return {
-      ...player,
-      heading: requestedHeading,
-    };
-  }
-  return undefined;
+): boolean => {
+  if (requestedHeading == null) return false;
+  return (
+    headingsAreParallel(currentHeading, requestedHeading) &&
+    currentHeading !== requestedHeading
+  );
 };
 
-const getHeadingAxis = (heading: Heading): "vertical" | "horizontal" => {
-  if ([Heading.UP, Heading.DOWN].includes(heading)) return "vertical";
-  else return "horizontal";
+enum Axis {
+  Vertical,
+  Horizontal,
+}
+
+const HEADINGS_BY_AXIS: Record<Axis, Heading[]> = {
+  [Axis.Vertical]: [Heading.UP, Heading.DOWN],
+  [Axis.Horizontal]: [Heading.LEFT, Heading.RIGHT],
+};
+
+const getHeadingsByAxis = (axis: Axis): Heading[] => {
+  return HEADINGS_BY_AXIS[axis];
+};
+
+const getHeadingAxis = (heading: Heading): Axis => {
+  if ([Heading.UP, Heading.DOWN].includes(heading)) return Axis.Vertical;
+  else return Axis.Horizontal;
+};
+
+const getPathAxis = (path: Path): Axis => {
+  if (path.start.x === path.end.x) return Axis.Vertical;
+  else if (path.start.y === path.end.y) return Axis.Horizontal;
+  else throw new Error("Path is diagonal, which is not allowed.");
 };
 
 const headingsAreParallel = (h1: Heading, h2: Heading): boolean => {
   return getHeadingAxis(h1) === getHeadingAxis(h2);
+};
+
+const pointIsNearPath = (point: Point, path: Path): boolean => {
+  if (getPathAxis(path) === Axis.Vertical)
+    return (
+      Math.abs(point.x - path.start.x) < INC * 0.9 &&
+      point.y <= Math.max(path.start.y, path.end.y) &&
+      point.y >= Math.min(path.start.y, path.end.y)
+    );
+  else
+    return (
+      Math.abs(point.y - path.start.y) < INC * 0.9 &&
+      point.x <= Math.max(path.start.x, path.end.x) &&
+      point.x >= Math.min(path.start.x, path.end.x)
+    );
+};
+
+const isNearPath = (heading: Heading, position: Point, path: Path) => {
+  return (
+    getHeadingAxis(heading) !== getPathAxis(path) &&
+    pointIsNearPath(position, path)
+  );
+};
+
+const getNearPath = (
+  heading: Heading,
+  position: Point,
+  paths: Path[]
+): Path | undefined => {
+  return paths.find((path) => isNearPath(heading, position, path));
+};
+
+const getRandomListItem = <T>(items: T[]): T => {
+  return items[Math.floor(Math.random() * items.length)];
 };
 
 const movePlayer = (
@@ -114,49 +162,35 @@ const movePlayer = (
   paths: Path[],
   requestedHeading?: Heading
 ): Player => {
-  const reversedByRequest = reverseHeadingIfRequested(player, requestedHeading);
-  if (reversedByRequest) return reversedByRequest;
+  if (reverseHeadingRequested(player.heading, requestedHeading)) {
+    return reverseHeading(player);
+  }
 
-  // if there is a near path and player has requested new heading that aligns with it,
-  // then switch heading and snap to that path
-
-  if (
+  // switching to a different path
+  const playerRequestedAxisChange =
     requestedHeading != null &&
-    !headingsAreParallel(requestedHeading, player.heading)
-  ) {
-    for (let path of paths) {
-      if (
-        (getHeadingAxis(player.heading) === "horizontal" &&
-          path.start.x === path.end.x &&
-          Math.abs(player.position.x - path.start.x) < INC &&
-          ((requestedHeading === Heading.UP &&
-            Math.min(path.start.y, path.end.y) < player.position.y) ||
-            (requestedHeading === Heading.DOWN &&
-              Math.max(path.start.y, path.end.y) > player.position.y))) ||
-        (getHeadingAxis(player.heading) === "vertical" &&
-          path.start.y === path.end.y &&
-          Math.abs(player.position.y - path.start.y) < INC &&
-          ((requestedHeading === Heading.LEFT &&
-            Math.min(path.start.x, path.end.x) < player.position.x) ||
-            (requestedHeading === Heading.RIGHT &&
-              Math.max(path.start.x, path.end.x) > player.position.x)))
-      ) {
-        return {
-          ...player,
-          heading: requestedHeading,
-          position: {
-            x: snap(player.position.x, INC * 2),
-            y: snap(player.position.y, INC * 2),
-          },
-        };
-      }
+    !headingsAreParallel(requestedHeading, player.heading);
+  if (playerRequestedAxisChange) {
+    const nearPath = getNearPath(player.heading, player.position, paths);
+    if (
+      nearPath != null &&
+      !atEndOfPath(nearPath, requestedHeading, player.position)
+    ) {
+      return {
+        ...player,
+        heading: requestedHeading,
+        position: {
+          x: snap(player.position.x, INC * 2),
+          y: snap(player.position.y, INC * 2),
+        },
+      };
     }
   }
 
-  const path = findPath(paths, player.heading, player.position);
-
-  const reversedPlayer = reverseHeadingIfAtEndOfPath(player, path);
-  if (reversedPlayer) return reversedPlayer;
+  const currentPath = findPath(paths, player.heading, player.position);
+  if (atEndOfPath(currentPath, player.heading, player.position)) {
+    return reverseHeading(player);
+  }
 
   return moveForward(player);
 };
@@ -167,9 +201,26 @@ const moveGhost = (ghost: Ghost, paths: Path[]): Ghost => {
   // if nearPath found, randomly choose between the following options:
   // going on new path and, if multiple directions possibly, randomly choose direction
   // staying in current path
+  const nearPath = getNearPath(ghost.heading, ghost.position, paths);
+  if (nearPath && Math.random() > 0.7) {
+    const validHeadings = getHeadingsByAxis(getPathAxis(nearPath)).filter(
+      (heading) => !atEndOfPath(nearPath, heading, ghost.position)
+    );
+    const heading = getRandomListItem(validHeadings);
+    const updatedGhost = {
+      ...ghost,
+      heading,
+      position: {
+        x: snap(ghost.position.x, INC * 2),
+        y: snap(ghost.position.y, INC * 2),
+      },
+    };
+    return moveForward(updatedGhost);
+  }
 
-  const reversedGhost = reverseHeadingIfAtEndOfPath(ghost, path);
-  if (reversedGhost) return reversedGhost;
+  if (atEndOfPath(path, ghost.heading, ghost.position)) {
+    return reverseHeading(ghost);
+  }
 
   return moveForward(ghost);
 };
