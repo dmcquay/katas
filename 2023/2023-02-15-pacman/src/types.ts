@@ -1,3 +1,8 @@
+export enum Axis {
+  Vertical,
+  Horizontal,
+}
+
 export interface Point {
   x: number;
   y: number;
@@ -39,10 +44,15 @@ export interface Path {
   end: Point;
 }
 
+export interface Crumb {
+  position: Point;
+}
+
 export interface GameState {
   players: Player[];
   ghosts: Ghost[];
   pacManVariation: number;
   ghostVariation: number;
   paths: Path[];
+  crumbs: Crumb[];
 }

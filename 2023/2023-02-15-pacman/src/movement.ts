@@ -1,5 +1,6 @@
+import { getPathAxis } from "./path-utils";
 import { StateStore } from "./state-store";
-import { Path, Player, Heading, Ghost, Point } from "./types";
+import { Path, Player, Heading, Ghost, Point, Axis } from "./types";
 
 const INC = 0.1;
 
@@ -94,11 +95,6 @@ const reverseHeadingRequested = (
   );
 };
 
-enum Axis {
-  Vertical,
-  Horizontal,
-}
-
 const HEADINGS_BY_AXIS: Record<Axis, Heading[]> = {
   [Axis.Vertical]: [Heading.UP, Heading.DOWN],
   [Axis.Horizontal]: [Heading.LEFT, Heading.RIGHT],
@@ -111,12 +107,6 @@ const getHeadingsByAxis = (axis: Axis): Heading[] => {
 const getHeadingAxis = (heading: Heading): Axis => {
   if ([Heading.UP, Heading.DOWN].includes(heading)) return Axis.Vertical;
   else return Axis.Horizontal;
-};
-
-const getPathAxis = (path: Path): Axis => {
-  if (path.start.x === path.end.x) return Axis.Vertical;
-  else if (path.start.y === path.end.y) return Axis.Horizontal;
-  else throw new Error("Path is diagonal, which is not allowed.");
 };
 
 const headingsAreParallel = (h1: Heading, h2: Heading): boolean => {

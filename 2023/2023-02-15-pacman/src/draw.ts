@@ -6,6 +6,7 @@ import {
   Path,
   Player,
   Ghost,
+  Crumb,
 } from "./types";
 
 const CELL_SIZE = 8;
@@ -134,6 +135,19 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
     );
   };
 
+  const drawCrumb = (crumb: Crumb) => {
+    const x =
+      crumb.position.x * CELL_SIZE * SCALE_FACTOR +
+      (CELL_SIZE * SCALE_FACTOR) / 2 -
+      SCALE_FACTOR;
+    const y =
+      crumb.position.y * CELL_SIZE * SCALE_FACTOR +
+      (CELL_SIZE * SCALE_FACTOR) / 2 -
+      SCALE_FACTOR;
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(x, y, SCALE_FACTOR * 2, SCALE_FACTOR * 2);
+  };
+
   const drawPath = (path: Path) => {
     // compute
     const startX =
@@ -167,6 +181,10 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
       for (let path of state.paths) {
         drawPath(path);
       }
+    }
+
+    for (let crumb of state.crumbs) {
+      drawCrumb(crumb);
     }
 
     for (let player of state.players) {

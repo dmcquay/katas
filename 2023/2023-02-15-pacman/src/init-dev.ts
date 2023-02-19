@@ -4,6 +4,7 @@ import { createStateStore } from "./state-store";
 import { cycleVariations } from "./cycle-variations";
 import { createPlayerMovement, createGhostMovement } from "./movement";
 import { paths } from "./paths";
+import { createStandardCrumbs } from "./crumbs";
 
 export const initDev = () => {
   const canvas = document.getElementById(
@@ -33,6 +34,7 @@ export const initDev = () => {
     pacManVariation: 0,
     ghostVariation: 0,
     paths,
+    crumbs: createStandardCrumbs(),
   };
 
   const store = createStateStore(state);
