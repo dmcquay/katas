@@ -1,9 +1,87 @@
 import { StateStore } from "./state-store";
-import { Path, Player, Heading } from "./types";
+import { Path, Player, Heading, Ghost, Point } from "./types";
 
 const INC = 0.1;
 
-const movePlayerOrGhost = (
+const findPath = (paths: Path[], heading: Heading, position: Point): Path => {
+  const path = paths.find((path) => {
+    if ([Heading.LEFT, Heading.RIGHT].includes(heading)) {
+      return (
+        position.y === path.start.y &&
+        position.y === path.end.y &&
+        position.x >= Math.min(path.start.x, path.end.x) &&
+        position.x <= Math.max(path.start.x, path.end.x)
+      );
+    } else {
+      return (
+        position.x === path.start.x &&
+        position.x === path.end.x &&
+        position.y >= Math.min(path.start.y, path.end.y) &&
+        position.y <= Math.max(path.start.y, path.end.y)
+      );
+    }
+  });
+  if (path == null)
+    throw new Error(
+      `Expected character to always be on a path, but no matching paths were found. Position: ${JSON.stringify(
+        position
+      )}`
+    );
+  return path;
+};
+
+const moveForward = <T extends Player | Ghost>(obj: T): T => {
+  const xInc =
+    obj.heading === Heading.RIGHT
+      ? INC
+      : obj.heading === Heading.LEFT
+      ? INC * -1
+      : 0;
+  const yInc =
+    obj.heading === Heading.DOWN
+      ? INC
+      : obj.heading === Heading.UP
+      ? INC * -1
+      : 0;
+  return {
+    ...obj,
+    position: {
+      x: snap(obj.position.x + xInc, INC * 0.9),
+      y: snap(obj.position.y + yInc, INC * 0.9),
+    },
+  };
+};
+
+const reverseHeadingIfAtEndOfPath = <T extends Player | Ghost>(
+  obj: T,
+  path: Path
+): T | undefined => {
+  if (
+    obj.heading === Heading.RIGHT &&
+    obj.position.x === Math.max(path.start.x, path.end.x)
+  ) {
+    return { ...obj, heading: Heading.LEFT };
+  } else if (
+    obj.heading === Heading.LEFT &&
+    obj.position.x === Math.min(path.start.x, path.end.x)
+  ) {
+    return { ...obj, heading: Heading.RIGHT };
+  } else if (
+    obj.heading === Heading.UP &&
+    obj.position.y === Math.min(path.start.y, path.end.y)
+  ) {
+    return { ...obj, heading: Heading.DOWN };
+  } else if (
+    obj.heading === Heading.DOWN &&
+    obj.position.y === Math.max(path.start.y, path.end.y)
+  ) {
+    return { ...obj, heading: Heading.UP };
+  } else {
+    return undefined;
+  }
+};
+
+const movePlayer = (
   player: Player,
   paths: Path[],
   requestedHeading: Heading | null | undefined
@@ -53,73 +131,27 @@ const movePlayerOrGhost = (
     }
   }
 
-  const path = paths.find((path) => {
-    if ([Heading.LEFT, Heading.RIGHT].includes(player.heading)) {
-      return (
-        player.position.y === path.start.y &&
-        player.position.y === path.end.y &&
-        player.position.x >= Math.min(path.start.x, path.end.x) &&
-        player.position.x <= Math.max(path.start.x, path.end.x)
-      );
-    } else {
-      return (
-        player.position.x === path.start.x &&
-        player.position.x === path.end.x &&
-        player.position.y >= Math.min(path.start.y, path.end.y) &&
-        player.position.y <= Math.max(path.start.y, path.end.y)
-      );
-    }
-  });
-  if (path == null)
-    throw new Error(
-      `Expected PacMan to always be on a path, but no matching paths were found. Position: ${JSON.stringify(
-        player.position
-      )}`
-    );
+  const path = findPath(paths, player.heading, player.position);
 
-  // if at end of path, reverse heading
-  if (
-    player.heading === Heading.RIGHT &&
-    player.position.x === Math.max(path.start.x, path.end.x)
-  ) {
-    return { ...player, heading: Heading.LEFT };
-  } else if (
-    player.heading === Heading.LEFT &&
-    player.position.x === Math.min(path.start.x, path.end.x)
-  ) {
-    return { ...player, heading: Heading.RIGHT };
-  } else if (
-    player.heading === Heading.UP &&
-    player.position.y === Math.min(path.start.y, path.end.y)
-  ) {
-    return { ...player, heading: Heading.DOWN };
-  } else if (
-    player.heading === Heading.DOWN &&
-    player.position.y === Math.max(path.start.y, path.end.y)
-  ) {
-    return { ...player, heading: Heading.UP };
-  }
+  const reversedPlayer = reverseHeadingIfAtEndOfPath(player, path);
+  if (reversedPlayer) return reversedPlayer;
 
   // if nothing else, just move forward
-  const xInc =
-    player.heading === Heading.RIGHT
-      ? INC
-      : player.heading === Heading.LEFT
-      ? INC * -1
-      : 0;
-  const yInc =
-    player.heading === Heading.DOWN
-      ? INC
-      : player.heading === Heading.UP
-      ? INC * -1
-      : 0;
-  return {
-    ...player,
-    position: {
-      x: snap(player.position.x + xInc, INC * 0.9),
-      y: snap(player.position.y + yInc, INC * 0.9),
-    },
-  };
+  return moveForward(player);
+};
+
+const moveGhost = (ghost: Ghost, paths: Path[]): Player => {
+  const path = findPath(paths, ghost.heading, ghost.position);
+
+  // if nearPath found, randomly choose between the following options:
+  // going on new path and, if multiple directions possibly, randomly choose direction
+  // staying in current path
+
+  const reversedGhost = reverseHeadingIfAtEndOfPath(ghost, path);
+  if (reversedGhost) return reversedGhost;
+
+  // if nothing else, just move forward
+  return moveForward(ghost);
 };
 
 const snap = (n: number, tolerance: number): number => {
@@ -153,13 +185,26 @@ export const createPlayerMovement = (
     const state = store.getState();
     const players = state.players.map((player, idx) => {
       if (idx === playerIndex) {
-        return movePlayerOrGhost(player, state.paths, requestedHeading);
+        return movePlayer(player, state.paths, requestedHeading);
       }
       return player;
     });
     store.setState({
       ...state,
       players,
+    });
+  }, 20);
+};
+
+export const createGhostMovement = (store: StateStore) => {
+  setInterval(() => {
+    const state = store.getState();
+    const ghosts = state.ghosts.map((ghost) => {
+      return moveGhost(ghost, state.paths);
+    });
+    store.setState({
+      ...state,
+      ghosts,
     });
   }, 20);
 };
