@@ -5,6 +5,7 @@ import { cycleVariations } from "./cycle-variations";
 import { createPlayerMovement, createGhostMovement } from "./movement";
 import { paths } from "./paths";
 import { createStandardCrumbs, eatCrumbs } from "./crumbs";
+import { createRandomGhosts } from "./ghosts";
 
 export const initDev = () => {
   const canvas = document.getElementById(
@@ -19,18 +20,7 @@ export const initDev = () => {
         position: { x: 1, y: 20 },
       },
     ],
-    ghosts: [
-      {
-        heading: Heading.RIGHT,
-        color: GhostColor.RED,
-        position: paths.find((p) => p.label === "H1A")!.start,
-      },
-      {
-        heading: Heading.DOWN,
-        color: GhostColor.PINK,
-        position: paths.find((p) => p.label === "V8")!.start,
-      },
-    ],
+    ghosts: createRandomGhosts(paths, 3),
     pacManVariation: 0,
     ghostVariation: 0,
     paths,

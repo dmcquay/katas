@@ -26,6 +26,12 @@ export enum GhostColor {
   CYAN,
   ORANGE,
 }
+export const AllGhostColors: GhostColor[] = [
+  GhostColor.RED,
+  GhostColor.PINK,
+  GhostColor.CYAN,
+  GhostColor.ORANGE,
+];
 
 export interface Ghost {
   color: GhostColor;

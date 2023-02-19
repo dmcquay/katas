@@ -1,6 +1,7 @@
-import { getPathAxis } from "./path-utils";
+import { getHeadingsByAxis, getPathAxis } from "./path-utils";
 import { StateStore } from "./state-store";
 import { Path, Player, Heading, Ghost, Point, Axis } from "./types";
+import { getRandomListItem } from "./utils";
 
 const INC = 0.1;
 
@@ -95,15 +96,6 @@ const reverseHeadingRequested = (
   );
 };
 
-const HEADINGS_BY_AXIS: Record<Axis, Heading[]> = {
-  [Axis.Vertical]: [Heading.UP, Heading.DOWN],
-  [Axis.Horizontal]: [Heading.LEFT, Heading.RIGHT],
-};
-
-const getHeadingsByAxis = (axis: Axis): Heading[] => {
-  return HEADINGS_BY_AXIS[axis];
-};
-
 const getHeadingAxis = (heading: Heading): Axis => {
   if ([Heading.UP, Heading.DOWN].includes(heading)) return Axis.Vertical;
   else return Axis.Horizontal;
@@ -141,10 +133,6 @@ const getNearPath = (
   paths: Path[]
 ): Path | undefined => {
   return paths.find((path) => isNearPath(heading, position, path));
-};
-
-const getRandomListItem = <T>(items: T[]): T => {
-  return items[Math.floor(Math.random() * items.length)];
 };
 
 const movePlayer = (
