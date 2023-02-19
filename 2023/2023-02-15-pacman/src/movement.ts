@@ -81,12 +81,11 @@ const reverseHeadingIfAtEndOfPath = <T extends Player | Ghost>(
   }
 };
 
-const movePlayer = (
+const reverseHeadingIfRequested = (
   player: Player,
-  paths: Path[],
-  requestedHeading: Heading | null | undefined
-): Player => {
-  // if requested heading is opposite of current heading, change it immediately
+  requestedHeading?: Heading
+): Player | undefined => {
+  if (requestedHeading == null) return;
   if (
     (player.heading === Heading.RIGHT && requestedHeading === Heading.LEFT) ||
     (player.heading === Heading.LEFT && requestedHeading === Heading.RIGHT) ||
@@ -98,20 +97,43 @@ const movePlayer = (
       heading: requestedHeading,
     };
   }
+  return undefined;
+};
+
+const getHeadingAxis = (heading: Heading): "vertical" | "horizontal" => {
+  if ([Heading.UP, Heading.DOWN].includes(heading)) return "vertical";
+  else return "horizontal";
+};
+
+const headingsAreParallel = (h1: Heading, h2: Heading): boolean => {
+  return getHeadingAxis(h1) === getHeadingAxis(h2);
+};
+
+const movePlayer = (
+  player: Player,
+  paths: Path[],
+  requestedHeading?: Heading
+): Player => {
+  const reversedByRequest = reverseHeadingIfRequested(player, requestedHeading);
+  if (reversedByRequest) return reversedByRequest;
 
   // if there is a near path and player has requested new heading that aligns with it,
   // then switch heading and snap to that path
-  if (requestedHeading != null && requestedHeading !== player.heading) {
+
+  if (
+    requestedHeading != null &&
+    !headingsAreParallel(requestedHeading, player.heading)
+  ) {
     for (let path of paths) {
       if (
-        ([Heading.LEFT, Heading.RIGHT].includes(player.heading) &&
+        (getHeadingAxis(player.heading) === "horizontal" &&
           path.start.x === path.end.x &&
           Math.abs(player.position.x - path.start.x) < INC &&
           ((requestedHeading === Heading.UP &&
             Math.min(path.start.y, path.end.y) < player.position.y) ||
             (requestedHeading === Heading.DOWN &&
               Math.max(path.start.y, path.end.y) > player.position.y))) ||
-        ([Heading.UP, Heading.DOWN].includes(player.heading) &&
+        (getHeadingAxis(player.heading) === "vertical" &&
           path.start.y === path.end.y &&
           Math.abs(player.position.y - path.start.y) < INC &&
           ((requestedHeading === Heading.LEFT &&
@@ -136,11 +158,10 @@ const movePlayer = (
   const reversedPlayer = reverseHeadingIfAtEndOfPath(player, path);
   if (reversedPlayer) return reversedPlayer;
 
-  // if nothing else, just move forward
   return moveForward(player);
 };
 
-const moveGhost = (ghost: Ghost, paths: Path[]): Player => {
+const moveGhost = (ghost: Ghost, paths: Path[]): Ghost => {
   const path = findPath(paths, ghost.heading, ghost.position);
 
   // if nearPath found, randomly choose between the following options:
@@ -150,7 +171,6 @@ const moveGhost = (ghost: Ghost, paths: Path[]): Player => {
   const reversedGhost = reverseHeadingIfAtEndOfPath(ghost, path);
   if (reversedGhost) return reversedGhost;
 
-  // if nothing else, just move forward
   return moveForward(ghost);
 };
 
@@ -171,7 +191,7 @@ export const createPlayerMovement = (
   store: StateStore,
   playerIndex: number
 ) => {
-  let requestedHeading: Heading | null | undefined;
+  let requestedHeading: Heading | undefined;
 
   window.addEventListener(
     "keydown",
@@ -179,7 +199,11 @@ export const createPlayerMovement = (
     false
   );
 
-  window.addEventListener("keyup", (e) => (requestedHeading = null), false);
+  window.addEventListener(
+    "keyup",
+    (e) => (requestedHeading = undefined),
+    false
+  );
 
   setInterval(() => {
     const state = store.getState();
