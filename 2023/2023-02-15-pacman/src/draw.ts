@@ -183,7 +183,7 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
       }
     }
 
-    for (let crumb of state.crumbs) {
+    for (let crumb of state.crumbs.filter((c) => !c.consumed)) {
       drawCrumb(crumb);
     }
 

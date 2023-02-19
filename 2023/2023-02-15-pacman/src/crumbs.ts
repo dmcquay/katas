@@ -1,7 +1,8 @@
-import { Crumb, Path, Axis } from "./types";
+import { Crumb, Path, Axis, GameState, Point } from "./types";
 import { getPathAxis } from "./path-utils";
 import { paths } from "./paths";
 import * as R from "ramda";
+import { StateStore } from "./state-store";
 
 const PATHS_WITH_CRUMBS: string[] = [
   "H1A",
@@ -33,7 +34,7 @@ const PATHS_WITH_CRUMBS: string[] = [
   "V5D",
   "V10A",
   "V10B",
-  "v10C",
+  "V10C",
   "V9",
   "V8",
   "V7A",
@@ -50,14 +51,14 @@ const createCrumbsAlongPath = (path: Path): Crumb[] => {
     const maxY = Math.max(path.start.y, path.end.y);
     const x = path.start.x;
     for (let y = minY; y <= maxY; y++) {
-      crumbs.push({ position: { x, y } });
+      crumbs.push({ position: { x, y }, consumed: false });
     }
   } else {
     const minX = Math.min(path.start.x, path.end.x);
     const maxX = Math.max(path.start.x, path.end.x);
     const y = path.start.y;
     for (let x = minX; x <= maxX; x++) {
-      crumbs.push({ position: { x, y } });
+      crumbs.push({ position: { x, y }, consumed: false });
     }
   }
   return crumbs;
@@ -73,4 +74,37 @@ export const createStandardCrumbs = (): Crumb[] => {
   );
   const crumbs = matchingPaths.flatMap(createCrumbsAlongPath);
   return R.uniqWith(crumbEq, crumbs);
+};
+
+const crumbIsCloseToPoint =
+  (point: Point) =>
+  (crumb: Crumb): boolean => {
+    const INC = 0.1;
+    return (
+      Math.abs(point.x - crumb.position.x) < INC &&
+      Math.abs(point.y - crumb.position.y) < INC
+    );
+  };
+
+export const eatCrumbs = (store: StateStore) => {
+  store.subscribe((state) => {
+    const isClose = crumbIsCloseToPoint(state.players[0].position);
+    const closeCrumb = state.crumbs.filter((c) => !c.consumed).find(isClose);
+    if (closeCrumb != null) {
+      const crumbs = state.crumbs.map((crumb) => {
+        if (crumbEq(closeCrumb, crumb)) {
+          return {
+            ...crumb,
+            consumed: true,
+          };
+        } else {
+          return crumb;
+        }
+      });
+      store.setState({
+        ...state,
+        crumbs,
+      });
+    }
+  });
 };

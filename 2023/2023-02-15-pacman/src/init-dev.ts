@@ -4,7 +4,7 @@ import { createStateStore } from "./state-store";
 import { cycleVariations } from "./cycle-variations";
 import { createPlayerMovement, createGhostMovement } from "./movement";
 import { paths } from "./paths";
-import { createStandardCrumbs } from "./crumbs";
+import { createStandardCrumbs, eatCrumbs } from "./crumbs";
 
 export const initDev = () => {
   const canvas = document.getElementById(
@@ -43,4 +43,5 @@ export const initDev = () => {
   cycleVariations(store);
   createPlayerMovement(store, 0);
   createGhostMovement(store);
+  eatCrumbs(store);
 };

@@ -46,6 +46,7 @@ export interface Path {
 
 export interface Crumb {
   position: Point;
+  consumed: boolean;
 }
 
 export interface GameState {
