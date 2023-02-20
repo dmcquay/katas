@@ -252,7 +252,8 @@ export const createPlayerMovement = (
   window.addEventListener(
     "keyup",
     (e) => {
-      if (!Object.keys(keyMap).includes(e.code)) return;
+      const heading = keyMap[e.code];
+      if (heading == null || heading !== requestedHeading) return;
       requestedHeading = undefined;
     },
     false
