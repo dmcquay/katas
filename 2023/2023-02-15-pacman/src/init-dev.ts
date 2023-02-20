@@ -67,6 +67,20 @@ export const initDev = () => {
       ...store.getState(),
       status: GameStatus.Playing,
     });
+
+    // toggle paused on spacebar
+    window.addEventListener("keypress", (e) => {
+      if (e.code === "Space") {
+        const state = store.getState();
+        store.setState({
+          ...state,
+          status:
+            state.status === GameStatus.Paused
+              ? GameStatus.Playing
+              : GameStatus.Paused,
+        });
+      }
+    });
   }, 3000);
 
   // open jail after timeout
