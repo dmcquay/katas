@@ -8,10 +8,28 @@ import {
   detectCollisions,
   KeyMapArrows,
   KeyMapWasd,
+  KeyMapIjlk,
 } from "./movement";
 import { paths } from "./paths";
 import { createStandardCrumbs, eatCrumbs } from "./crumbs";
 import { createRandomGhosts } from "./ghosts";
+
+const players = [
+  {
+    heading: Heading.LEFT,
+    position: { x: 26, y: 26 },
+  },
+  {
+    heading: Heading.DOWN,
+    position: { x: 6, y: 1 },
+  },
+  {
+    heading: Heading.RIGHT,
+    position: { x: 1, y: 20 },
+  },
+];
+
+const numPlayers = 2;
 
 export const initDev = () => {
   const canvas = document.getElementById(
@@ -21,16 +39,7 @@ export const initDev = () => {
 
   const state: GameState = {
     status: GameStatus.Playing,
-    players: [
-      {
-        heading: Heading.LEFT,
-        position: { x: 26, y: 26 },
-      },
-      {
-        heading: Heading.RIGHT,
-        position: { x: 1, y: 20 },
-      },
-    ],
+    players: players.slice(0, numPlayers),
     ghosts: createRandomGhosts(paths, 4),
     pacManVariation: 0,
     ghostVariation: 0,
@@ -38,12 +47,15 @@ export const initDev = () => {
     crumbs: createStandardCrumbs(),
   };
 
+  const keyMaps = [KeyMapArrows, KeyMapWasd, KeyMapIjlk];
+
   const store = createStateStore(state);
   const renderer = createCanvasRenderer({ canvas, displayPaths: false });
   store.subscribe(renderer.renderGameState);
   cycleVariations(store);
-  createPlayerMovement(store, 0, KeyMapArrows);
-  createPlayerMovement(store, 1, KeyMapWasd);
+  for (let i = 0; i < numPlayers; i++) {
+    createPlayerMovement(store, i, keyMaps[i]);
+  }
   createGhostMovement(store);
   eatCrumbs(store);
   detectCollisions(store);

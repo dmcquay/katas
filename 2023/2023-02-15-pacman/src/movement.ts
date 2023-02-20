@@ -225,6 +225,13 @@ export const KeyMapWasd: KeyMap = {
   KeyD: Heading.RIGHT,
 };
 
+export const KeyMapIjlk: KeyMap = {
+  KeyI: Heading.UP,
+  KeyK: Heading.DOWN,
+  KeyJ: Heading.LEFT,
+  KeyL: Heading.RIGHT,
+};
+
 export const createPlayerMovement = (
   store: StateStore,
   playerIndex: number,
