@@ -6,6 +6,8 @@ import {
   createPlayerMovement,
   createGhostMovement,
   detectCollisions,
+  KeyMapArrows,
+  KeyMapWasd,
 } from "./movement";
 import { paths } from "./paths";
 import { createStandardCrumbs, eatCrumbs } from "./crumbs";
@@ -20,6 +22,10 @@ export const initDev = () => {
   const state: GameState = {
     status: GameStatus.Playing,
     players: [
+      {
+        heading: Heading.LEFT,
+        position: { x: 26, y: 26 },
+      },
       {
         heading: Heading.RIGHT,
         position: { x: 1, y: 20 },
@@ -36,7 +42,8 @@ export const initDev = () => {
   const renderer = createCanvasRenderer({ canvas, displayPaths: false });
   store.subscribe(renderer.renderGameState);
   cycleVariations(store);
-  createPlayerMovement(store, 0);
+  createPlayerMovement(store, 0, KeyMapArrows);
+  createPlayerMovement(store, 1, KeyMapWasd);
   createGhostMovement(store);
   eatCrumbs(store);
   detectCollisions(store);

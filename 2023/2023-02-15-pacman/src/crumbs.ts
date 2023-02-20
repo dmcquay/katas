@@ -77,15 +77,19 @@ export const createStandardCrumbs = (): Crumb[] => {
   return R.uniqWith(crumbEq, crumbs);
 };
 
-const crumbIsCloseToPoint =
-  (point: Point) =>
+const crumbIsCloseToPoints =
+  (points: Point[]) =>
   (crumb: Crumb): boolean => {
-    return pointsAreClose(point)(crumb.position);
+    return (
+      points.find((point) => pointsAreClose(point)(crumb.position)) != null
+    );
   };
 
 export const eatCrumbs = (store: StateStore) => {
   store.subscribe((state) => {
-    const isClose = crumbIsCloseToPoint(state.players[0].position);
+    const isClose = crumbIsCloseToPoints(
+      state.players.map((player) => player.position)
+    );
     const closeCrumb = state.crumbs.filter((c) => !c.consumed).find(isClose);
     if (closeCrumb != null) {
       const crumbs = state.crumbs.map((crumb) => {

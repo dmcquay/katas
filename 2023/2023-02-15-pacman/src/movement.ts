@@ -209,28 +209,45 @@ const snap = (n: number, tolerance: number): number => {
   return n;
 };
 
-const KEY_TO_HEADING_MAP: Record<string, Heading> = {
+type KeyMap = Record<string, Heading>;
+
+export const KeyMapArrows: KeyMap = {
   ArrowUp: Heading.UP,
   ArrowDown: Heading.DOWN,
   ArrowLeft: Heading.LEFT,
   ArrowRight: Heading.RIGHT,
 };
 
+export const KeyMapWasd: KeyMap = {
+  KeyW: Heading.UP,
+  KeyS: Heading.DOWN,
+  KeyA: Heading.LEFT,
+  KeyD: Heading.RIGHT,
+};
+
 export const createPlayerMovement = (
   store: StateStore,
-  playerIndex: number
+  playerIndex: number,
+  keyMap: KeyMap
 ) => {
   let requestedHeading: Heading | undefined;
 
   window.addEventListener(
     "keydown",
-    (e) => (requestedHeading = KEY_TO_HEADING_MAP[e.code]),
+    (e) => {
+      const heading = keyMap[e.code];
+      if (heading == null || heading === requestedHeading) return;
+      requestedHeading = keyMap[e.code];
+    },
     false
   );
 
   window.addEventListener(
     "keyup",
-    (e) => (requestedHeading = undefined),
+    (e) => {
+      if (!Object.keys(keyMap).includes(e.code)) return;
+      requestedHeading = undefined;
+    },
     false
   );
 
@@ -265,8 +282,11 @@ export const createGhostMovement = (store: StateStore) => {
 export const detectCollisions = (store: StateStore) => {
   store.subscribe((state) => {
     if (state.status !== GameStatus.Playing) return;
-    const isClose = pointsAreClose(state.players[0].position, 0.5);
-    const closeGhost = state.ghosts.find((ghost) => isClose(ghost.position));
+    const isClose = (ghost: Ghost) =>
+      state.players.find((player) =>
+        pointsAreClose(player.position, 0.5)(ghost.position)
+      );
+    const closeGhost = state.ghosts.find(isClose);
     if (closeGhost != null) {
       store.setState({
         ...state,
