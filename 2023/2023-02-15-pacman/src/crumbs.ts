@@ -3,7 +3,7 @@ import { getPathAxis } from "./path-utils";
 import { paths } from "./paths";
 import * as R from "ramda";
 import { StateStore } from "./state-store";
-import { pointsAreClose } from "./utils";
+import { pointEq, pointsAreClose } from "./utils";
 
 const PATHS_WITH_CRUMBS: string[] = [
   "H1A",
@@ -45,6 +45,19 @@ const PATHS_WITH_CRUMBS: string[] = [
   "V6D",
 ];
 
+const BIG_CRUMB_POSITIONS: Point[] = [
+  { x: 1, y: 3 },
+  { x: 1, y: 23 },
+  { x: 26, y: 3 },
+  { x: 26, y: 23 },
+];
+
+const crumbShouldBeBig = (crumb: Crumb): boolean => {
+  return (
+    BIG_CRUMB_POSITIONS.find((point) => pointEq(crumb.position, point)) != null
+  );
+};
+
 const createCrumbsAlongPath = (path: Path): Crumb[] => {
   const crumbs: Crumb[] = [];
   if (getPathAxis(path) === Axis.Vertical) {
@@ -66,15 +79,17 @@ const createCrumbsAlongPath = (path: Path): Crumb[] => {
 };
 
 const crumbEq = (c1: Crumb, c2: Crumb): boolean => {
-  return c1.position.x === c2.position.x && c1.position.y === c2.position.y;
+  return pointEq(c1.position, c2.position);
 };
 
 export const createStandardCrumbs = (): Crumb[] => {
   const matchingPaths = paths.filter((p) =>
     PATHS_WITH_CRUMBS.includes(p.label)
   );
-  const crumbs = matchingPaths.flatMap(createCrumbsAlongPath);
-  return R.uniqWith(crumbEq, crumbs);
+  let crumbs = matchingPaths.flatMap(createCrumbsAlongPath);
+  crumbs = R.uniqWith(crumbEq, crumbs);
+  crumbs.filter(crumbShouldBeBig).forEach((crumb) => (crumb.isBig = true));
+  return crumbs;
 };
 
 const crumbIsCloseToPoints =

@@ -54,6 +54,7 @@ export interface Path {
 export interface Crumb {
   position: Point;
   consumed: boolean;
+  isBig?: boolean;
 }
 
 export enum GameStatus {

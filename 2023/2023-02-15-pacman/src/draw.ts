@@ -142,16 +142,18 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
   };
 
   const drawCrumb = (crumb: Crumb) => {
+    const radius = crumb.isBig ? 3 * SCALE_FACTOR : SCALE_FACTOR;
     const x =
       crumb.position.x * CELL_SIZE * SCALE_FACTOR +
-      (CELL_SIZE * SCALE_FACTOR) / 2 -
-      SCALE_FACTOR;
+      (CELL_SIZE * SCALE_FACTOR) / 2;
     const y =
       crumb.position.y * CELL_SIZE * SCALE_FACTOR +
-      (CELL_SIZE * SCALE_FACTOR) / 2 -
-      SCALE_FACTOR;
+      (CELL_SIZE * SCALE_FACTOR) / 2;
+
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
     ctx.fillStyle = "yellow";
-    ctx.fillRect(x, y, SCALE_FACTOR * 2, SCALE_FACTOR * 2);
+    ctx.fill();
   };
 
   const drawPath = (path: Path, isJailOpen: boolean) => {
