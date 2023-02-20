@@ -1,6 +1,15 @@
 import { getHeadingsByAxis, getPathAxis } from "./path-utils";
 import { StateStore } from "./state-store";
-import { Path, Player, Heading, Ghost, Point, Axis, GameStatus } from "./types";
+import {
+  Path,
+  Player,
+  Heading,
+  Ghost,
+  Point,
+  Axis,
+  GameStatus,
+  GameState,
+} from "./types";
 import { getRandomListItem, pointsAreClose } from "./utils";
 
 const INC = 0.1;
@@ -105,7 +114,7 @@ const headingsAreParallel = (h1: Heading, h2: Heading): boolean => {
   return getHeadingAxis(h1) === getHeadingAxis(h2);
 };
 
-const pointIsNearPath = (point: Point, path: Path): boolean => {
+const pathIsNearPoint = (point: Point, path: Path): boolean => {
   if (getPathAxis(path) === Axis.Vertical)
     return (
       Math.abs(point.x - path.start.x) < INC * 0.9 &&
@@ -123,7 +132,7 @@ const pointIsNearPath = (point: Point, path: Path): boolean => {
 const isNearPath = (heading: Heading, position: Point, path: Path) => {
   return (
     getHeadingAxis(heading) !== getPathAxis(path) &&
-    pointIsNearPath(position, path)
+    pathIsNearPoint(position, path)
   );
 };
 
@@ -232,6 +241,14 @@ export const KeyMapIjlk: KeyMap = {
   KeyL: Heading.RIGHT,
 };
 
+const getEnabledPaths = (state: GameState): Path[] => {
+  if (state.isJailOpen) {
+    return state.paths;
+  } else {
+    return state.paths.filter((path) => !path.isJailExit);
+  }
+};
+
 export const createPlayerMovement = (
   store: StateStore,
   playerIndex: number,
@@ -263,7 +280,7 @@ export const createPlayerMovement = (
     const state = store.getState();
     const players = state.players.map((player, idx) => {
       if (idx === playerIndex) {
-        return movePlayer(player, state.paths, requestedHeading);
+        return movePlayer(player, getEnabledPaths(state), requestedHeading);
       }
       return player;
     });
@@ -278,7 +295,7 @@ export const createGhostMovement = (store: StateStore) => {
   setInterval(() => {
     const state = store.getState();
     const ghosts = state.ghosts.map((ghost) => {
-      return moveGhost(ghost, state.paths);
+      return moveGhost(ghost, getEnabledPaths(state));
     });
     store.setState({
       ...state,

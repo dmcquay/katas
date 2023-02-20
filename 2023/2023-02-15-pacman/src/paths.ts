@@ -1,4 +1,6 @@
-export const paths = [
+import { Heading, Path } from "./types";
+
+export const paths: Path[] = [
   {
     label: "H1A",
     start: { x: 1, y: 1 },
@@ -223,5 +225,22 @@ export const paths = [
     label: "V10C",
     start: { x: 26, y: 26 },
     end: { x: 26, y: 29 },
+  },
+  {
+    label: "Jail",
+    start: { x: 12, y: 14 },
+    end: { x: 15, y: 14 },
+  },
+  {
+    label: "JailExit1",
+    start: { x: 13, y: 11 },
+    end: { x: 13, y: 14 },
+    isJailExit: true,
+  },
+  {
+    label: "JailExit2",
+    start: { x: 14, y: 11 },
+    end: { x: 14, y: 14 },
+    isJailExit: true,
   },
 ];

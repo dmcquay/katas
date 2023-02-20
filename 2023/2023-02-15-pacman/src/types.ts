@@ -48,6 +48,7 @@ export interface Path {
   label: string;
   start: Point;
   end: Point;
+  isJailExit?: boolean;
 }
 
 export interface Crumb {
@@ -69,4 +70,5 @@ export interface GameState {
   ghostVariation: number;
   paths: Path[];
   crumbs: Crumb[];
+  isJailOpen: boolean;
 }

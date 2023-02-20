@@ -92,6 +92,11 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
     );
   };
 
+  const drawOpenJail = () => {
+    ctx.fillStyle = "black";
+    ctx.fillRect(416, 400, 64, 20);
+  };
+
   const drawPacMan = (player: Player, variation: number) => {
     const spriteCell = SPRITE_PACMAN_CELL_MAP[player.heading][variation];
     ctx.drawImage(
@@ -161,7 +166,7 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
       path.end.y * CELL_SIZE * SCALE_FACTOR + (CELL_SIZE * SCALE_FACTOR) / 2;
 
     // draw line
-    ctx.strokeStyle = "white";
+    ctx.strokeStyle = path.isDisabled ? "red" : "white";
     ctx.beginPath();
     ctx.moveTo(startX, startY);
     ctx.lineTo(endX, endY);
@@ -189,6 +194,10 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     drawBoard();
+
+    if (state.isJailOpen) {
+      drawOpenJail();
+    }
 
     if (state.status === GameStatus.Win) {
       drawWin();

@@ -29,7 +29,7 @@ const players = [
   },
 ];
 
-const numPlayers = 2;
+const numPlayers = 1;
 
 export const initDev = () => {
   const canvas = document.getElementById(
@@ -40,11 +40,12 @@ export const initDev = () => {
   const state: GameState = {
     status: GameStatus.Playing,
     players: players.slice(0, numPlayers),
-    ghosts: createRandomGhosts(paths, 4),
+    ghosts: createRandomGhosts(paths, 3),
     pacManVariation: 0,
     ghostVariation: 0,
     paths,
     crumbs: createStandardCrumbs(),
+    isJailOpen: false,
   };
 
   const keyMaps = [KeyMapArrows, KeyMapWasd, KeyMapIjlk];
@@ -59,4 +60,12 @@ export const initDev = () => {
   createGhostMovement(store);
   eatCrumbs(store);
   detectCollisions(store);
+
+  // open jail after timeout
+  setTimeout(() => {
+    store.setState({
+      ...store.getState(),
+      isJailOpen: true,
+    });
+  }, 10000);
 };

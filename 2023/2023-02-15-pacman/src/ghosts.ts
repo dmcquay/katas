@@ -7,12 +7,16 @@ export const createRandomGhosts = (paths: Path[], count: number): Ghost[] => {
   let g = 0;
 
   for (let i = 0; i < count; i++) {
-    const path = getRandomListItem(paths);
+    const jailXValues = [];
+    const path = paths.find((p) => p.label === "Jail")!;
+    for (let i = path.start.x; i <= path.end.x; i++) {
+      jailXValues.push(i);
+    }
     const headings = getHeadingsByAxis(getPathAxis(path));
     const color = AllGhostColors[g++];
     if (g > AllGhostColors.length - 1) g = 0;
     ghosts.push({
-      position: path.start,
+      position: { x: getRandomListItem(jailXValues), y: path.start.y },
       heading: getRandomListItem(headings),
       color,
     });
