@@ -232,13 +232,13 @@ export const paths: Path[] = [
     end: { x: 15, y: 14 },
   },
   {
-    label: "JailExit1",
+    label: "JE1",
     start: { x: 13, y: 11 },
     end: { x: 13, y: 14 },
     isJailExit: true,
   },
   {
-    label: "JailExit2",
+    label: "JE2",
     start: { x: 14, y: 11 },
     end: { x: 14, y: 14 },
     isJailExit: true,

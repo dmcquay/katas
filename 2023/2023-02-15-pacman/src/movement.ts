@@ -1,15 +1,6 @@
-import { getHeadingsByAxis, getPathAxis } from "./path-utils";
+import { getEnabledPaths, getHeadingsByAxis, getPathAxis } from "./path-utils";
 import { StateStore } from "./state-store";
-import {
-  Path,
-  Player,
-  Heading,
-  Ghost,
-  Point,
-  Axis,
-  GameStatus,
-  GameState,
-} from "./types";
+import { Path, Player, Heading, Ghost, Point, Axis, GameStatus } from "./types";
 import { getRandomListItem, pointsAreClose } from "./utils";
 
 const INC = 0.1;
@@ -239,14 +230,6 @@ export const KeyMapIjlk: KeyMap = {
   KeyK: Heading.DOWN,
   KeyJ: Heading.LEFT,
   KeyL: Heading.RIGHT,
-};
-
-const getEnabledPaths = (state: GameState): Path[] => {
-  if (state.isJailOpen) {
-    return state.paths;
-  } else {
-    return state.paths.filter((path) => !path.isJailExit);
-  }
 };
 
 export const createPlayerMovement = (

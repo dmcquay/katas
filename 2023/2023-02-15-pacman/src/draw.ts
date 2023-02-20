@@ -154,7 +154,7 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
     ctx.fillRect(x, y, SCALE_FACTOR * 2, SCALE_FACTOR * 2);
   };
 
-  const drawPath = (path: Path) => {
+  const drawPath = (path: Path, isJailOpen: boolean) => {
     // compute
     const startX =
       path.start.x * CELL_SIZE * SCALE_FACTOR + (CELL_SIZE * SCALE_FACTOR) / 2;
@@ -166,7 +166,7 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
       path.end.y * CELL_SIZE * SCALE_FACTOR + (CELL_SIZE * SCALE_FACTOR) / 2;
 
     // draw line
-    ctx.strokeStyle = path.isDisabled ? "red" : "white";
+    ctx.strokeStyle = path.isJailExit && !isJailOpen ? "red" : "white";
     ctx.beginPath();
     ctx.moveTo(startX, startY);
     ctx.lineTo(endX, endY);
@@ -209,7 +209,7 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
 
     if (opts.displayPaths) {
       for (let path of state.paths) {
-        drawPath(path);
+        drawPath(path, state.isJailOpen);
       }
     }
 
