@@ -60,6 +60,7 @@ export enum GameStatus {
   Playing,
   Win,
   Lose,
+  Paused,
 }
 
 export interface GameState {

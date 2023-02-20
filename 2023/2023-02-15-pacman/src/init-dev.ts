@@ -38,7 +38,7 @@ export const initDev = () => {
   if (canvas == null) throw new Error("cannot find canvas element");
 
   const state: GameState = {
-    status: GameStatus.Playing,
+    status: GameStatus.Paused,
     players: players.slice(0, numPlayers),
     ghosts: createRandomGhosts(paths, 3),
     pacManVariation: 0,
@@ -60,6 +60,14 @@ export const initDev = () => {
   createGhostMovement(store);
   eatCrumbs(store);
   detectCollisions(store);
+
+  // game is paused briefly at start so players can get oriented
+  setTimeout(() => {
+    store.setState({
+      ...store.getState(),
+      status: GameStatus.Playing,
+    });
+  }, 3000);
 
   // open jail after timeout
   setTimeout(() => {

@@ -261,6 +261,7 @@ export const createPlayerMovement = (
 
   setInterval(() => {
     const state = store.getState();
+    if (state.status === GameStatus.Paused) return;
     const players = state.players.map((player, idx) => {
       if (idx === playerIndex) {
         return movePlayer(player, getEnabledPaths(state), requestedHeading);
@@ -277,6 +278,7 @@ export const createPlayerMovement = (
 export const createGhostMovement = (store: StateStore) => {
   setInterval(() => {
     const state = store.getState();
+    if (state.status === GameStatus.Paused) return;
     const ghosts = state.ghosts.map((ghost) => {
       return moveGhost(ghost, getEnabledPaths(state));
     });
