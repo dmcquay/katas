@@ -2,6 +2,7 @@ import { getEnabledPaths, getHeadingsByAxis, getPathAxis } from "./path-utils";
 import { StateStore } from "./state-store";
 import { Path, Player, Heading, Ghost, Point, Axis, GameStatus } from "./types";
 import { getRandomListItem, pointsAreClose } from "./utils";
+import * as R from "ramda";
 
 const INC = 0.1;
 
@@ -232,10 +233,11 @@ export const KeyMapIjlk: KeyMap = {
   KeyL: Heading.RIGHT,
 };
 
-export const createPlayerMovement = (
+export const createKeyboardControlledMovement = (
   store: StateStore,
-  playerIndex: number,
-  keyMap: KeyMap
+  targetIdx: number,
+  keyMap: KeyMap,
+  isGhost?: boolean
 ) => {
   let requestedHeading: Heading | undefined;
 
@@ -262,25 +264,33 @@ export const createPlayerMovement = (
   setInterval(() => {
     const state = store.getState();
     if (state.status === GameStatus.Paused) return;
-    const players = state.players.map((player, idx) => {
-      if (idx === playerIndex) {
-        return movePlayer(player, getEnabledPaths(state), requestedHeading);
+    const characters = isGhost ? state.ghosts : state.players;
+    const updated = characters.map((character, idx) => {
+      if (idx === targetIdx) {
+        return movePlayer(character, getEnabledPaths(state), requestedHeading);
       }
-      return player;
+      return character;
     });
     store.setState({
       ...state,
-      players,
+      [isGhost ? "ghosts" : "players"]: updated,
     });
   }, 20);
 };
 
-export const createGhostMovement = (store: StateStore) => {
+export const createGhostMovement = (
+  store: StateStore,
+  ghostIdxList?: number[]
+) => {
   setInterval(() => {
     const state = store.getState();
     if (state.status === GameStatus.Paused) return;
-    const ghosts = state.ghosts.map((ghost) => {
-      return moveGhost(ghost, getEnabledPaths(state));
+    const ghosts = state.ghosts.map((ghost, idx) => {
+      if (ghostIdxList == null || ghostIdxList.includes(idx)) {
+        return moveGhost(ghost, getEnabledPaths(state));
+      } else {
+        return ghost;
+      }
     });
     store.setState({
       ...state,
