@@ -9,5 +9,5 @@ describe("1 - bulk require", () => {
     console.log("    after");
   });
 
-  bulkRequire(__dirname, ["*.subtest.js"]);
+  bulkRequire(__dirname, ["*"]);
 });
