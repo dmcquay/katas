@@ -73,4 +73,5 @@ export interface GameState {
   paths: Path[];
   crumbs: Crumb[];
   isJailOpen: boolean;
+  ghostsEdibleUntil?: number; // Date epoch millis
 }

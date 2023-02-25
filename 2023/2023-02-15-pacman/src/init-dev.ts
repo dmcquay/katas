@@ -29,7 +29,7 @@ const players = [
   },
 ];
 
-const numPlayers = 2;
+const numPlayers = 1;
 
 export const initDev = () => {
   const canvas = document.getElementById(
@@ -40,7 +40,7 @@ export const initDev = () => {
   const state: GameState = {
     status: GameStatus.Paused,
     players: players.slice(0, numPlayers),
-    ghosts: [...createRandomGhosts(paths, 3)],
+    ghosts: [...createRandomGhosts(paths, 4)],
     pacManVariation: 0,
     ghostVariation: 0,
     paths,
@@ -48,17 +48,15 @@ export const initDev = () => {
     isJailOpen: false,
   };
 
-  const keyMaps = [KeyMapWasd, KeyMapIjlk];
-
   const store = createStateStore(state);
   const renderer = createCanvasRenderer({ canvas, displayPaths: false });
   store.subscribe(renderer.renderGameState);
   cycleVariations(store);
   for (let i = 0; i < numPlayers; i++) {
-    createKeyboardControlledMovement(store, i, keyMaps[i]);
+    createKeyboardControlledMovement(store, i, KeyMapArrows);
   }
-  createGhostMovement(store, [0, 1]);
-  createKeyboardControlledMovement(store, 2, KeyMapArrows, true);
+  createGhostMovement(store);
+  // createKeyboardControlledMovement(store, 2, KeyMapArrows, true);
 
   eatCrumbs(store);
   detectCollisions(store);

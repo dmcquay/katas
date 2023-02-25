@@ -309,16 +309,26 @@ export const createGhostMovement = (
 export const detectCollisions = (store: StateStore) => {
   store.subscribe((state) => {
     if (state.status !== GameStatus.Playing) return;
+    const ghostsAreEdible =
+      state.ghostsEdibleUntil != null && state.ghostsEdibleUntil >= Date.now();
     const isClose = (ghost: Ghost) =>
       state.players.find((player) =>
         pointsAreClose(player.position, 0.5)(ghost.position)
       );
     const closeGhost = state.ghosts.find(isClose);
     if (closeGhost != null) {
-      store.setState({
-        ...state,
-        status: GameStatus.Lose,
-      });
+      if (ghostsAreEdible) {
+        const ghosts = state.ghosts.filter((g) => g !== closeGhost);
+        store.setState({
+          ...state,
+          ghosts,
+        });
+      } else {
+        store.setState({
+          ...state,
+          status: GameStatus.Lose,
+        });
+      }
     }
   });
 };

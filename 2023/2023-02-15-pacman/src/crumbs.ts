@@ -125,6 +125,9 @@ export const eatCrumbs = (store: StateStore) => {
         ...state,
         crumbs,
         status,
+        ghostsEdibleUntil: closeCrumb.isBig
+          ? Date.now() + 10000
+          : state.ghostsEdibleUntil,
       });
     }
   });

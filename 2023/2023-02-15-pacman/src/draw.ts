@@ -63,6 +63,10 @@ const SPRITE_GHOSTS_HEADING_TO_COLS_MAP: Record<Heading, number[]> = {
   [Heading.DOWN]: [6, 7],
 };
 
+const SPRITE_GHOSTS_EDIBLE_ROW = 0;
+const SPRITE_GHOSTS_EDIBLE_COLS = [8, 9];
+const SPRITE_GHOSTS_EDIBLE_COLS_ALT = [10, 11];
+
 type RendererOptions = {
   canvas: HTMLCanvasElement;
   displayPaths: boolean;
@@ -118,10 +122,24 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
     );
   };
 
-  const drawGhost = (ghost: Ghost, variation: number) => {
-    const spriteRow = SPRITE_GHOSTS_COLOR_TO_ROW_MAP[ghost.color];
-    const spriteCol =
-      SPRITE_GHOSTS_HEADING_TO_COLS_MAP[ghost.heading][variation];
+  const drawGhost = (
+    ghost: Ghost,
+    variation: number,
+    ghostsEdibleUntil?: number
+  ) => {
+    let spriteRow = SPRITE_GHOSTS_COLOR_TO_ROW_MAP[ghost.color];
+    let spriteCol = SPRITE_GHOSTS_HEADING_TO_COLS_MAP[ghost.heading][variation];
+
+    if (ghostsEdibleUntil != null && ghostsEdibleUntil >= Date.now()) {
+      spriteRow = SPRITE_GHOSTS_EDIBLE_ROW;
+      const remaining = ghostsEdibleUntil - Date.now();
+      if (remaining > 3000 || Math.floor(Date.now() / 500) % 2 === 0) {
+        spriteCol = SPRITE_GHOSTS_EDIBLE_COLS[variation];
+      } else {
+        spriteCol = SPRITE_GHOSTS_EDIBLE_COLS_ALT[variation];
+      }
+    }
+
     ctx.drawImage(
       img,
       SPRITE_GHOSTS_TL.x +
@@ -220,7 +238,7 @@ export const createCanvasRenderer = (opts: RendererOptions) => {
     }
 
     for (let ghost of state.ghosts) {
-      drawGhost(ghost, state.ghostVariation);
+      drawGhost(ghost, state.ghostVariation, state.ghostsEdibleUntil);
     }
 
     for (let player of state.players) {
