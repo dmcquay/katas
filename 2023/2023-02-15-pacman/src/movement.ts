@@ -233,6 +233,13 @@ export const KeyMapIjlk: KeyMap = {
   KeyL: Heading.RIGHT,
 };
 
+export const KeyMapGvbn: KeyMap = {
+  KeyG: Heading.UP,
+  KeyB: Heading.DOWN,
+  KeyV: Heading.LEFT,
+  KeyN: Heading.RIGHT,
+};
+
 export const createKeyboardControlledMovement = (
   store: StateStore,
   targetIdx: number,
