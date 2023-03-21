@@ -1,0 +1,16 @@
+{
+  "name": "2023-03-21-js-errors",
+  "version": "1.0.0",
+  "description": "- Stack traces are ordered from leaf nodes to root nodes. e.g. if A call B and B throws, B will be listed first in the stack trace. - Rejected Promises don't throw stack traces - There are examples on the web demonstrating that stack traces can work   - https://stackoverflow.com/questions/71698860/stack-trace-with-fs-promises-and-async-await   - I think you have to use async/await only. Don't use p.catch on the outermost layer. You have to do the try/catch w/ logging inside an async function.   - Still not working for me with node 16.x   - Upgrading to latest version did not help (19.8.1 at time of writing)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "clarify": "^2.1.0",
+    "trace": "^3.1.1"
+  }
+}
