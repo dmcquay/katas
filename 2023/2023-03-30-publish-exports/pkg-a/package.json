@@ -2,7 +2,11 @@
   "name": "pkg-a",
   "version": "1.0.0",
   "description": "",
-  "exports": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./feat1": "./dist/public/feat1.js",
+    "./feat2": "./dist/public/feat2"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

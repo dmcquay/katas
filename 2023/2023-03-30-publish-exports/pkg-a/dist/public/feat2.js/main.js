@@ -1,5 +1,5 @@
 module.exports = {
   sayName() {
-    console.log("public/feat1");
+    console.log("public/feat2");
   },
 };
