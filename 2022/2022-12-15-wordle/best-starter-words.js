@@ -20,7 +20,7 @@ for (const word of wordsWith5Letters) {
   }
 }
 
-const wordsWithScores = [];
+let wordsWithScores = [];
 for (const word of wordsWith5Letters) {
   let score = 0;
   const letters = R.uniq(word.split(""));
@@ -30,6 +30,18 @@ for (const word of wordsWith5Letters) {
   wordsWithScores.push({ word, score });
 }
 
+const lettersToAvoid = "";
+
+if (lettersToAvoid) {
+  wordsWithScores = wordsWithScores.filter((wordWithScore) => {
+    const word = wordWithScore.word;
+    for (const l of lettersToAvoid.split("")) {
+      if (word.indexOf(l) !== -1) return false;
+    }
+    return true;
+  });
+}
+
 const sorted = R.reverse(R.sortBy(R.prop("score"), wordsWithScores));
 
-console.log(sorted.slice(0, 10));
+console.log(sorted.slice(0, 40));

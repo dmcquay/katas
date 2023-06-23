@@ -8,7 +8,7 @@ const dict = fs
 
 const wordsWith5Letters = dict.filter((x) => x.length === 5);
 
-const easyTypeHints = ["sNe?rNa?iN", "lNa?dNe?nN"];
+const easyTypeHints = ["sNwNaYmNpN", "bNeNaYcNhN", "gNiNaYnNtN"];
 
 const hintTypeMap = {
   N: "no match",
@@ -79,6 +79,12 @@ for (const word of matches) {
   wordsWithScores.push({ word, score });
 }
 
-const sorted = R.reverse(R.sortBy(R.prop("score"), wordsWithScores));
+let sorted = R.reverse(R.sortBy(R.prop("score"), wordsWithScores));
 
-console.log(sorted.slice(0, 40));
+sorted = sorted.filter((x) => {
+  const matches = x.word.match(/a/g);
+  return matches != null && matches.length >= 2;
+});
+
+// console.log(sorted.slice(0, 50));
+console.log(sorted.length);
