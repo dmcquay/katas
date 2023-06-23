@@ -1,4 +1,15 @@
-Wish list
+## Turn it on
+
+```
+npm i
+npm start
+```
+
+Open browser to http://localhost:1234/dev
+
+May need to edit number of players and their controls in `init-dev.ts`.
+
+## Wish list
 
 - Allow players to control ghosts and go after pacman.
 - Multiple lives instead of losing immediately.
