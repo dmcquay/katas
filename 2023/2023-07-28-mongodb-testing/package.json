@@ -1,0 +1,18 @@
+{
+  "name": "2023-07-28-mongodb-testing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "mongodb3": "npm:mongodb@3",
+    "mongodb4": "npm:mongodb@4"
+  }
+}

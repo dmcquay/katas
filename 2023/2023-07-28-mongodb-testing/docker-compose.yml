@@ -1,0 +1,21 @@
+version: "3.3"
+
+services:
+  mongo4:
+    image: mongo:4.4.23
+    ports:
+      - target: 27017
+        published: 27004
+    restart: always
+  mongo5:
+    image: mongo:5
+    ports:
+      - target: 27017
+        published: 27005
+    restart: always
+  mongo6:
+    image: mongo:6
+    ports:
+      - target: 27017
+        published: 27006
+    restart: always
