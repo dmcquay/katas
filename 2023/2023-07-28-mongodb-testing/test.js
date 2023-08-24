@@ -13,11 +13,11 @@ const client3server4 = new mongodb3.MongoClient("mongodb://localhost:27004/", {
 const client4server4 = new mongodb4.MongoClient("mongodb://localhost:27004/");
 
 const clients = { client3server4, client4server4 };
-console.log(Object.keys(clients));
+
+const randInt = () => Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
 
 describe("mongo", () => {
   for (let clientKey of Object.keys(clients)) {
-    console.log(clientKey);
     const client = clients[clientKey];
     describe(clientKey, () => {
       let db, users;
@@ -49,6 +49,61 @@ describe("mongo", () => {
           .then((r) => r.value);
 
         expect(u1.doNotText).to.be.false;
+      });
+
+      it("find.countDocuments", async () => {
+        const testProp = randInt();
+        await users.insertOne({ testProp });
+        await users.insertOne({ testProp });
+        await users.insertOne({ testProp: 1 });
+
+        // deprecated in >= 4.x
+        // const count = await users.find({ testProp }).count();
+
+        // this does not work. you must call countDocuments on a collection, not a cursor
+        // const count = await users.find({ testProp }).countDocuments();
+
+        const count = await users.countDocuments({ testProp });
+
+        expect(count).to.eq(2);
+      });
+
+      it("ensureIndex once", async () => {
+        await users.ensureIndex(
+          { ensureIndexOnce: 1 },
+          { name: "ensureIndex_once" }
+        );
+      });
+
+      it("ensureIndex duplicate", async () => {
+        await users.ensureIndex(
+          { ensureIndexDuplicate: 1 },
+          { name: "ensureIndex_duplicate" }
+        );
+
+        await users.ensureIndex(
+          { ensureIndexDuplicate: 1 },
+          { name: "ensureIndex_duplicate" }
+        );
+      });
+
+      it("createIndex once", async () => {
+        await users.createIndex(
+          { createIndexOnce: 1 },
+          { name: "createIndex_once" }
+        );
+      });
+
+      it("createIndex duplicate", async () => {
+        await users.createIndex(
+          { createIndexDuplicate: 1 },
+          { name: "createIndex_duplicate" }
+        );
+
+        await users.createIndex(
+          { createIndexDuplicate: 1 },
+          { name: "createIndex_duplicate" }
+        );
       });
     });
   }
