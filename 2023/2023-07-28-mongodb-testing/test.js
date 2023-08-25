@@ -105,6 +105,20 @@ describe("mongo", () => {
           { name: "createIndex_duplicate" }
         );
       });
+
+      it("fetching inserted object from response.ops", async () => {
+        const doc = { name: `Customer ${Math.random()}` };
+        const response = await users.insertOne(doc);
+        const [first] = response.ops;
+        expect(first._id).to.not.be.undefined;
+      });
+
+      it("getting insertedId for inserted object via response.insertedId", async () => {
+        const doc = { name: `Customer ${Math.random()}` };
+        const response = await users.insertOne(doc);
+        const { insertedId } = response;
+        expect(insertedId).to.not.be.undefined;
+      });
     });
   }
 });
