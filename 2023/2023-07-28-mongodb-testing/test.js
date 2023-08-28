@@ -119,6 +119,24 @@ describe("mongo", () => {
         const { insertedId } = response;
         expect(insertedId).to.not.be.undefined;
       });
+
+      it("get inserted id by assuming mongo driver adds it to passed document", async () => {
+        const doc = { name: `Customer ${Math.random()}` };
+        expect(doc._id).to.be.undefined;
+        const response = await users.insertOne(doc);
+        const { insertedId } = response;
+        expect(doc._id).to.eq(insertedId);
+      });
+
+      it("updates other ids", async () => {
+        const doc = {
+          otherId: new mongodb4.ObjectId(),
+        };
+        const { insertedId } = await users.insertOne(doc);
+        const doc2 = await users.findOne({ _id: insertedId });
+        expect(doc.otherId.toHexString()).to.eql(doc2.otherId.toHexString());
+        expect(doc.otherId).to.eql(doc2.otherId);
+      });
     });
   }
 });
