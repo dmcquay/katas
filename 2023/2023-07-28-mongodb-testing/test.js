@@ -172,6 +172,43 @@ describe("mongo", () => {
         expect(doc.otherId.toHexString()).to.eql(doc2.otherId.toHexString());
         expect(doc.otherId).to.eql(doc2.otherId);
       });
+
+      // no need to do this, if it fails it will just throw, so i'm not providing an alternative
+      // it("DOESN'T WORK IN v3, MAYBE IT WORKED < v3?: detect insertOne failure via result.ok", async () => {
+      //   const doc = { _id: "invalid" };
+      //   const res = await users.insertOne(doc);
+      //   expect(res.result.ok).to.be.false;
+      // });
+
+      // just don't do this. instead, make sure skip values are set to non-negative integers
+      it("GOOD: updateOne upsertedId has two potential shapes", async () => {
+        const _id = new client.ObjectId();
+        const result = await users.updateOne(
+          { _id },
+          { $set: { name: "Bob" } },
+          { upsert: true, new: true }
+        );
+        expect(result.upsertedId._id || result.upsertedId).to.be.instanceof(
+          client.ObjectId
+        );
+      });
+
+      it("one id should deep equal itself", () => {
+        const id1 = new client.ObjectId();
+        expect(id1).to.deep.equal(id1);
+      });
+
+      it("two ids should not deep equal each other", () => {
+        const id1 = new client.ObjectId();
+        const id2 = new client.ObjectId();
+        expect(id1).to.not.deep.equal(id2);
+      });
+
+      it("constructing an ObjectId from the buffer of another ObjectId", () => {
+        const id1 = new client.ObjectId();
+        const id2 = new client.ObjectId(id1.id);
+        expect(id1).to.eql(id2);
+      });
     });
   }
 });
