@@ -12,7 +12,8 @@
   "dependencies": {
     "chai": "^4.3.7",
     "mocha": "^10.2.0",
-    "mongodb3": "npm:mongodb@3",
-    "mongodb4": "npm:mongodb@4"
+    "mongodb3": "npm:mongodb@^3",
+    "mongodb4": "npm:mongodb@^4",
+    "mongodb5": "npm:mongodb@^5"
   }
 }

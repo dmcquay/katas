@@ -4,6 +4,7 @@ const { expect } = require("chai");
 
 const mongodb3 = require("mongodb3");
 const mongodb4 = require("mongodb4");
+const mongodb5 = require("mongodb5");
 
 const client3server4 = new mongodb3.MongoClient("mongodb://localhost:27004/", {
   useNewUrlParser: true,
@@ -16,7 +17,11 @@ const client4server4 = new mongodb4.MongoClient("mongodb://localhost:27004/");
 client4server4.ObjectId = mongodb4.ObjectId;
 client4server4.IncompatibleObjectId = mongodb3.ObjectId;
 
-const clients = { client3server4, client4server4 };
+const client5server4 = new mongodb5.MongoClient("mongodb://localhost:27004/");
+client5server4.ObjectId = mongodb5.ObjectId;
+client5server4.IncompatibleObjectId = mongodb3.ObjectId;
+
+const clients = { client3server4, client4server4, client5server4 };
 
 const randInt = () => Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
 
@@ -209,6 +214,11 @@ describe("mongo", () => {
         const id2 = new client.ObjectId(id1.id);
         expect(id1).to.eql(id2);
       });
+
+      // it("STOPPED WORKING IN v5: constrcting an ObjectId id without the use of the new keyword", () => {
+      //   const id = client.ObjectId("0".repeat(24));
+      //   expect(id.toHexString()).to.eq("0".repeat(24))
+      // })
     });
   }
 });
