@@ -12,6 +12,7 @@
   "dependencies": {
     "bson1": "npm:bson@^1.1.6",
     "bson4": "npm:bson@^4.0.0",
-    "clone": "^0.1.19"
+    "clone0": "npm:clone@^0.1.19",
+    "clone2": "npm:clone@^2.1.2"
   }
 }
