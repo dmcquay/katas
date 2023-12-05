@@ -1,0 +1,3 @@
+#!/bin/bash
+
+tap-mongodb --config config.json --catalog catalog-log.json --state state.json

@@ -1,0 +1,56 @@
+{
+  "streams": [
+    {
+      "table_name": "Users",
+      "stream": "Users",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "table-key-properties": [
+              "_id"
+            ],
+            "database-name": "test",
+            "row-count": 1,
+            "is-view": false,
+            "valid-replication-keys": [
+              "_id"
+            ],
+            "selected": true,
+            "replication-method": "FULL_TABLE"
+          }
+        }
+      ],
+      "tap_stream_id": "test-Users",
+      "schema": {
+        "type": "object"
+      }
+    },
+    {
+      "table_name": "Posts",
+      "stream": "Posts",
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "table-key-properties": [
+              "_id"
+            ],
+            "database-name": "test",
+            "row-count": 2,
+            "is-view": false,
+            "valid-replication-keys": [
+              "_id"
+            ],
+            "selected": true,
+            "replication-method": "FULL_TABLE"
+          }
+        }
+      ],
+      "tap_stream_id": "test-Posts",
+      "schema": {
+        "type": "object"
+      }
+    }
+  ]
+}
