@@ -1,28 +1,80 @@
-# Full directions
+# Initialize python virtualenv
 
-https://github.com/singer-io/tap-mongodb
+Set up new env and install deps:
 
-# Short directions
+```
+python3 -m venv ~/.virtualenvs/tap-mongodb
+source ~/.virtualenvs/tap-mongodb/bin/activate
+pip install -U pip setuptools
+pip install tap-mongodb
+```
 
-Use full directions first time.
+Or just activate if you already did this once:
 
 ```
 source ~/.virtualenvs/tap-mongodb/bin/activate
 ```
 
-# Key for mongo
-
-The key is committed to git, but for the record, this is how it was generated:
+# Initializing the DB
 
 ```
-openssl rand -base64 756 > mongo-keyfile
-chmod 400 mongo-keyfile
+./generate-keyfile.sh
+docker compose up -d
+docker exec -it mongodb mongo -u root -p pass --authenticationDatabase admin
+rs.initiate()
+
+# replica set will use some internal address for the single
+# member, so you need to override that with "localhost"
+var cfg = rs.config();
+cfg.members[0].host = "localhost:27017";
+rs.reconfig(cfg);
 ```
 
-# Starting up mongo without compose
+# Insert some data
+
+```sh
+python3 create-posts.py
+```
+
+# Do a full sync
+
+```sh
+./sync-full
+```
+
+# Do a log-based sync
+
+```sh
+./sync-log
+```
+
+# Optional: Connect to DB
 
 ```
-docker run --rm -d -p 27017:27017 -h $(hostname) --name mongo mongo:6.0.5 --replSet=dbrs
-sleep 5
-docker exec mongo mongosh --quiet --eval "rs.initiate();"
+docker exec -it mongodb mongo -u root -p pass --authenticationDatabase admin
 ```
+
+Or use this connection string to connect using compass, etc.
+
+`mongodb://root:pass@localhost:27017/?replicaSet=rs0&authSource=admin`
+
+The oplog is found in local > oplog.rs.
+
+# Optional: Regenerate the catalog
+
+```sh
+./discover
+```
+
+Then edit `catalog.json` and add the following to the metadata for any collections that should be included:
+
+```json
+"selected": true,
+"replication-method": "FULL_TABLE"
+```
+
+Then clone as `catalog-log.json` and change `replication-method` to `LOG_BASED`.
+
+# See Also
+
+- https://github.com/singer-io/tap-mongodb
