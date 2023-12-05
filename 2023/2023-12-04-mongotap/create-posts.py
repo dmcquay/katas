@@ -18,6 +18,10 @@ def random_string(length=50):
     letters = string.ascii_letters + string.digits
     return ''.join(random.choice(letters) for i in range(length))
 
+def generate_random_items(num_items=50):
+    # Generate an array of random strings
+    return [random_string() for _ in range(num_items)]
+
 def insert_documents(batch_size):
     # MongoDB connection setup
     client = MongoClient('mongodb://root:pass@127.0.0.1:27017/?authSource=admin&replicaSet=rs0')
@@ -30,7 +34,11 @@ def insert_documents(batch_size):
     try:
         while True:
             # Create a document with a random string content
-            document = {"content": random_string()}
+            document = {
+                "content": random_string(),
+                "items": generate_random_items()
+            }
+
             batch.append(document)
 
             # When the batch reaches the specified size, insert it
