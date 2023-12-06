@@ -8,7 +8,14 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: pass
       MONGO_INITDB_DATABASE: admin
-    command: --replSet "rs0" --auth --keyFile /data/keyfile/mongodb-keyfile
+    command: 
+      - "--replSet"
+      - "rs0"
+      - "--auth"
+      - "--keyFile"
+      - "/data/keyfile/mongodb-keyfile"
+      - "--setParameter"
+      - "localLogicalSessionTimeoutMinutes=1"
     ports:
       - "27017:27017"
     volumes:

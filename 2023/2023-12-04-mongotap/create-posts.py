@@ -13,12 +13,12 @@ def signal_handler(sig, frame):
 # Register the signal handler for Ctrl+C
 signal.signal(signal.SIGINT, signal_handler)
 
-def random_string(length=50):
+def random_string(length=500):
     # Generate a random string of the specified length
     letters = string.ascii_letters + string.digits
     return ''.join(random.choice(letters) for i in range(length))
 
-def generate_random_items(num_items=50):
+def generate_random_items(num_items=500):
     # Generate an array of random strings
     return [random_string() for _ in range(num_items)]
 
@@ -30,6 +30,7 @@ def insert_documents(batch_size):
     posts_collection = db['Posts']
 
     batch = []
+    prev_time = time.time()
 
     try:
         while True:
@@ -44,7 +45,8 @@ def insert_documents(batch_size):
             # When the batch reaches the specified size, insert it
             if len(batch) == batch_size:
                 posts_collection.insert_many(batch)
-                print(f'Inserted a batch of {batch_size} documents.')
+                print(f'Inserted a batch of {batch_size} documents in {time.time() - prev_time} seconds.')
+                prev_time = time.time()
                 batch = []
 
             # Small delay to avoid too rapid insertion (can be adjusted)

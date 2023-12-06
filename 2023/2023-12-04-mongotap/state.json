@@ -1,17 +1,19 @@
 {
   "bookmarks": {
     "test-Users": {
-      "oplog_ts_time": 1701795241,
+      "last_replication_method": "LOG_BASED",
+      "oplog_ts_time": 1701830495,
       "oplog_ts_inc": 1,
-      "version": 1701795250962,
+      "version": 1701830495849,
       "initial_full_table_complete": true
     },
     "test-Posts": {
-      "oplog_ts_time": 1701795241,
+      "last_replication_method": "LOG_BASED",
+      "oplog_ts_time": 1701830495,
       "oplog_ts_inc": 1,
-      "version": 1701795250966,
+      "version": 1701830495857,
       "initial_full_table_complete": true
     }
   },
-  "currently_syncing": "test-Posts"
+  "currently_syncing": null
 }
