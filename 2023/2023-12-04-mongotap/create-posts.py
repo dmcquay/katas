@@ -13,7 +13,7 @@ def signal_handler(sig, frame):
 # Register the signal handler for Ctrl+C
 signal.signal(signal.SIGINT, signal_handler)
 
-def random_string(length=500):
+def random_string(length=5000):
     # Generate a random string of the specified length
     letters = string.ascii_letters + string.digits
     return ''.join(random.choice(letters) for i in range(length))
@@ -25,7 +25,6 @@ def generate_random_items(num_items=500):
 def insert_documents(batch_size):
     # MongoDB connection setup
     client = MongoClient('mongodb://root:pass@127.0.0.1:27017/?authSource=admin&replicaSet=rs0')
-    # client = MongoClient('mongodb://localhost:27017/')
     db = client['test']
     posts_collection = db['Posts']
 
@@ -56,6 +55,6 @@ def insert_documents(batch_size):
         print('Batch insertion stopped.')
 
 if __name__ == "__main__":
-    batch_size = 100  # Adjust the batch size as needed
+    batch_size = 10  # Adjust the batch size as needed
     insert_documents(batch_size)
 
