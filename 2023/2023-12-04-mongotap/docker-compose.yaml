@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mongodb:
-    image: mongo:4
+    image: mongo:4.4.26
     container_name: mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
@@ -15,19 +15,12 @@ services:
       - "--keyFile"
       - "/data/keyfile/mongodb-keyfile"
       - "--setParameter"
-      - "localLogicalSessionTimeoutMinutes=1"
+      - "localLogicalSessionTimeoutMinutes=15"
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
       - ./mongodb-keyfile:/data/keyfile/mongodb-keyfile
-      - ./mongodb-healthcheck.sh:/usr/local/bin/mongodb-healthcheck
-    healthcheck:
-      test: ["CMD-SHELL", "/usr/local/bin/mongodb-healthcheck"]
-      start_period: 20s
-      interval: 2s
-      timeout: 10s
-      retries: 3
 
 volumes:
   mongodb_data:

@@ -1,3 +1,0 @@
-#!/bin/bash
-
-tap-mongodb --config config.json --discover > catalog.json
