@@ -13,12 +13,12 @@ def signal_handler(sig, frame):
 # Register the signal handler for Ctrl+C
 signal.signal(signal.SIGINT, signal_handler)
 
-def random_string(length=5000):
+def random_string(length=5):
     # Generate a random string of the specified length
     letters = string.ascii_letters + string.digits
     return ''.join(random.choice(letters) for i in range(length))
 
-def generate_random_items(num_items=500):
+def generate_random_items(num_items=0):
     # Generate an array of random strings
     return [random_string() for _ in range(num_items)]
 
@@ -55,6 +55,6 @@ def insert_documents(batch_size):
         print('Batch insertion stopped.')
 
 if __name__ == "__main__":
-    batch_size = 10  # Adjust the batch size as needed
+    batch_size = 100  # Adjust the batch size as needed
     insert_documents(batch_size)
 
