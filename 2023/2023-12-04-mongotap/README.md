@@ -18,7 +18,7 @@ Just run `./init.sh`. It sets up all the specific state needed to reproduce this
 ./run-broken.sh
 ```
 
-It will take around 20 minutes, but eventually you will get a missing cursor error. Copy the id of the cursor, then search for it in the mongo logs with `docker compose logs | grep [cursorId]` and you will see the full history of this cursor. First you'll see a find call, possibly a getMore call (fetching a second batch), then a notice about the session/cursor being killed and finally an error about a query trying to use that cursor but the cursor was not found.
+It will take around 13 minutes, but eventually you will get a missing cursor error. Copy the id of the cursor, then search for it in the mongo logs with `docker compose logs | grep [cursorId]` and you will see the full history of this cursor. First you'll see a find call, possibly a getMore call (fetching a second batch), then a notice about the session/cursor being killed and finally an error about a query trying to use that cursor but the cursor was not found.
 
 ## Applying the patch
 
@@ -59,6 +59,26 @@ If you want/need to put the original file back:
 ```sh
 cp ./oplog-original.py ~/.virtualenvs/tap-mongodb-timeout-repro/lib/python3.*/site-packages/tap_mongodb/sync_strategies/oplog.py
 ```
+
+# Explanation of why the cursor times out
+
+By default, a session is created for each query. Cursors belong to a session. When a session times out, the session becomes eligible for
+deletion. However, there seems to be a delay until it is actually killed. I have observed this delay to be around 7-10 minutes in my local environment. I'm going to refer to this combined session timeout + delay until session is actually killed as EFFECTIVE_SESSION_TIMEOUT.
+
+In a production environment, SESSION_TIMEOUT will typically be 30 minutes (the docs warn against changing this) plus the delay. Let's assume
+around 10 minutes. So a production EFFECTIVE_SESSION_TIMEOUT is around 40 minutes give or take.
+
+In this local project, the SESSION_TIMEOUT is set to 1 minute and the delay is around 8 minutes, so the EFFECTIVE_SESSION_TIMEOUT is ~9 mins.
+
+When iterating on a cursor, pymongo does not communicate with the server on each iteration of the loop. Rather, it fetches data in batches.
+A session is "refreshed" when the next batch is fetched. A batch_size can be set on a query. It is a document count. When specified, each
+batch will contain exactly this many documents provided there are sufficient docs remaining to be fetched and provided that total batch does
+not exceed 16MB. If batch_size is not specified (tap-mongodb does not specify batch_size), then the first batch will be exactly 101 docs and
+all remaining batches will be a full 16 MB.
+
+I was able to observe the actual max batch size when fetching oplog entries. I did this in a controlled environment where the oplog contained insert operations only. I inserted about a million docs. I increased logging by running `db.setProfilingLevel(0,-1)` in mongosh. I ran
+tap-mongodb in log mode. I then searched the mongo logs with `dc logs | grep 'oplog' | grep 'nreturned'` where I was able to see that the
+first batch was 101 and the second was 153529.
 
 # Optional: Connect to DB
 

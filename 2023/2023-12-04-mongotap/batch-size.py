@@ -6,21 +6,39 @@
 # size. After or during running this script, you can `docker compose logs | grep batchSize` to see related logs.
 
 import time
-from pymongo import MongoClient
+import pymongo
 
 MONGO_URI = 'mongodb://root:pass@127.0.0.1:27017/?authSource=admin&replicaSet=rs0'
 
+oplog_query = {
+    'ns': {'$eq' : '{}.{}'.format('test', 'Posts')}
+}
+
+base_projection = {
+    "ts": 1, "ns": 1, "op": 1, 'o2': 1
+}
+
 def main():
-    client = MongoClient(MONGO_URI)
-    db = client['test']
-    posts_collection = db['Posts']
+    client = pymongo.MongoClient(MONGO_URI)
+    db = client['local']
+    collection = db['oplog.rs']
+
+    collection.count(
+        oplog_query,
+        sort=[('$natural', pymongo.ASCENDING)],
+        oplog_replay=True
+    )
 
     i = 0
-    cursor = posts_collection.find()
-    for post in cursor:
+    cursor = collection.find(
+        oplog_query,
+        sort=[('$natural', pymongo.ASCENDING)],
+        oplog_replay=True
+    )
+    for doc in cursor:
         i += 1
         print(f'{i}')
-        time.sleep(.5)
+        time.sleep(.1)
 
 if __name__ == "__main__":
     main()
