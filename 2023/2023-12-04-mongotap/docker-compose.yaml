@@ -15,7 +15,7 @@ services:
       - "--keyFile"
       - "/data/keyfile/mongodb-keyfile"
       - "--setParameter"
-      - "localLogicalSessionTimeoutMinutes=15"
+      - "localLogicalSessionTimeoutMinutes=1"
     ports:
       - "27017:27017"
     volumes:

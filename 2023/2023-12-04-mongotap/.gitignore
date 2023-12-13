@@ -1,1 +1,2 @@
-state*.json
+state-before-inserts.json
+state-after-inserts.json

@@ -24,10 +24,12 @@ docker compose down --volumes
 docker compose up -d
 sleep 5
 ./mongodb-init.sh
+echo "Initializing tap-mongodb and storing state before inserts"
+tap-mongodb --config config.json --catalog catalog-log.json 2>/dev/null | grep 'STATE' | tail -n 1 | jq '.value' > state-before-inserts.json
 echo "Inserting posts"
 python3 create-posts.py
-echo "Initializing tap-mongodb and storing state after inserts"
-tap-mongodb --config config.json --catalog catalog-log.json 2>/dev/null | grep 'STATE' | tail -n 1 | jq '.value' > state-after-inserts.json
-echo "Editing posts"
-python3 edit-posts.py
+# echo "Initializing tap-mongodb and storing state after inserts"
+# tap-mongodb --config config.json --catalog catalog-log.json 2>/dev/null | grep 'STATE' | tail -n 1 | jq '.value' > state-after-inserts.json
+# echo "Editing posts"
+# python3 edit-posts.py
 echo "Done"

@@ -148,7 +148,8 @@ def sync_collection(client, stream, state, stream_projection, max_oplog_ts=None)
             oplog_query,
             projection,
             sort=[('$natural', pymongo.ASCENDING)],
-            oplog_replay=oplog_replay
+            oplog_replay=oplog_replay,
+            batch_size=100
     ) as cursor:
         for row in cursor:
             # assertions that mongo is respecing the ts query and sort order

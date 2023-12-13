@@ -13,7 +13,7 @@ def signal_handler(sig, frame):
 # Register the signal handler for Ctrl+C
 signal.signal(signal.SIGINT, signal_handler)
 
-def random_string(length=5):
+def random_string(length=5000):
     # Generate a random string of the specified length
     letters = string.ascii_letters + string.digits
     return ''.join(random.choice(letters) for i in range(length))
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     client = MongoClient('mongodb://root:pass@127.0.0.1:27017/?authSource=admin&replicaSet=rs0')
     batch_size = 100  # Adjust the batch size as needed
     docs_inserted = 0
-    desired_doc_count = 25000
+    desired_doc_count = 300
     while docs_inserted < desired_doc_count:
         insert_documents(client, batch_size)
         docs_inserted += batch_size

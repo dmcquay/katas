@@ -161,19 +161,24 @@ def sync_collection(client, stream, state, stream_projection, max_oplog_ts=None)
     # consider adding oplog_replay, but this would require removing the projection
     # default behavior is a non_tailable cursor but we might want a tailable one
     # regardless of whether its long lived or not.
-    batch_start_time = time.time()
+    
+    ping_interval_seconds = 60
+    last_ping = time.time()
+    
     with client.start_session() as session:
         with client.local.oplog.rs.find(
                 oplog_query,
                 sort=[('$natural', pymongo.ASCENDING)],
                 oplog_replay=oplog_replay,
-                session=session
-        ).batch_size(14000) as cursor:
+                session=session,
+                batch_size=100
+        ) as cursor:
             #for row in cursor:
-            for batch_counter, row in enumerate(cursor):
-                if (batch_counter + 1) % 1000 == 0:
-                    print('Refreshing session', file=sys.stderr)
+            for row in cursor:
+                if time.time() - last_ping > ping_interval_seconds:
+                    LOGGER.info('Refreshing session')
                     client.local.command('ping', session=session)
+                    last_ping = time.time()
 
                 # assertions that mongo is respecing the ts query and sort order
                 if row.get('ts') and row.get('ts') < oplog_ts:

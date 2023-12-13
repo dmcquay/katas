@@ -15,15 +15,43 @@ Just run `./init.sh`. It sets up all the specific state needed to reproduce this
 ## Reproducing the cursor/session timeout
 
 ```
-./repro.sh
+./run-broken.sh
 ```
 
-In approximatly 11.5 minutes, you will get a missing cursor error. Copy the id of the cursor, then search for it in the mongo logs with `docker compose logs | grep [cursorId]` and you will see a correlating error indicating that it was actually the session that timed out which caused the cursor to be deleted.
+It will take around 20 minutes, but eventually you will get a missing cursor error. Copy the id of the cursor, then search for it in the mongo logs with `docker compose logs | grep [cursorId]` and you will see the full history of this cursor. First you'll see a find call, possibly a getMore call (fetching a second batch), then a notice about the session/cursor being killed and finally an error about a query trying to use that cursor but the cursor was not found.
 
 ## Applying the patch
 
 ```sh
-cp ./oplog-patched.py ~/.virtualenvs/tap-mongodb-timeout-repro/lib/python3.*/site-packages/tap_mongodb/sync_strategies/oplog.py
+./run-patched.sh
+```
+
+This script will apply a patch and then run the script again. This time it will work due to the patch.
+
+Here are the changes from the patched oplog.py file:
+
+Create an explicit session.
+
+```py
+with client.start_session() as session:
+```
+
+Then modify the oplog find query by passing the session. Also, pass no_cursor_timeout=True while you're at it.
+
+```py
+with client.local.oplog.rs.find(
+        oplog_query,
+        sort=[('$natural', pymongo.ASCENDING)],
+        oplog_replay=oplog_replay,
+        session=session,
+        no_cursor_timeout=True
+) as cursor:
+```
+
+In the oplog cursor loop, periodically run a lightweight query to keep the session alive:
+
+```py
+client.local.command('ping', session=session)
 ```
 
 If you want/need to put the original file back:
