@@ -30,30 +30,6 @@ This script will apply a patch and then run the script again. This time it will 
 
 Here are the changes from the patched oplog.py file:
 
-Create an explicit session.
-
-```py
-with client.start_session() as session:
-```
-
-Then modify the oplog find query by passing the session. Also, pass no_cursor_timeout=True while you're at it.
-
-```py
-with client.local.oplog.rs.find(
-        oplog_query,
-        sort=[('$natural', pymongo.ASCENDING)],
-        oplog_replay=oplog_replay,
-        session=session,
-        no_cursor_timeout=True
-) as cursor:
-```
-
-In the oplog cursor loop, periodically run a lightweight query to keep the session alive:
-
-```py
-client.local.command('ping', session=session)
-```
-
 If you want/need to put the original file back:
 
 ```sh
@@ -79,6 +55,51 @@ all remaining batches will be a full 16 MB.
 I was able to observe the actual max batch size when fetching oplog entries. I did this in a controlled environment where the oplog contained insert operations only. I inserted about a million docs. I increased logging by running `db.setProfilingLevel(0,-1)` in mongosh. I ran
 tap-mongodb in log mode. I then searched the mongo logs with `dc logs | grep 'oplog' | grep 'nreturned'` where I was able to see that the
 first batch was 101 and the second was 153529.
+
+Therefore, to cause a timeout, it must take longer than EFFECTIVE_SESSION_TIMEOUT to process a batch of 153529 oplog entries (that number
+may of course vary based on the size of your oplog docs, but this serves as a baseline). In my local, controlled environment, it is exactly
+that number.
+
+tap-mongodb can process 153529 oplog docs very fast, but it writes to stdout which is piped into another process. UNIX pipe buffers are
+typically 16 KB and if the consumer of the pipe isn't reading as fast, it will fill up. When the pipe buffer is full, python flush calls
+will block. `singer.write_message` calls flush with every print call. Therefore if the target is slow, as it can be when the source mongo
+docs are huge, nested, etc and the target is having to map this to a table/columnar structure. In my production environment, this is the case.
+I have emulated this in this local proof of concept with slow-cosumer.py.
+
+# Recommended fix
+
+We need to refresh the session periodically. There is no "refresh_session" call. We just need to call something lightweight,
+such as a ping. We also need to create an explicit session which we'll pass into the oplog find call AND the ping call so
+that they are using the same session or else they will each have separate sessions and the ping will not affect the find
+call's session.
+
+1. Create an explicit session.
+
+```py
+with client.start_session() as session:
+```
+
+2. Then modify the oplog find query by passing the session. Also, pass `no_cursor_timeout=True` while you're at it to ensure
+   we are only limited by the session timeout (default 30 minutes) and not the cursor timeout (default 10 minutes).
+
+```py
+with client.local.oplog.rs.find(
+        oplog_query,
+        sort=[('$natural', pymongo.ASCENDING)],
+        oplog_replay=oplog_replay,
+        session=session,
+        no_cursor_timeout=True
+) as cursor:
+```
+
+3. In the oplog cursor loop, periodically run a lightweight query to keep the session alive. I suggest around 10 minutes. Don't
+   use 29 minutes because updates get batched in tap-mongodb and if you get unlucky and the updates get flushed in that iteration
+   of the loop, then it could take a while so we want to make sure our ping enough more frequently than SESSION_TIMEOUT to
+   provide some head room.
+
+```py
+client.local.command('ping', session=session)
+```
 
 # Optional: Connect to DB
 
