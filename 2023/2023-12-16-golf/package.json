@@ -1,0 +1,14 @@
+{
+  "name": "2023-12-16-golf",
+  "module": "state-server.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --hot index.ts"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
