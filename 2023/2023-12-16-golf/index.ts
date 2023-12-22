@@ -21,7 +21,7 @@ type RoomStore = ReturnType<typeof createStore<Room>>;
 
 const rooms: Record<string, RoomStore> = {};
 
-const getOrCreateRoom = (roomName: string, ws: ServerWebSocket<unknown>):RoomStore => {
+const getOrCreateRoom = (roomName: string):RoomStore => {
     if (rooms[roomName]) {
         return rooms[roomName];
     } else {
@@ -61,9 +61,8 @@ const server = Bun.serve({
   async fetch(req, server) {
     const url = new URL(req.url);
     if (url.pathname === "/state") {
-        // upgrade the request to a WebSocket
         if (server.upgrade(req)) {
-            return; // do not return a Response
+            return;
         }
         return new Response("Upgrade failed :(", { status: 500 });
     } else {
@@ -89,7 +88,7 @@ const server = Bun.serve({
         if (action === 'join room') {
             const {roomName, name, playerId} = payload;
             ws.subscribe(roomName);
-            const roomStore = getOrCreateRoom(roomName, ws);
+            const roomStore = getOrCreateRoom(roomName);
             const player = { id: playerId, name };
             console.log({roomState: roomStore.getState(), player})
             roomStore.set(state => {
@@ -102,14 +101,6 @@ const server = Bun.serve({
                 }
             })
         }
-    }, // a message is received
-    open(ws) {
-        // console.log('Open')
-        // ws.subscribe('state')
-        // ws.publish('state', 'state1')
-    },
-    close(ws, code, message) {
-        // console.log('Close')
     }
   }
 });

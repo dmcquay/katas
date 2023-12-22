@@ -30,39 +30,6 @@ socket.addEventListener("error", event => {
     // console.log('error', event)
 });
 
-const nameInput = document.getElementById('name-input');
-nameInput.addEventListener('keyup', (evt) => {
-    store.set((state) => {
-        return {
-            ...state,
-            name: evt.target.value
-        }
-    })
-});
-
-const roomNameInput = document.getElementById('room-name-input');
-roomNameInput.addEventListener('keyup', (evt) => {
-    store.set((state) => {
-        return {
-            ...state,
-            roomName: evt.target.value
-        }
-    })
-});
-
-const joinRoomBtn = document.getElementById('join-btn');
-joinRoomBtn.addEventListener('click', () => {
-    const state = store.getState();
-    socket.send(JSON.stringify({
-        action: 'join room',
-        payload: {
-            roomName: state.roomName,
-            name: state.name,
-            playerId: state.playerId
-        }
-    }));
-});
-
 function render(state) {
     const pages = {
         initial: document.getElementById('initial')
@@ -76,12 +43,6 @@ const getPlayerId = () => {
     localStorage.setItem('playerId', newPlayerId);
     return newPlayerId;
 }
-
-const INITIAL_STATE = {
-    playerId: getPlayerId(),
-    name: '',
-    roomName: ''
-};
 
 const createStore = (initialState) => {
     let state = initialState;
@@ -106,9 +67,68 @@ const createStore = (initialState) => {
     }
 };
 
-const store = createStore(INITIAL_STATE);
+const getInitialState = () => {
+    const stateStr = localStorage.getItem('state');
+    if (stateStr != null) {
+        return JSON.parse(stateStr);
+    } else {
+        const state = {
+            playerId: getPlayerId(),
+            name: '',
+            roomName: ''
+        }
+        localStorage.setItem('state', JSON.stringify(state));
+        return state;
+    }
+};
+
+const initialState = getInitialState();
+const store = createStore(initialState);
 store.subscribe(render);
+store.subscribe(state => {
+    const partialState = {
+        playerId: state.playerId,
+        name: state.name,
+        roomName: state.roomName
+    }
+    localStorage.setItem('state', JSON.stringify(partialState));
+});
 const stateInspector = document.getElementById('state-inspector');
 store.subscribe(state => {
     stateInspector.value = JSON.stringify(state, null, 2);
-})
+});
+
+const nameInput = document.getElementById('name-input');
+nameInput.value = initialState.name;
+nameInput.addEventListener('keyup', (evt) => {
+    store.set((state) => {
+        return {
+            ...state,
+            name: evt.target.value
+        }
+    })
+});
+
+const roomNameInput = document.getElementById('room-name-input');
+roomNameInput.value = initialState.roomName;
+roomNameInput.addEventListener('keyup', (evt) => {
+    store.set((state) => {
+        return {
+            ...state,
+            roomName: evt.target.value
+        }
+    })
+});
+
+const joinRoomBtn = document.getElementById('join-btn');
+joinRoomBtn.addEventListener('click', () => {
+    const state = store.getState();
+    socket.send(JSON.stringify({
+        action: 'join room',
+        payload: {
+            roomName: state.roomName,
+            name: state.name,
+            playerId: state.playerId
+        }
+    }));
+});
