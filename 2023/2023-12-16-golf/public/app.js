@@ -51,6 +51,9 @@ function render(state) {
             pages[pageName].style.display = 'none';
         }
     }
+    if (activePage === 'playing') {
+        topOfDiscardPile.innerText = JSON.stringify(state.room.round.discardPile[state.room.round.discardPile.length - 1]);
+    }
 }
 
 const getPlayerId = () => {
@@ -158,3 +161,5 @@ startBtn.addEventListener('click', () => {
         roomName: state.roomName
     }));
 });
+
+const topOfDiscardPile = document.getElementById('top-of-discard-pile');

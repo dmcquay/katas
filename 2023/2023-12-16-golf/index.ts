@@ -8,6 +8,13 @@ type Player = {
 type Room = {
   players: Player[];
   status: "waiting for players to join" | "playing";
+  round?: {
+    hands: Record<string, Hand>;
+    deck: Card[];
+    discardPile: Card[];
+    drawnCard?: Card;
+    currentPlayerIdx: number;
+  };
 };
 
 const EMPTY_ROOM: Room = {
@@ -178,18 +185,40 @@ const server = Bun.serve({
         }
         const roomStore = getRoom(roomName);
         if (action === "start") {
-            const deck = buildDeck();
-            const hands: Record<string, Hand> = {}
-            
+          const deck = buildDeck();
+          const hands: Record<string, Hand> = {};
+          const discardPile: Card[] = [draw(deck)];
+
           roomStore.set((state) => {
             for (let player of state.players) {
-                hands[player.id] = buildHand(deck)
+              hands[player.id] = buildHand(deck);
             }
             return {
               ...state,
               status: "playing",
-              hands,
-              deck
+              round: {
+                hands,
+                deck,
+                discardPile,
+                drawnCard: undefined,
+                currentPlayerIdx: 0,
+              },
+            };
+          });
+        } else if (action === "draw") {
+          roomStore.set((state) => {
+            if (state.round == null) {
+                throw new Error('Expected round to be defined')
+            }
+            const deck = [...state.round.deck];
+            const drawnCard = draw(state.round.deck);
+            return {
+              ...state,
+              round: {
+                ...state.round,
+                drawnCard,
+                deck
+              }
             };
           });
         }
