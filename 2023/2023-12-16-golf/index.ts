@@ -27,7 +27,7 @@ const getOrCreateRoom = (roomName: string, ws: ServerWebSocket<unknown>):RoomSto
     } else {
         rooms[roomName] = createStore(EMPTY_ROOM);
         rooms[roomName].subscribe(state => {
-            ws.send(JSON.stringify(state));
+            server.publish(roomName, JSON.stringify(state));
         })
         return rooms[roomName];
     }
@@ -90,27 +90,26 @@ const server = Bun.serve({
             const {roomName, name, playerId} = payload;
             ws.subscribe(roomName);
             const roomStore = getOrCreateRoom(roomName, ws);
+            const player = { id: playerId, name };
+            console.log({roomState: roomStore.getState(), player})
             roomStore.set(state => {
                 return {
                     ...state,
                     players: [
                         ...state.players,
-                        { id: playerId, name }
+                        player
                     ]
                 }
             })
         }
     }, // a message is received
     open(ws) {
-        console.log('Open')
+        // console.log('Open')
         // ws.subscribe('state')
         // ws.publish('state', 'state1')
-    }, // a socket is opened
+    },
     close(ws, code, message) {
-        console.log('Close')
-    }, // a socket is closed
-    drain(ws) {
-        console.log('Drain')
-    }, // the socket is ready to receive more data
-  }, // handlers
+        // console.log('Close')
+    }
+  }
 });

@@ -72,7 +72,7 @@ function render(state) {
 const getPlayerId = () => {
     const playerId = localStorage.getItem('playerId');
     if (playerId != null) return playerId;
-    const newPlayerId = Math.random() * 99999999999999 + '';
+    const newPlayerId = Math.floor(Math.random() * 99999999999999) + '';
     localStorage.setItem('playerId', newPlayerId);
     return newPlayerId;
 }
