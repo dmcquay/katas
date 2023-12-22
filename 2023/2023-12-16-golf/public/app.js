@@ -32,8 +32,25 @@ socket.addEventListener("error", event => {
 
 function render(state) {
     const pages = {
-        initial: document.getElementById('initial')
+        initial: document.getElementById('page-initial'),
+        waiting: document.getElementById('page-waiting-for-others-to-join'),
+        playing: document.getElementById('page-playing')
     };
+    let activePage = 'initial';
+    if (state.room != null) {
+        if (state.room.status === 'waiting for players to join') {
+            activePage = 'waiting';
+        } else {
+            activePage = 'playing';
+        }
+    }
+    for (let pageName of Object.keys(pages)) {
+        if (pageName === activePage) {
+            pages[pageName].style.display = 'block';
+        } else {
+            pages[pageName].style.display = 'none';
+        }
+    }
 }
 
 const getPlayerId = () => {
@@ -130,5 +147,14 @@ joinRoomBtn.addEventListener('click', () => {
             name: state.name,
             playerId: state.playerId
         }
+    }));
+});
+
+const startBtn = document.getElementById('start-btn');
+startBtn.addEventListener('click', () => {
+    const state = store.getState();
+    socket.send(JSON.stringify({
+        action: 'start',
+        roomName: state.roomName
     }));
 });

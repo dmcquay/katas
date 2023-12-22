@@ -9,7 +9,7 @@ type Player = {
 
 type Room = {
     players: Player[],
-    status: 'waiting for players to join'
+    status: 'waiting for players to join' | 'playing'
 }
 
 const EMPTY_ROOM: Room = {
@@ -31,6 +31,13 @@ const getOrCreateRoom = (roomName: string):RoomStore => {
         })
         return rooms[roomName];
     }
+}
+
+const getRoom = (roomName: string):RoomStore => {
+    if (rooms[roomName] == null) {
+        throw new Error(`Room ${roomName} does not exist.`);
+    }
+    return rooms[roomName];
 }
 
 const createStore = <T>(initialState: T) => {
@@ -84,7 +91,7 @@ const server = Bun.serve({
   },
   websocket: {
     message(ws, message: string) {
-        const {action, payload} = JSON.parse(message);
+        const {action, roomName, payload} = JSON.parse(message);
         if (action === 'join room') {
             const {roomName, name, playerId} = payload;
             ws.subscribe(roomName);
@@ -99,6 +106,19 @@ const server = Bun.serve({
                     ]
                 }
             })
+        } else {
+            if (typeof(roomName) !== 'string') {
+                throw new Error('Missing roomName property');
+            }
+            const roomStore = getRoom(roomName);
+            if (action === 'start') {
+                roomStore.set(state => {
+                    return {
+                        ...state,
+                        status: 'playing'
+                    }
+                })
+            }
         }
     }
   }

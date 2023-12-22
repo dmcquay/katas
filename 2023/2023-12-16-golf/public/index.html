@@ -1,6 +1,6 @@
 <html>
     <body>
-        <div id="page-initial">
+        <div id="page-initial" style="display: none">
             <div>
                 <label for="name-input">Name:</label>
                 <input type="text" id="name-input"/>
@@ -10,6 +10,12 @@
                 <input type="text" id="room-name-input"/>
             </div>
             <button id="join-btn">Create/Join Room</button>
+        </div>
+        <div id="page-waiting-for-others-to-join" style="display: none">
+            <button id="start-btn">Start Game</button>
+        </div>
+        <div id="page-playing" style="display: none">
+            <p>Playing game...</p>
         </div>
         <textarea id="state-inspector" style="width: 100%; max-width: 700px; height: 300px;"></textarea>
         <script src="/app.js"></script>
