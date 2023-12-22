@@ -90,12 +90,11 @@ const server = Bun.serve({
             ws.subscribe(roomName);
             const roomStore = getOrCreateRoom(roomName);
             const player = { id: playerId, name };
-            console.log({roomState: roomStore.getState(), player})
             roomStore.set(state => {
                 return {
                     ...state,
                     players: [
-                        ...state.players,
+                        ...state.players.filter(x => x.id !== player.id),
                         player
                     ]
                 }
