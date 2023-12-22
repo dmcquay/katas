@@ -5,6 +5,13 @@ socket.addEventListener("message", event => {
     // const el = document.createElement('li')
     // el.innerHTML = event.data;
     // document.getElementById('messages').append(el)
+    const roomState = JSON.parse(event.data);
+    store.set(state => {
+        return {
+            ...state,
+            room: roomState
+        }
+    })
 });
 
 // socket opened
@@ -23,7 +30,7 @@ socket.addEventListener("error", event => {
     // console.log('error', event)
 });
 
-const nameInput = document.getElementById('name');
+const nameInput = document.getElementById('name-input');
 nameInput.addEventListener('keyup', (evt) => {
     store.set((state) => {
         return {
@@ -33,12 +40,12 @@ nameInput.addEventListener('keyup', (evt) => {
     })
 });
 
-const roomInput = document.getElementById('room');
-roomInput.addEventListener('keyup', (evt) => {
+const roomNameInput = document.getElementById('room-name-input');
+roomNameInput.addEventListener('keyup', (evt) => {
     store.set((state) => {
         return {
             ...state,
-            room: evt.target.value
+            roomName: evt.target.value
         }
     })
 });
@@ -48,7 +55,11 @@ joinRoomBtn.addEventListener('click', () => {
     const state = store.getState();
     socket.send(JSON.stringify({
         action: 'join room',
-        room: state.room
+        payload: {
+            roomName: state.roomName,
+            name: state.name,
+            playerId: state.playerId
+        }
     }));
 });
 
@@ -58,18 +69,18 @@ function render(state) {
     };
 }
 
-const getClientId = () => {
-    const clientId = localStorage.getItem('clientId');
-    if (clientId != null) return clientId;
-    const newClientId = Math.random() * 99999999999999 + ''
-    localStorage.setItem('clientId', newClientId);
-    return newClientId;
+const getPlayerId = () => {
+    const playerId = localStorage.getItem('playerId');
+    if (playerId != null) return playerId;
+    const newPlayerId = Math.random() * 99999999999999 + '';
+    localStorage.setItem('playerId', newPlayerId);
+    return newPlayerId;
 }
 
 const INITIAL_STATE = {
-    room: '',
+    playerId: getPlayerId(),
     name: '',
-    clientId: getClientId()
+    roomName: ''
 };
 
 const createStore = (initialState) => {
@@ -97,22 +108,7 @@ const createStore = (initialState) => {
 
 const store = createStore(INITIAL_STATE);
 store.subscribe(render);
-
-/*
-
-
-action: joinRoom(room, name)
-
-localState = {
-    room: "my-room"
-}
-remoteState = {
-
-}
-
-state = {
-    status: "initial"
-}
-action:
-state: enter game id
-*/
+const stateInspector = document.getElementById('state-inspector');
+store.subscribe(state => {
+    stateInspector.value = JSON.stringify(state, null, 2);
+})
