@@ -53,6 +53,13 @@ function render(state) {
     }
     if (activePage === 'playing') {
         topOfDiscardPile.innerText = JSON.stringify(state.room.round.discardPile[state.room.round.discardPile.length - 1]);
+        const currentPlayerId = state.room.round.playerIds[state.room.round.currentPlayerIdx];
+        if (state.playerId === currentPlayerId) {
+            whosTurnIsIt.innerText = `Your turn`;
+        } else {
+            const currentPlayer = state.room.players.find(p => p.id === currentPlayerId);
+            whosTurnIsIt.innerText = `${currentPlayer.name}'s turn`;
+        }
     }
 }
 
@@ -163,3 +170,5 @@ startBtn.addEventListener('click', () => {
 });
 
 const topOfDiscardPile = document.getElementById('top-of-discard-pile');
+
+const whosTurnIsIt = document.getElementById('whos-turn-is-it');

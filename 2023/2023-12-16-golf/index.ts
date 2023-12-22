@@ -9,6 +9,7 @@ type Room = {
   players: Player[];
   status: "waiting for players to join" | "playing";
   round?: {
+    playerIds: string[];
     hands: Record<string, Hand>;
     deck: Card[];
     discardPile: Card[];
@@ -197,6 +198,7 @@ const server = Bun.serve({
               ...state,
               status: "playing",
               round: {
+                playerIds: state.players.map(p => p.id),
                 hands,
                 deck,
                 discardPile,
