@@ -1,25 +1,50 @@
 <html>
-    <body>
-        <div id="page-initial" style="display: none">
-            <div>
-                <label for="name-input">Name:</label>
-                <input type="text" id="name-input"/>
-            </div>
-            <div>
-                <label for="room-name-input">Room:</label>
-                <input type="text" id="room-name-input"/>
-            </div>
-            <button id="join-btn">Create/Join Room</button>
-        </div>
-        <div id="page-waiting-for-others-to-join" style="display: none">
-            <button id="start-btn">Start Game</button>
-        </div>
-        <div id="page-playing" style="display: none">
-            <p>Playing game...</p>
-            <p id="whos-turn-is-it"></p>
-            <p>Top of discard pile: <span id="top-of-discard-pile"></span></p>
-        </div>
-        <textarea id="state-inspector" style="width: 100%; max-width: 700px; height: 300px;"></textarea>
-        <script src="/app.js"></script>
-    </body>
+  <head>
+    <style>
+      .card {
+        height: 100px;
+        width: 70px;
+        border: 1px solid black;
+      }
+
+      .card i {
+        display: block;
+        width: 32px;
+        height: 32px;
+        background-image: url(/img/card-suits.svg);
+        background-position: 0px 0px;
+        background-size: 72px 72px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="page-initial" style="display: none">
+      <div>
+        <label for="name-input">Name:</label>
+        <input type="text" id="name-input" />
+      </div>
+      <div>
+        <label for="room-name-input">Room:</label>
+        <input type="text" id="room-name-input" />
+      </div>
+      <button id="join-btn">Create/Join Room</button>
+    </div>
+    <div id="page-waiting-for-others-to-join" style="display: none">
+      <button id="start-btn">Start Game</button>
+    </div>
+    <div id="page-playing" style="display: none">
+      <p>Playing game...</p>
+      <p id="whos-turn-is-it"></p>
+      <div class="card">
+        <i></i>
+        <span class="kind">A</span>
+      </div>
+      <p>Top of discard pile: <span id="top-of-discard-pile"></span></p>
+    </div>
+    <textarea
+      id="state-inspector"
+      style="width: 100%; max-width: 700px; height: 300px"
+    ></textarea>
+    <script src="/app.js"></script>
+  </body>
 </html>
