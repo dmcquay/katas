@@ -1,5 +1,3 @@
-import { ServerWebSocket } from "bun";
-
 const BASE_PATH = "./public";
 
 type Player = {
