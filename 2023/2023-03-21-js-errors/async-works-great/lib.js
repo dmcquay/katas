@@ -1,16 +1,12 @@
-const externalFn = () => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      reject(new Error("it failed"));
-    }, 1);
-  });
-};
-
 const fnThatThrows = async () => {
   try {
-    await externalFn();
+    return await new Promise((resolve, reject) => {
+      setTimeout(() => {
+        reject(new Error("it failed"));
+      }, 1);
+    });
   } catch (err) {
-    throw new Error("seconddary thrown error");
+    throw new Error(err.message);
   }
 };
 
