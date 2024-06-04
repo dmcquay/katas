@@ -2,7 +2,7 @@ import pygame
 import sys
 
 # Constants
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 1600, 1000
 PARTICLE_RADIUS = 1
 BACKGROUND_COLOR = (0, 0, 0)
 PARTICLE_COLOR = (255, 255, 255)

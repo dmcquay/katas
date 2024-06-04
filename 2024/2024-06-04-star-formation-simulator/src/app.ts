@@ -15,24 +15,25 @@ const randNum = (min: number, max: number) => {
 };
 
 const MAX_INITIAL_DISTNACE = 200;
-const INTERVAL_SECONDS = 1000;
-const NUM_PARTICLES = 30;
-// const G = 6.6743e-11;
-const G = 6.6743e-6;
-const EARTH_LIKE_MASS = 5.972e24;
-const MOON_LIKE_MASS = 7.348e22;
+const INTERVAL_SECONDS = 10e10;
+const NUM_PARTICLES = 300;
+const G = 6.6743e-11; // real
+// const G = 6.6743e-6;
+const EARTH_LIKE_MASS_KG = 5.972e24;
+const MOON_LIKE_MASS_KG = 7.348e22;
+const HYDROGEN_MASS_KG = 1.67e-27;
 
 const createRandomParticle = (): Particle => {
   return {
-    x: randNum(200, 600),
-    y: randNum(150, 450),
+    x: randNum(0, 1600),
+    y: randNum(0, 1000),
     v: {
       //   x: randNum(-1, 1),
       //   y: randNum(-1, 1),
       x: 0,
       y: 0,
     },
-    mass: randNum(1, 5),
+    mass: HYDROGEN_MASS_KG * 60e25,
   };
 };
 
@@ -146,4 +147,4 @@ const shutdown = () => {
 
 process.on("SIGINT", shutdown);
 
-setTimeout(shutdown, 3000);
+setTimeout(shutdown, 1000);
