@@ -1,0 +1,17 @@
+{
+  "devDependencies": {
+    "@types/chai": "^4.3.16",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.14.1",
+    "chai": "^5.1.1",
+    "mocha": "^10.4.0",
+    "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "start": "ts-node src/app.ts",
+    "test": "ts-mocha \"src/**/*.test.ts\"",
+    "test:watch": "npm test -- -w --watch-files src --reporter min"
+  }
+}
