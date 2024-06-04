@@ -37,6 +37,17 @@ const createRandomParticle = (): Particle => {
   };
 };
 
+const distance = (p1: Particle, p2: Particle): number => {
+  // Calculate the distance vector between p1 and p2
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+
+  // Calculate the distance magnitude
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  return distance;
+};
+
 const calculateGravitationalForce = (p1: Particle, p2: Particle): Vector => {
   // Calculate the distance vector between p1 and p2
   const dx = p2.x - p1.x;
@@ -83,6 +94,49 @@ const addVectors = (vectors: Vector[]): Vector => {
   };
 };
 
+function combineParticles(
+  particles: Particle[],
+  collisionDistance: number
+): Particle[] {
+  const combinedParticles: Particle[] = [];
+
+  for (let i = 0; i < particles.length; i++) {
+    const particle1 = particles[i];
+    let combined = false;
+
+    for (let j = i + 1; j < particles.length; j++) {
+      const particle2 = particles[j];
+
+      const dx = particle1.x - particle2.x;
+      const dy = particle1.y - particle2.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < collisionDistance) {
+        // Combine the particles
+        const totalMass = particle1.mass + particle2.mass;
+        const combinedVx =
+          (particle1.mass * particle1.v.x + particle2.mass * particle2.v.x) /
+          totalMass;
+        const combinedVy =
+          (particle1.mass * particle1.v.y + particle2.mass * particle2.v.y) /
+          totalMass;
+
+        particle1.mass = totalMass;
+        particle1.v = { x: combinedVx, y: combinedVy };
+
+        combined = true;
+        break;
+      }
+    }
+
+    if (!combined) {
+      combinedParticles.push(particle1);
+    }
+  }
+
+  return combinedParticles;
+}
+
 const updateParticles = (particles: Particle[]) => {
   for (const p of particles) {
     p.x += p.v.x;
@@ -93,6 +147,8 @@ const updateParticles = (particles: Particle[]) => {
     );
     applyForce(p, forceVector, INTERVAL_SECONDS);
   }
+
+  return combineParticles(particles, 1);
 };
 
 const printParticles = (particles: Particle[]) => {
@@ -102,42 +158,13 @@ const printParticles = (particles: Particle[]) => {
   console.log("---");
 };
 
-const particles: Particle[] = [];
+let particles: Particle[] = [];
 for (let i = 0; i < NUM_PARTICLES; i++) {
   particles.push(createRandomParticle());
 }
-// const particles: Particle[] = [
-//   {
-//     x: 300,
-//     y: 300,
-//     v: {
-//       x: 0,
-//       y: -1,
-//     },
-//     mass: 5,
-//   },
-//   {
-//     x: 500,
-//     y: 300,
-//     v: {
-//       x: 0,
-//       y: 1,
-//     },
-//     mass: 5,
-//   },
-//     {
-//       x: 500,
-//       y: 500,
-//       v: {
-//         x: 0,
-//         y: 1,
-//       },
-//       mass: 2,
-//     },
-// ];
 
 const interval = setInterval(() => {
-  updateParticles(particles);
+  particles = updateParticles(particles);
   printParticles(particles);
 }, 1);
 
