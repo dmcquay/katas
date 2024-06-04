@@ -54,7 +54,7 @@ def main():
 
         render_particles(data[step])
         step = (step + 1) % len(data)
-        clock.tick(20)  # Adjust to your preferred speed
+        clock.tick(10)  # Adjust to your preferred speed
 
     pygame.quit()
     sys.exit()

@@ -16,12 +16,14 @@ const randNum = (min: number, max: number) => {
 
 const MAX_INITIAL_DISTNACE = 200;
 const INTERVAL_SECONDS = 10e10;
-const NUM_PARTICLES = 300;
+const NUM_PARTICLES = 10000;
 const G = 6.6743e-11; // real
 // const G = 6.6743e-6;
 const EARTH_LIKE_MASS_KG = 5.972e24;
 const MOON_LIKE_MASS_KG = 7.348e22;
 const HYDROGEN_MASS_KG = 1.67e-27;
+const COLLISION_DISTANCE_METERS = 2;
+const MINIMUM_FORCE_DISTANCE_METERS = 2;
 
 const createRandomParticle = (): Particle => {
   return {
@@ -33,7 +35,7 @@ const createRandomParticle = (): Particle => {
       x: 0,
       y: 0,
     },
-    mass: HYDROGEN_MASS_KG * 60e25,
+    mass: HYDROGEN_MASS_KG * 60e25, // too small won't be rendered and also interact too little with the particle count i can handle currently
   };
 };
 
@@ -57,7 +59,7 @@ const calculateGravitationalForce = (p1: Particle, p2: Particle): Vector => {
   const distance = Math.sqrt(dx * dx + dy * dy);
 
   // Avoid division by zero
-  if (distance === 0) {
+  if (distance < MINIMUM_FORCE_DISTANCE_METERS) {
     return { x: 0, y: 0 };
   }
 
@@ -94,10 +96,7 @@ const addVectors = (vectors: Vector[]): Vector => {
   };
 };
 
-function combineParticles(
-  particles: Particle[],
-  collisionDistance: number
-): Particle[] {
+function combineParticles(particles: Particle[]): Particle[] {
   const combinedParticles: Particle[] = [];
 
   for (let i = 0; i < particles.length; i++) {
@@ -111,8 +110,7 @@ function combineParticles(
       const dy = particle1.y - particle2.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance < collisionDistance) {
-        // Combine the particles
+      if (distance < COLLISION_DISTANCE_METERS) {
         const totalMass = particle1.mass + particle2.mass;
         const combinedVx =
           (particle1.mass * particle1.v.x + particle2.mass * particle2.v.x) /
@@ -148,7 +146,7 @@ const updateParticles = (particles: Particle[]) => {
     applyForce(p, forceVector, INTERVAL_SECONDS);
   }
 
-  return combineParticles(particles, 1);
+  return combineParticles(particles);
 };
 
 const printParticles = (particles: Particle[]) => {
@@ -174,4 +172,4 @@ const shutdown = () => {
 
 process.on("SIGINT", shutdown);
 
-setTimeout(shutdown, 1000);
+// setTimeout(shutdown, 10000);
