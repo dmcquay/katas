@@ -35,7 +35,7 @@ const createRandomParticle = (): Particle => {
       x: 0,
       y: 0,
     },
-    mass: HYDROGEN_MASS_KG * 60e25, // too small won't be rendered and also interact too little with the particle count i can handle currently
+    mass: HYDROGEN_MASS_KG * 60e24, // too small won't be rendered and also interact too little with the particle count i can handle currently
   };
 };
 
@@ -121,7 +121,7 @@ function combineParticles(particles: Particle[]): Particle[] {
         collisionCount++;
         particleCount--;
         maxMass = Math.max(maxMass, totalMass);
-        console.error({ particleCount, collisionCount, maxMass });
+        // console.error({ particleCount, collisionCount, maxMass });
 
         const combinedVx =
           (particle1.mass * particle1.v.x + particle2.mass * particle2.v.x) /
