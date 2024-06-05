@@ -37,7 +37,8 @@ def load_data(filename):
 def render_particles(particles):
     screen.fill(BACKGROUND_COLOR)
     for x, y, mass in particles:
-        pygame.draw.circle(screen, PARTICLE_COLOR, (int(x), int(y)), PARTICLE_RADIUS * mass)
+        if mass >= 1:
+            pygame.draw.circle(screen, PARTICLE_COLOR, (int(x), int(y)), PARTICLE_RADIUS * mass)
     pygame.display.flip()
 
 # Main loop
