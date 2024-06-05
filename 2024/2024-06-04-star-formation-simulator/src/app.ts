@@ -96,14 +96,20 @@ const addVectors = (vectors: Vector[]): Vector => {
   };
 };
 
+let collisionCount = 0;
+let particleCount = NUM_PARTICLES;
+let maxMass = 0;
+
 function combineParticles(particles: Particle[]): Particle[] {
   const combinedParticles: Particle[] = [];
+  const deletedIndexes: Record<number, boolean> = {};
 
   for (let i = 0; i < particles.length; i++) {
+    if (deletedIndexes[i]) continue;
     const particle1 = particles[i];
-    let combined = false;
 
     for (let j = i + 1; j < particles.length; j++) {
+      if (deletedIndexes[j]) continue;
       const particle2 = particles[j];
 
       const dx = particle1.x - particle2.x;
@@ -112,6 +118,11 @@ function combineParticles(particles: Particle[]): Particle[] {
 
       if (distance < COLLISION_DISTANCE_METERS) {
         const totalMass = particle1.mass + particle2.mass;
+        collisionCount++;
+        particleCount--;
+        maxMass = Math.max(maxMass, totalMass);
+        console.error({ particleCount, collisionCount, maxMass });
+
         const combinedVx =
           (particle1.mass * particle1.v.x + particle2.mass * particle2.v.x) /
           totalMass;
@@ -122,14 +133,12 @@ function combineParticles(particles: Particle[]): Particle[] {
         particle1.mass = totalMass;
         particle1.v = { x: combinedVx, y: combinedVy };
 
-        combined = true;
+        deletedIndexes[j] = true;
         break;
       }
     }
 
-    if (!combined) {
-      combinedParticles.push(particle1);
-    }
+    combinedParticles.push(particle1);
   }
 
   return combinedParticles;
@@ -161,13 +170,15 @@ for (let i = 0; i < NUM_PARTICLES; i++) {
   particles.push(createRandomParticle());
 }
 
-const interval = setInterval(() => {
+let interrupted = false;
+
+while (!interrupted) {
   particles = updateParticles(particles);
   printParticles(particles);
-}, 1);
+}
 
 const shutdown = () => {
-  clearInterval(interval);
+  interrupted = true;
 };
 
 process.on("SIGINT", shutdown);
