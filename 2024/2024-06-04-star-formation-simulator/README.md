@@ -1,9 +1,13 @@
 # How to run
 
-- `bun run simulate.ts | gzip > data/example.gz`
-- `tail -n +1 data/example.gz | gunzip | python3 render.py`
+- Create a data dir: `mkdir -p data/example`
+- Create a config: `cp example.env data/example/config.env` (edit as desired)
+- Run simulation: `bun run --env-file data/example/config.env simulate.ts | gzip > data/example/data.gz` (will run forever, interrupt with ctrl+c)
+- Render: `tail -n +1 data/example/data.gz | gunzip | python3 render.py`
 
-# Time to write >= 10MB
+# Simulation performance
+
+Time to write >= 10MB
 
 | Runtime | Duration | Peak Mem |
 | ------- | -------: | -------: |

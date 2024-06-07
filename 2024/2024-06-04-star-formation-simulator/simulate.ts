@@ -14,28 +14,45 @@ const randNum = (min: number, max: number) => {
   return Math.random() * (max - min) + min;
 };
 
-const NURSERY_WIDTH = 1600;
-const NURSERY_HEIGHT = 1600;
-const INTERVAL_SECONDS = 10e9;
-const NUM_PARTICLES = 10000;
-const G = 6.6743e-11; // real
-const EARTH_LIKE_MASS_KG = 5.972e24;
-const MOON_LIKE_MASS_KG = 7.348e22;
-const HYDROGEN_MASS_KG = 1.67e-27;
+const getInt = (key: string): number => {
+  const strVal = process.env[key];
+  if (strVal == null) {
+    throw new Error(`Missing environment variable ${key}`);
+  }
+  // parseFloat is compatible with scientific notation (e.g. 10e9), while parseInt is not
+  const floatVal = parseFloat(strVal);
+  if (isNaN(floatVal)) {
+    throw new Error(`Expected environment variable ${key} to be an integer`);
+  }
+  return Math.floor(floatVal);
+};
+
+// For reference
+// const EARTH_LIKE_MASS_KG = 5.972e24;
+// const MOON_LIKE_MASS_KG = 7.348e22;
+// const HYDROGEN_MASS_KG = 1.67e-27;
+
+const NURSERY_WIDTH_METERS = getInt("NURSERY_WIDTH_METERS");
+const NURSERY_HEIGHT_METERS = getInt("NURSERY_HEIGHT_METERS");
+const INTERVAL_SECONDS = getInt("INTERVAL_SECONDS");
+const NUM_PARTICLES = getInt("NUM_PARTICLES");
+const PARTICLE_MASS_KG = getInt("PARTICLE_MASS_KG");
+
+const G = 6.6743e-11;
 const MIN_COLLISION_DISTANCE_METERS = 1;
 const MINIMUM_FORCE_DISTANCE_METERS = 2;
 
 const createRandomParticle = (): Particle => {
   return {
-    x: randNum(NURSERY_WIDTH / -2, NURSERY_WIDTH / 2),
-    y: randNum(NURSERY_HEIGHT / -2, NURSERY_HEIGHT / 2),
+    x: randNum(NURSERY_WIDTH_METERS / -2, NURSERY_WIDTH_METERS / 2),
+    y: randNum(NURSERY_HEIGHT_METERS / -2, NURSERY_HEIGHT_METERS / 2),
     v: {
       //   x: randNum(-1, 1),
       //   y: randNum(-1, 1),
       x: 0,
       y: 0,
     },
-    mass: HYDROGEN_MASS_KG * 60e25, // too small won't be rendered and also interact too little with the particle count i can handle currently
+    mass: PARTICLE_MASS_KG,
   };
 };
 
@@ -89,8 +106,8 @@ let collisionCount = 0;
 let particleCount = NUM_PARTICLES;
 let maxMass = 0;
 
-function radiusFromVolume(volume: number): number {
-  return Math.cbrt((3 * volume) / (4 * Math.PI));
+function radiusFromArea(area: number): number {
+  return Math.sqrt(area / Math.PI);
 }
 
 function combineParticles(particles: Particle[]): Particle[] {
@@ -110,7 +127,7 @@ function combineParticles(particles: Particle[]): Particle[] {
       const distance = Math.sqrt(dx * dx + dy * dy);
       const collisionDistance = Math.max(
         MIN_COLLISION_DISTANCE_METERS,
-        radiusFromVolume(particle1.mass) + radiusFromVolume(particle2.mass)
+        radiusFromArea(particle1.mass) + radiusFromArea(particle2.mass)
       );
 
       if (distance < collisionDistance) {

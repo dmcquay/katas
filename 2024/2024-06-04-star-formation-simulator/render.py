@@ -34,8 +34,8 @@ def read_next_timestep():
             x, y, mass = map(float, parts)
             timestep.append((x, y, mass))
 
-def radius_from_volume(volume):
-    return ((3 * volume) / (4 * math.pi))**(1/3)
+def radius_from_area(area):
+    return math.sqrt(area / math.pi)
 
 # Render particles
 def render_particles(particles, zoom_level, offset_x, offset_y):
@@ -43,7 +43,7 @@ def render_particles(particles, zoom_level, offset_x, offset_y):
     for x, y, mass in particles:
         screen_x = int((x - offset_x) * zoom_level + WIDTH // 2)
         screen_y = int((y - offset_y) * zoom_level + HEIGHT // 2)
-        screen_radius = int(radius_from_volume(mass) * zoom_level)
+        screen_radius = int(radius_from_area(mass) * zoom_level)
         if screen_radius >= 1:
             pygame.draw.circle(screen, (255, 255, 255), (screen_x, screen_y), int(screen_radius))
         else:
