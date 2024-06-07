@@ -1,9 +1,9 @@
 import pygame
 import sys
+import math
 
 # Constants
 WIDTH, HEIGHT = 1600, 1000
-PARTICLE_RADIUS = 1
 BACKGROUND_COLOR = (0, 0, 0)
 
 # Initialize Pygame
@@ -28,10 +28,14 @@ def read_next_timestep():
         else:
             # adding a new line to the current batch
             parts = line.split(',')
-            if len(parts) < 3:
+            is_any_blank = any(part == "" for part in parts)
+            if len(parts) < 3 or is_any_blank:
                 continue
             x, y, mass = map(float, parts)
             timestep.append((x, y, mass))
+
+def radius_from_volume(volume):
+    return ((3 * volume) / (4 * math.pi))**(1/3)
 
 # Render particles
 def render_particles(particles, zoom_level, offset_x, offset_y):
@@ -39,7 +43,7 @@ def render_particles(particles, zoom_level, offset_x, offset_y):
     for x, y, mass in particles:
         screen_x = int((x - offset_x) * zoom_level + WIDTH // 2)
         screen_y = int((y - offset_y) * zoom_level + HEIGHT // 2)
-        screen_radius = int(PARTICLE_RADIUS * mass * zoom_level)
+        screen_radius = int(radius_from_volume(mass) * zoom_level)
         if screen_radius >= 1:
             pygame.draw.circle(screen, (255, 255, 255), (screen_x, screen_y), int(screen_radius))
         else:

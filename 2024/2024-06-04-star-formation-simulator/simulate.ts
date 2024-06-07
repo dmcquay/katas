@@ -16,13 +16,13 @@ const randNum = (min: number, max: number) => {
 
 const NURSERY_WIDTH = 1600;
 const NURSERY_HEIGHT = 1600;
-const INTERVAL_SECONDS = 10e10;
+const INTERVAL_SECONDS = 10e9;
 const NUM_PARTICLES = 10000;
 const G = 6.6743e-11; // real
 const EARTH_LIKE_MASS_KG = 5.972e24;
 const MOON_LIKE_MASS_KG = 7.348e22;
 const HYDROGEN_MASS_KG = 1.67e-27;
-const COLLISION_DISTANCE_METERS = 2;
+const MIN_COLLISION_DISTANCE_METERS = 1;
 const MINIMUM_FORCE_DISTANCE_METERS = 2;
 
 const createRandomParticle = (): Particle => {
@@ -89,6 +89,10 @@ let collisionCount = 0;
 let particleCount = NUM_PARTICLES;
 let maxMass = 0;
 
+function radiusFromVolume(volume: number): number {
+  return Math.cbrt((3 * volume) / (4 * Math.PI));
+}
+
 function combineParticles(particles: Particle[]): Particle[] {
   const combinedParticles: Particle[] = [];
   const deletedIndexes: Record<number, boolean> = {};
@@ -104,8 +108,12 @@ function combineParticles(particles: Particle[]): Particle[] {
       const dx = particle1.x - particle2.x;
       const dy = particle1.y - particle2.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
+      const collisionDistance = Math.max(
+        MIN_COLLISION_DISTANCE_METERS,
+        radiusFromVolume(particle1.mass) + radiusFromVolume(particle2.mass)
+      );
 
-      if (distance < COLLISION_DISTANCE_METERS) {
+      if (distance < collisionDistance) {
         const totalMass = particle1.mass + particle2.mass;
         collisionCount++;
         particleCount--;

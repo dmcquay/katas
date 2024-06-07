@@ -1,7 +1,7 @@
 # How to run
 
 - `bun run simulate.ts | gzip > data/example.gz`
-- `cat data/example.gz | gunzip | python3 render.py`
+- `tail -n +1 data/example.gz | gunzip | python3 render.py`
 
 # Time to write >= 10MB
 
@@ -30,3 +30,4 @@
 - Object tracking
 - Detect/display orbits and related metrics (hard)
 - Single button stroke to save current view (pan, zoom, timestamp) to be able to return to an event.
+- When multiple particles share a pixel in the current display, increase brightness.
