@@ -6,6 +6,7 @@
 - Render:
   - `./render myproj` (to render the latest simulation output)
   - `./render data/myproj/2024-06-07T09:22:12Z.gz` (to render output from a specific run)
+- Watch file size: `watch ls -Rlh data` (`brew install watch`, if needed)
 
 # Simulation performance
 
@@ -19,6 +20,10 @@ Time to write >= 10MB
 
 # simulate ideas
 
+- implement custom quadtree with total mass and center of mass caching. use to more efficiently compute collisions. also, when
+  computing gravitational interactions, only compute pairwise interactions for nearby objects. for more distant objects, treat
+  groups (sections of the quadtree) as though they were single objects, using their mass and center of mass.
+- reduce file size by reducing unnecessary location precision.
 - collision account for volume. larger particles should collide at greater distance from center.
 - Increase local volume and/or density
 - Decrease particle mass to more realistic value

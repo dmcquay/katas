@@ -60,8 +60,11 @@ def main():
     dragging = False
     last_mouse_pos = None
     running = True
+    last_timestep = None
 
     for timestep in read_next_timestep():
+        last_timestep = timestep
+        
         if not running:
             break
 
@@ -88,8 +91,11 @@ def main():
                         offset_x -= (mouse_x - last_mouse_pos[0]) / zoom_level
                         offset_y -= (mouse_y - last_mouse_pos[1]) / zoom_level
                     last_mouse_pos = (mouse_x, mouse_y)
+
         render_particles(timestep, zoom_level, offset_x, offset_y)
-        clock.tick(10)  # Adjust to your preferred speed
+        clock.tick(10)
+    
+    print("ended main loop")
     
     while running:
         for event in pygame.event.get():
@@ -97,6 +103,27 @@ def main():
                 running = False
             elif event.type == pygame.KEYDOWN:
                 running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 4:  # Scroll up
+                    zoom_level *= 1.1
+                elif event.button == 5:  # Scroll down
+                    zoom_level /= 1.1
+                elif event.button == 1:  # Left mouse button
+                    dragging = True
+                    last_mouse_pos = pygame.mouse.get_pos()
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    dragging = False
+            elif event.type == pygame.MOUSEMOTION:
+                if dragging:
+                    mouse_x, mouse_y = pygame.mouse.get_pos()
+                    if last_mouse_pos:
+                        offset_x -= (mouse_x - last_mouse_pos[0]) / zoom_level
+                        offset_y -= (mouse_y - last_mouse_pos[1]) / zoom_level
+                    last_mouse_pos = (mouse_x, mouse_y)
+            
+        render_particles(last_timestep, zoom_level, offset_x, offset_y)
+        clock.tick(10)
 
     pygame.quit()
     sys.exit()
