@@ -1,14 +1,4 @@
-interface Vector {
-  x: number;
-  y: number;
-}
-
-interface Particle {
-  x: number;
-  y: number;
-  v: Vector;
-  mass: number;
-}
+import type { Vector, Particle } from "./types";
 
 const randNum = (min: number, max: number) => {
   return Math.random() * (max - min) + min;
