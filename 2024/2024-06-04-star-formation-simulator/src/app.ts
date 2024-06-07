@@ -35,7 +35,7 @@ const createRandomParticle = (): Particle => {
       x: 0,
       y: 0,
     },
-    mass: HYDROGEN_MASS_KG * 60e23, // too small won't be rendered and also interact too little with the particle count i can handle currently
+    mass: HYDROGEN_MASS_KG * 60e25, // too small won't be rendered and also interact too little with the particle count i can handle currently
   };
 };
 
