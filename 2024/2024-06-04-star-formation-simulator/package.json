@@ -1,0 +1,11 @@
+{
+  "name": "2024-06-04-star-formation-simulator",
+  "module": "simulate.ts",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "type": "module"
+}
