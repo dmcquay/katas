@@ -14,11 +14,11 @@ const randNum = (min: number, max: number) => {
   return Math.random() * (max - min) + min;
 };
 
-const MAX_INITIAL_DISTNACE = 200;
+const NURSERY_WIDTH = 1600;
+const NURSERY_HEIGHT = 1600;
 const INTERVAL_SECONDS = 10e10;
 const NUM_PARTICLES = 10000;
 const G = 6.6743e-11; // real
-// const G = 6.6743e-6;
 const EARTH_LIKE_MASS_KG = 5.972e24;
 const MOON_LIKE_MASS_KG = 7.348e22;
 const HYDROGEN_MASS_KG = 1.67e-27;
@@ -27,8 +27,8 @@ const MINIMUM_FORCE_DISTANCE_METERS = 2;
 
 const createRandomParticle = (): Particle => {
   return {
-    x: randNum(0, 1600),
-    y: randNum(0, 1000),
+    x: randNum(NURSERY_WIDTH / -2, NURSERY_WIDTH / 2),
+    y: randNum(NURSERY_HEIGHT / -2, NURSERY_HEIGHT / 2),
     v: {
       //   x: randNum(-1, 1),
       //   y: randNum(-1, 1),
@@ -37,17 +37,6 @@ const createRandomParticle = (): Particle => {
     },
     mass: HYDROGEN_MASS_KG * 60e25, // too small won't be rendered and also interact too little with the particle count i can handle currently
   };
-};
-
-const distance = (p1: Particle, p2: Particle): number => {
-  // Calculate the distance vector between p1 and p2
-  const dx = p2.x - p1.x;
-  const dy = p2.y - p1.y;
-
-  // Calculate the distance magnitude
-  const distance = Math.sqrt(dx * dx + dy * dy);
-
-  return distance;
 };
 
 const calculateGravitationalForce = (p1: Particle, p2: Particle): Vector => {
@@ -182,5 +171,3 @@ const shutdown = () => {
 };
 
 process.on("SIGINT", shutdown);
-
-// setTimeout(shutdown, 10000);

@@ -13,7 +13,6 @@
 
 # simulate ideas
 
-- center is now 0,0
 - collision account for volume. larger particles should collide at greater distance from center.
 - Increase local volume and/or density
 - Decrease particle mass to more realistic value
