@@ -1,26 +1,30 @@
 # Time to write >= 10MB
 
-| Command                           | Duration | Peak Mem |
-| --------------------------------- | -------: | -------: |
-| `python3 simulate.py > py.out`    |    14:00 |     15MB |
-| `npx ts-node src/app.ts > ts.out` |     0:52 |    540MB |
-| `bun run src/app.ts > bun.out`    |     0:32 |     82MB |
+| Runtime | Duration | Peak Mem |
+| ------- | -------: | -------: |
+| python3 |    14:00 |     15MB |
+| Nodejs  |     0:52 |    540MB |
+| Bun     |     0:32 |     82MB |
 
 # simulate ideas
 
+- center is now 0,0
 - collision account for volume. larger particles should collide at greater distance from center.
+- Increase local volume and/or density
+- Decrease particle mass to more realistic value
 
 # render ideas
 
+- Screen resize. Fullscreen.
 - Render volume more accurrately (should not be equal to diameter)
-- Center on mouse
-- Pan
-- Min particle render diameter 1px so everthing always displays?
 - Display timestep index and allow seeking
 - Pause
+- Change play speed
 - Step forward/back? Or just rewind? Or maybe seeking makes this unnecessary.
+- Object tracking
+- Detect/display orbits and related metrics (hard)
 
 # compression
 
-- `bun run src/app.ts | gzip > bun.out.gz`
-- `cat bun.out.gz | gunzip | python3 render.py`
+- `bun run simulate.ts | gzip > data.gz`
+- `cat data.gz | gunzip | python3 render.py`

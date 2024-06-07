@@ -1,4 +1,1 @@
-node_modules/
-data.txt
-*.out
-*.out.gz
+data*
