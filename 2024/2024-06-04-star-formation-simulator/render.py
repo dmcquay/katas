@@ -5,7 +5,6 @@ import sys
 WIDTH, HEIGHT = 1600, 1000
 PARTICLE_RADIUS = 1
 BACKGROUND_COLOR = (0, 0, 0)
-PARTICLE_COLOR = (255, 255, 255)
 
 # Initialize Pygame
 pygame.init()
@@ -38,11 +37,14 @@ def read_next_timestep():
 def render_particles(particles, zoom_level, offset_x, offset_y):
     screen.fill(BACKGROUND_COLOR)
     for x, y, mass in particles:
-        if mass >= 1:
-            screen_x = int((x - offset_x) * zoom_level + WIDTH // 2)
-            screen_y = int((y - offset_y) * zoom_level + HEIGHT // 2)
-            screen_radius = int(PARTICLE_RADIUS * mass * zoom_level)
-            pygame.draw.circle(screen, PARTICLE_COLOR, (screen_x, screen_y), screen_radius)
+        screen_x = int((x - offset_x) * zoom_level + WIDTH // 2)
+        screen_y = int((y - offset_y) * zoom_level + HEIGHT // 2)
+        screen_radius = int(PARTICLE_RADIUS * mass * zoom_level)
+        if screen_radius >= 1:
+            pygame.draw.circle(screen, (255, 255, 255), (screen_x, screen_y), screen_radius)
+        else:
+            c = (screen_radius * 200) + 55
+            pygame.draw.circle(screen, (c,c,c), (screen_x, screen_y), 1)
     pygame.display.flip()
 
 # Main loop
