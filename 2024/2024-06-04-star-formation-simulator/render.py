@@ -12,26 +12,27 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Particle Simulation')
 
-# Load simulation data
-def load_data(filename):
-    with open(filename, 'r') as file:
-        data = []
-        timestep = []
-        for line in file:
-            line = line.strip()
-            if line == '---':
-                if timestep:
-                    data.append(timestep)
-                    timestep = []
-            else:
-                parts = line.split(',')
-                if (len(parts) < 3):
-                    continue
-                x, y, mass = map(float, parts)
-                timestep.append((x, y, mass))
-        if timestep:
-            data.append(timestep)
-    return data
+def read_next_timestep():
+    timestep = []
+    while True:
+        line = sys.stdin.readline()
+        if not line:
+            # end of file reached
+            # this will cause the iterator to finish
+            return
+        elif line.strip() == "---":
+            # end of block
+            # in this case we want to yield the data we collected in this batch
+            ret = timestep
+            timestep = []
+            yield ret
+        else:
+            # adding a new line to the current batch
+            parts = line.split(',')
+            if (len(parts) < 3):
+                continue
+            x, y, mass = map(float, parts)
+            timestep.append((x, y, mass))
 
 # Render particles
 def render_particles(particles):
@@ -43,18 +44,18 @@ def render_particles(particles):
 
 # Main loop
 def main():
-    data = load_data('data.txt')
     clock = pygame.time.Clock()
-    step = 0
+    i = 0
 
     running = True
-    while running:
+    for timestep in read_next_timestep():
+        i += 1
+        if not running:
+            break
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-
-        render_particles(data[step])
-        step = (step + 1) % len(data)
+        render_particles(timestep)
         clock.tick(10)  # Adjust to your preferred speed
 
     pygame.quit()
