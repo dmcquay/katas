@@ -58,6 +58,13 @@ def main():
         render_particles(timestep)
         clock.tick(10)  # Adjust to your preferred speed
 
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                running = False
+
     pygame.quit()
     sys.exit()
 
