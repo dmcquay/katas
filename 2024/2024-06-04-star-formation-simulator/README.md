@@ -1,9 +1,11 @@
 # How to run
 
-- Create a data dir: `mkdir -p data/example`
-- Create a config: `cp example.env data/example/config.env` (edit as desired)
-- Run simulation: `bun run --env-file data/example/config.env simulate.ts | gzip > data/example/data.gz` (will run forever, interrupt with ctrl+c)
-- Render: `tail -n +1 data/example/data.gz | gunzip | python3 render.py`
+- Create a new project: `./new myproj`
+- Edit config (located in `data/myproj/config.env`)
+- Run simulation: `./simulate myproj` (will create a new data file each run, not overwrite prev)
+- Render:
+  - `./render myproj` (to render the latest simulation output)
+  - `./render data/myproj/2024-06-07T09:22:12Z.gz` (to render output from a specific run)
 
 # Simulation performance
 
