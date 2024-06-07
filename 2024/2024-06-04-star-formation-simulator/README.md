@@ -6,8 +6,13 @@
 | `npx ts-node src/app.ts > ts.out` |     0:52 |    540MB |
 | `bun run src/app.ts > bun.out`    |     0:32 |     82MB |
 
+# simulate ideas
+
+- collision account for volume. larger particles should collide at greater distance from center.
+
 # render ideas
 
+- Render volume more accurrately (should not be equal to diameter)
 - Center on mouse
 - Pan
 - Min particle render diameter 1px so everthing always displays?

@@ -41,9 +41,9 @@ def render_particles(particles, zoom_level, offset_x, offset_y):
         screen_y = int((y - offset_y) * zoom_level + HEIGHT // 2)
         screen_radius = int(PARTICLE_RADIUS * mass * zoom_level)
         if screen_radius >= 1:
-            pygame.draw.circle(screen, (255, 255, 255), (screen_x, screen_y), screen_radius)
+            pygame.draw.circle(screen, (255, 255, 255), (screen_x, screen_y), int(screen_radius))
         else:
-            c = (screen_radius * 200) + 55
+            c = int((screen_radius * 200)) + 55
             pygame.draw.circle(screen, (c,c,c), (screen_x, screen_y), 1)
     pygame.display.flip()
 
