@@ -35,29 +35,42 @@ def read_next_timestep():
             timestep.append((x, y, mass))
 
 # Render particles
-def render_particles(particles):
+def render_particles(particles, zoom_level, offset_x, offset_y):
     screen.fill(BACKGROUND_COLOR)
     for x, y, mass in particles:
         if mass >= 1:
-            pygame.draw.circle(screen, PARTICLE_COLOR, (int(x), int(y)), PARTICLE_RADIUS * mass)
+            screen_x = int((x + offset_x) * zoom_level)
+            screen_y = int((y + offset_y) * zoom_level)
+            screen_radius = int(PARTICLE_RADIUS * mass * zoom_level)
+            pygame.draw.circle(screen, PARTICLE_COLOR, (screen_x, screen_y), screen_radius)
     pygame.display.flip()
 
 # Main loop
 def main():
     clock = pygame.time.Clock()
-    i = 0
-
+    zoom_level = 1.0
+    offset_x = 0
+    offset_y = 0
     running = True
+
     for timestep in read_next_timestep():
-        i += 1
         if not running:
             break
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-        render_particles(timestep)
-        clock.tick(10)  # Adjust to your preferred speed
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 4:  # Scroll up
+                    zoom_level *= 1.1
+                elif event.button == 5:  # Scroll down
+                    zoom_level /= 1.1
 
+        render_particles(timestep, zoom_level, offset_x, offset_y)
+        clock.tick(10)  # Adjust to your preferred speed
+    
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
