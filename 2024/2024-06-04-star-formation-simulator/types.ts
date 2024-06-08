@@ -12,3 +12,8 @@ export type Particle = Point & {
   v: Vector;
   mass: number;
 };
+
+export type GravitySource = Point & {
+  mass: number;
+  objectCount: number;
+};

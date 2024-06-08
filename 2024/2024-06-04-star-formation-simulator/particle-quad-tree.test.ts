@@ -1,4 +1,4 @@
-import { test, expect, describe } from "bun:test";
+import { test, expect } from "bun:test";
 import { ParticleQuadTree } from "./particle-quad-tree";
 import { Particle } from "./types";
 
@@ -58,4 +58,27 @@ test("can return neighbors", () => {
   expect(result).toContain(p2);
   expect(result).toContain(p3);
   expect(result).toHaveLength(2);
+});
+
+test("can return gravitational clusters", () => {
+  const p1 = buildParticle({ x: 0, y: 0 });
+  const p2 = buildParticle({ x: 0, y: 10 });
+  const p3 = buildParticle({ x: 0, y: 11 });
+  const p4 = buildParticle({ x: -100, y: 100, mass: 10 });
+  const p5 = buildParticle({ x: -101, y: 100, mass: 20 });
+  const pqt = new ParticleQuadTree({ maxParticles: 2 });
+  pqt.add(p1);
+  pqt.add(p2);
+  pqt.add(p3);
+  pqt.add(p4);
+  pqt.add(p5);
+
+  const result = pqt.getGravitationalClusters(p1, 10);
+  expect(result).toHaveLength(1);
+  const first = result[0];
+  if (first == null) throw new Error("this should not happen");
+  expect(first.mass).toBe(30);
+  expect(first.x).toBeGreaterThan(-101);
+  expect(first.x).toBeLessThan(-100);
+  expect(first.y).toBe(100);
 });

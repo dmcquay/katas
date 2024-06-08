@@ -1,4 +1,4 @@
-import type { Point, Particle } from "./types";
+import type { Point, Particle, GravitySource } from "./types";
 
 type ParticleQuadTreeData =
   | {
@@ -44,9 +44,67 @@ const boundsOverlap = (b1: Bounds, b2: Bounds): boolean => {
   );
 };
 
+class ClusterStats {
+  public centerOfMass: Point | undefined;
+  public mass: number;
+  public count: number;
+
+  constructor() {
+    this.centerOfMass = undefined;
+    this.mass = 0;
+    this.count = 0;
+  }
+
+  addParticle(particle: Particle) {
+    if (this.centerOfMass == null) {
+      this.centerOfMass = {
+        x: particle.x,
+        y: particle.y,
+      };
+      this.mass = particle.mass;
+      this.count = 1;
+    } else {
+      const totalMass = this.mass + particle.mass;
+      const x =
+        (this.mass * this.centerOfMass.x + particle.mass * particle.x) /
+        totalMass;
+      const y =
+        (this.mass * this.centerOfMass.y + particle.mass * particle.y) /
+        totalMass;
+      this.centerOfMass = { x, y };
+      this.mass += particle.mass;
+      this.count++;
+    }
+  }
+
+  removeParticle(particle: Particle) {
+    if (this.count === 0 || this.centerOfMass == null) {
+      throw new Error("Cannot remove particle from empty cluster");
+    }
+    const remainingMass = this.mass - particle.mass;
+    if (remainingMass < 0) {
+      throw new Error("The remaining mass cannot be less than 0.");
+    }
+    if (remainingMass === 0) {
+      this.centerOfMass = undefined;
+      this.mass = 0;
+    } else {
+      const x =
+        (this.centerOfMass.x * this.mass - particle.mass * particle.x) /
+        remainingMass;
+      const y =
+        (this.centerOfMass.y * this.mass - particle.mass * particle.y) /
+        remainingMass;
+      this.centerOfMass = { x, y };
+      this.mass -= particle.mass;
+    }
+    this.count--;
+  }
+}
+
 export class ParticleQuadTree {
   private data: ParticleQuadTreeData;
-  public count: number;
+  public clusterStats: ClusterStats;
   private opts: ParticleQuadTreeOptions;
   private bounds: Bounds;
 
@@ -57,7 +115,7 @@ export class ParticleQuadTree {
     this.data = { isDivided: false, particles: [] };
     this.bounds = bounds;
     this.opts = opts;
-    this.count = 0;
+    this.clusterStats = new ClusterStats();
   }
 
   private getXDivide() {
@@ -88,7 +146,7 @@ export class ParticleQuadTree {
   }
 
   add(particle: Particle): void {
-    this.count++;
+    this.clusterStats.addParticle(particle);
 
     if (this.data.isDivided) {
       const subTree = this.getSubTree(particle);
@@ -96,7 +154,7 @@ export class ParticleQuadTree {
     } else {
       this.data.particles.push(particle);
 
-      if (this.count > this.opts.maxParticles) {
+      if (this.clusterStats.count > this.opts.maxParticles) {
         const particles = this.data.particles;
         const xDivide = this.getXDivide();
         const yDivide = this.getYDivide();
@@ -136,10 +194,11 @@ export class ParticleQuadTree {
   }
 
   remove(particle: Particle): void {
+    this.clusterStats.removeParticle(particle);
+
     if (this.data.isDivided) {
       this.getSubTree(particle).remove(particle);
-      this.count--;
-      if (this.count <= this.opts.maxParticles) {
+      if (this.clusterStats.count <= this.opts.maxParticles) {
         this.data = {
           isDivided: false,
           particles: this.getAll(),
@@ -181,7 +240,7 @@ export class ParticleQuadTree {
         this.data.bottomRight,
       ];
       const overlappingSubTrees = allSubTrees.filter(
-        (t) => t.count > 0 && boundsOverlap(bounds, t.bounds)
+        (t) => t.clusterStats.count > 0 && boundsOverlap(bounds, t.bounds)
       );
       return overlappingSubTrees.flatMap((t) =>
         t.getNeighbors(point, maxDistance)
@@ -192,7 +251,65 @@ export class ParticleQuadTree {
   }
 
   // to get virtual particles for simplified gravitational computations
-  getGravitationalClusters(point: Point): Particle[] {
-    return [];
+  getGravitationalClusters(point: Point, minDistance: number): GravitySource[] {
+    const bounds = {
+      top: point.y + minDistance,
+      bottom: point.y - minDistance,
+      left: point.x - minDistance,
+      right: point.x + minDistance,
+    };
+
+    if (this.clusterStats.centerOfMass == null) {
+      // console.log("center of mass null, return []");
+      return [];
+    }
+
+    if (!this.data.isDivided) {
+      if (boundsOverlap(bounds, this.bounds)) {
+        // console.log("not divided and not overlapping, return []");
+        return [];
+      } else {
+        // console.log("not divided, overlapping");
+        return [
+          {
+            ...this.clusterStats.centerOfMass,
+            mass: this.clusterStats.mass,
+            objectCount: this.clusterStats.count,
+          },
+        ];
+      }
+    }
+
+    const allSubTrees = [
+      this.data.topLeft,
+      this.data.topRight,
+      this.data.bottomLeft,
+      this.data.bottomRight,
+    ];
+    const nonOverlappingSubTrees = allSubTrees.filter(
+      (t) => !boundsOverlap(bounds, t.bounds)
+    );
+    // console.log(
+    //   `Non-overlapping subtree count: ${nonOverlappingSubTrees.length}`
+    // );
+
+    if (nonOverlappingSubTrees.length === 4) {
+      return [
+        {
+          ...this.clusterStats.centerOfMass,
+          mass: this.clusterStats.mass,
+          objectCount: this.clusterStats.count,
+        },
+      ];
+    }
+
+    const nonEmptySubTrees = allSubTrees.filter(
+      (t) => t.clusterStats.count > 0
+    );
+    // console.log(`Non-empty subtree count: ${nonEmptySubTrees.length}`);
+
+    return nonEmptySubTrees.flatMap((t) => {
+      return t.getGravitationalClusters(point, minDistance);
+    });
   }
 }
