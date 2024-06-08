@@ -5,12 +5,13 @@ import { Particle } from "./types";
 let x = 0;
 let y = 0;
 
-const buildParticle = (): Particle => {
+const buildParticle = (obj: Partial<Particle> = {}): Particle => {
   return {
     x: x++,
     y: y++,
     v: { x: 0, y: 0 },
     mass: 10,
+    ...obj,
   };
 };
 
@@ -38,4 +39,23 @@ test("can add and remove", () => {
   expect(result2).toContain(p2);
   expect(result2).not.toContain(p3);
   expect(result2).not.toContain(p4);
+});
+
+test("can return neighbors", () => {
+  const p1 = buildParticle({ x: 0, y: 0 });
+  const p2 = buildParticle({ x: 0, y: 10 });
+  const p3 = buildParticle({ x: 0, y: 11 });
+  const p4 = buildParticle({ x: -100, y: 100, mass: 10 });
+  const p5 = buildParticle({ x: -101, y: 100, mass: 20 });
+  const pqt = new ParticleQuadTree({ maxParticles: 2 });
+  pqt.add(p1);
+  pqt.add(p2);
+  pqt.add(p3);
+  pqt.add(p4);
+  pqt.add(p5);
+
+  const result = pqt.getNeighbors(p1, 10);
+  expect(result).toContain(p2);
+  expect(result).toContain(p3);
+  expect(result).toHaveLength(2);
 });

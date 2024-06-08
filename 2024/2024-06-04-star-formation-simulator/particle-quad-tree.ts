@@ -28,13 +28,6 @@ const DEFAULT_OPTIONS: ParticleQuadTreeOptions = {
   maxParticles: 10,
 };
 
-// const DEFAULT_BOUNDS: Bounds = {
-//   top: Number.MAX_SAFE_INTEGER,
-//   bottom: Number.MIN_SAFE_INTEGER,
-//   right: Number.MAX_SAFE_INTEGER,
-//   left: Number.MIN_SAFE_INTEGER,
-// };
-
 const DEFAULT_BOUNDS: Bounds = {
   top: 10000000,
   bottom: -10000000,
@@ -42,9 +35,18 @@ const DEFAULT_BOUNDS: Bounds = {
   left: -10000000,
 };
 
+const boundsOverlap = (b1: Bounds, b2: Bounds): boolean => {
+  return (
+    b1.right >= b2.left &&
+    b1.left <= b2.right &&
+    b1.top >= b2.bottom &&
+    b1.bottom <= b2.top
+  );
+};
+
 export class ParticleQuadTree {
   private data: ParticleQuadTreeData;
-  private count: number;
+  public count: number;
   private opts: ParticleQuadTreeOptions;
   private bounds: Bounds;
 
@@ -121,7 +123,7 @@ export class ParticleQuadTree {
           bottomRight: new ParticleQuadTree(this.opts, {
             top: yDivide,
             bottom: this.bounds.bottom,
-            left: yDivide,
+            left: xDivide,
             right: this.bounds.right,
           }),
         };
@@ -162,8 +164,31 @@ export class ParticleQuadTree {
   }
 
   // to get actual particles for collision detection
+  // will always return full quad tree leaf nodes. therefore, guaranteed to give you all neighbors
+  // within distance and then maybe some extra.
   getNeighbors(point: Point, maxDistance: number): Particle[] {
-    return [];
+    if (this.data.isDivided) {
+      const bounds = {
+        top: point.y + maxDistance,
+        bottom: point.y - maxDistance,
+        left: point.x - maxDistance,
+        right: point.x + maxDistance,
+      };
+      const allSubTrees = [
+        this.data.topLeft,
+        this.data.topRight,
+        this.data.bottomLeft,
+        this.data.bottomRight,
+      ];
+      const overlappingSubTrees = allSubTrees.filter(
+        (t) => t.count > 0 && boundsOverlap(bounds, t.bounds)
+      );
+      return overlappingSubTrees.flatMap((t) =>
+        t.getNeighbors(point, maxDistance)
+      );
+    } else {
+      return this.data.particles.filter((p) => p !== point);
+    }
   }
 
   // to get virtual particles for simplified gravitational computations
