@@ -40,7 +40,10 @@ def radius_from_area(area):
     return math.sqrt(area / math.pi)
 
 # Render particles
+generation = 0
 def render_particles(particles, zoom_level, offset_x, offset_y):
+    global generation
+    generation += 1
     screen.fill(BACKGROUND_COLOR)
     for id, x, y, mass in particles:
         screen_x = int((x - offset_x) * zoom_level + WIDTH // 2)
@@ -63,8 +66,17 @@ def render_particles(particles, zoom_level, offset_x, offset_y):
             top_3[2] = (particle, mass)
     l1, l2, l3 = top_3[0][0], top_3[1][0], top_3[2][0]
 
-    text_surface = font.render('{} particles, l1 mass: {}, l2 mass: {}, l3 mass: {}'.format(len(particles), l1[3], l2[3], l3[3]), True, (255, 255, 255))
-    screen.blit(text_surface, (10, 10))
+    text_idx = 0
+
+    def print_stat(txt):
+        nonlocal text_idx
+        text_surface = font.render(txt, True, (255, 255, 255))
+        screen.blit(text_surface, (10, 10 + (text_idx * 24)))
+        text_idx += 1
+
+    print_stat('generation: {}'.format(generation))
+    print_stat('objects: {}'.format(len(particles)))
+    print_stat('largest objects: {}, {}, {}'.format(l1[3], l2[3], l3[3]))
 
     pygame.display.flip()
 
