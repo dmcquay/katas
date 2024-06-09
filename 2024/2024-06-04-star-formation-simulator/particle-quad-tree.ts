@@ -25,14 +25,14 @@ type ParticleQuadTreeOptions = {
 };
 
 const DEFAULT_OPTIONS: ParticleQuadTreeOptions = {
-  maxParticles: 10,
+  maxParticles: 100,
 };
 
 const DEFAULT_BOUNDS: Bounds = {
-  top: 10000000,
-  bottom: -10000000,
-  right: 10000000,
-  left: -10000000,
+  top: 10000,
+  bottom: -10000,
+  right: 10000,
+  left: -10000,
 };
 
 const boundsOverlap = (b1: Bounds, b2: Bounds): boolean => {
@@ -48,14 +48,23 @@ class ClusterStats {
   public centerOfMass: Point | undefined;
   public mass: number;
   public count: number;
+  private log: Record<string, any>[];
 
   constructor() {
     this.centerOfMass = undefined;
     this.mass = 0;
     this.count = 0;
+    this.log = [];
   }
 
   addParticle(particle: Particle) {
+    // this.log.push({
+    //   action: "addParticle",
+    //   particle,
+    //   centerOfMass: this.centerOfMass,
+    //   mass: this.mass,
+    //   count: this.count,
+    // });
     if (this.centerOfMass == null) {
       this.centerOfMass = {
         x: particle.x,
@@ -78,12 +87,40 @@ class ClusterStats {
   }
 
   removeParticle(particle: Particle) {
-    if (this.count === 0 || this.centerOfMass == null) {
-      throw new Error("Cannot remove particle from empty cluster");
+    // this.log.push({
+    //   action: "removeParticle",
+    //   particle,
+    //   centerOfMass: this.centerOfMass,
+    //   mass: this.mass,
+    //   count: this.count,
+    // });
+    if (this.centerOfMass == null) {
+      throw new Error(
+        `Cannot remove particle from empty cluster (centerOfMass is nullish). Particle ID: ${
+          particle.id
+        }\n${JSON.stringify(this.log, null, 2)}`
+      );
+    }
+    if (this.count === 0) {
+      throw new Error(
+        `Cannot remove particle from empty cluster (count is 0). Particle ID: ${
+          particle.id
+        }\n${JSON.stringify(this.log, null, 2)}`
+      );
     }
     const remainingMass = this.mass - particle.mass;
     if (remainingMass < 0) {
-      throw new Error("The remaining mass cannot be less than 0.");
+      throw new Error(
+        `The remaining mass cannot be less than 0. mass: ${
+          this.mass
+        }, particle mass: ${
+          particle.mass
+        }, remainingMass: ${remainingMass}\n${JSON.stringify(
+          this.log,
+          null,
+          2
+        )}`
+      );
     }
     if (remainingMass === 0) {
       this.centerOfMass = undefined;
@@ -107,6 +144,7 @@ export class ParticleQuadTree {
   public clusterStats: ClusterStats;
   private opts: ParticleQuadTreeOptions;
   private bounds: Bounds;
+  private log: Record<string, any>[];
 
   constructor(
     opts: ParticleQuadTreeOptions = DEFAULT_OPTIONS,
@@ -116,6 +154,7 @@ export class ParticleQuadTree {
     this.bounds = bounds;
     this.opts = opts;
     this.clusterStats = new ClusterStats();
+    this.log = [];
   }
 
   private getXDivide() {
@@ -146,6 +185,7 @@ export class ParticleQuadTree {
   }
 
   add(particle: Particle): void {
+    // this.log.push({ action: "add", particle });
     this.clusterStats.addParticle(particle);
 
     if (this.data.isDivided) {
@@ -194,8 +234,7 @@ export class ParticleQuadTree {
   }
 
   remove(particle: Particle): void {
-    this.clusterStats.removeParticle(particle);
-
+    // this.log.push({ action: "remove", particle });
     if (this.data.isDivided) {
       this.getSubTree(particle).remove(particle);
       if (this.clusterStats.count <= this.opts.maxParticles) {
@@ -205,8 +244,19 @@ export class ParticleQuadTree {
         };
       }
     } else {
+      const found = this.data.particles.find((p) => p === particle);
+      if (found == null) {
+        throw new Error(
+          `Tried to remove particle that does not exist.\n${JSON.stringify(
+            this.log,
+            null,
+            2
+          )}`
+        );
+      }
       this.data.particles = this.data.particles.filter((p) => p !== particle);
     }
+    this.clusterStats.removeParticle(particle);
   }
 
   getAll(): Particle[] {

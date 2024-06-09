@@ -9,6 +9,7 @@ export interface Vector {
 }
 
 export type Particle = Point & {
+  id: number;
   v: Vector;
   mass: number;
 };

@@ -29,6 +29,8 @@ Time to write >= 10MB
 - Decrease particle mass to more realistic value
 - Store env vars in separate files
 - Store config in simulation output file. Store the state when stopped. Support resume.
+- Better Numerical Methods: The Euler method is simple but can be inaccurate. Consider using more advanced methods like the Runge-Kutta method for better accuracy. (runga-katta-4)[https://www.npmjs.com/package/runge-kutta-4]
+- Performance Optimization: For many particles, optimize the force calculations using techniques like the Barnes-Hut algorithm to reduce computational complexity from 𝑂(𝑁^2) to 𝑂(𝑁 log 𝑁). This is equivalent to ParticleQuadTree.
 
 # render ideas
 

@@ -1,4 +1,5 @@
-import type { Vector, Particle } from "./types";
+import type { Vector, Particle, GravitySource } from "./types";
+import { ParticleQuadTree } from "./particle-quad-tree";
 
 const randNum = (min: number, max: number) => {
   return Math.random() * (max - min) + min;
@@ -32,8 +33,11 @@ const G = 6.6743e-11;
 const MIN_COLLISION_DISTANCE_METERS = 1;
 const MINIMUM_FORCE_DISTANCE_METERS = 2;
 
+let nextParticleId = 0;
+
 const createRandomParticle = (): Particle => {
   return {
+    id: nextParticleId++,
     x: randNum(NURSERY_WIDTH_METERS / -2, NURSERY_WIDTH_METERS / 2),
     y: randNum(NURSERY_HEIGHT_METERS / -2, NURSERY_HEIGHT_METERS / 2),
     v: {
@@ -46,7 +50,10 @@ const createRandomParticle = (): Particle => {
   };
 };
 
-const calculateGravitationalForce = (p1: Particle, p2: Particle): Vector => {
+const calculateGravitationalForce = (
+  p1: Particle,
+  p2: GravitySource
+): Vector => {
   // Calculate the distance vector between p1 and p2
   const dx = p2.x - p1.x;
   const dy = p2.y - p1.y;
@@ -100,17 +107,18 @@ function radiusFromArea(area: number): number {
   return Math.sqrt(area / Math.PI);
 }
 
-function combineParticles(particles: Particle[]): Particle[] {
-  const combinedParticles: Particle[] = [];
-  const deletedIndexes: Record<number, boolean> = {};
+function combineParticles(pqt: ParticleQuadTree) {
+  const particles = pqt.getAll();
+  const deletedParticleIds: Record<number, boolean> = {};
+  const distance = Math.max(...particles.map((p) => radiusFromArea(p.mass)));
 
   for (let i = 0; i < particles.length; i++) {
-    if (deletedIndexes[i]) continue;
     const particle1 = particles[i];
-
-    for (let j = i + 1; j < particles.length; j++) {
-      if (deletedIndexes[j]) continue;
-      const particle2 = particles[j];
+    if (deletedParticleIds[particle1.id]) continue;
+    const neighbors = pqt.getNeighbors(particle1, distance);
+    for (let j = i + 1; j < neighbors.length; j++) {
+      const particle2 = neighbors[j];
+      if (deletedParticleIds[particle2.id]) continue;
 
       const dx = particle1.x - particle2.x;
       const dy = particle1.y - particle2.y;
@@ -121,11 +129,23 @@ function combineParticles(particles: Particle[]): Particle[] {
       );
 
       if (distance < collisionDistance) {
+        console.error("collision detected");
+        if (particle1.id === particle2.id) {
+          throw new Error("these are the same particle");
+        }
+        pqt.remove(particle1);
+        pqt.remove(particle2);
+
         const totalMass = particle1.mass + particle2.mass;
         collisionCount++;
         particleCount--;
         maxMass = Math.max(maxMass, totalMass);
-        // console.error({ particleCount, collisionCount, maxMass });
+        console.error({
+          particleCount,
+          clusterStats: pqt.clusterStats,
+          collisionCount,
+          maxMass,
+        });
 
         const combinedVx =
           (particle1.mass * particle1.v.x + particle2.mass * particle2.v.x) /
@@ -134,32 +154,47 @@ function combineParticles(particles: Particle[]): Particle[] {
           (particle1.mass * particle1.v.y + particle2.mass * particle2.v.y) /
           totalMass;
 
-        particle1.mass = totalMass;
-        particle1.v = { x: combinedVx, y: combinedVy };
+        const combinedParticle: Particle = {
+          id: nextParticleId++,
+          mass: totalMass,
+          v: { x: combinedVx, y: combinedVy },
+          x: particle1.x,
+          y: particle1.y,
+        };
+        pqt.add(combinedParticle);
 
-        deletedIndexes[j] = true;
-        break;
+        deletedParticleIds[particle1.id] = true;
+        deletedParticleIds[particle2.id] = true;
       }
     }
-
-    combinedParticles.push(particle1);
   }
-
-  return combinedParticles;
 }
 
-const updateParticles = (particles: Particle[]) => {
+const updateParticles = (pqt: ParticleQuadTree) => {
+  const particles = pqt.getAll();
   for (const p of particles) {
+    pqt.remove(p);
+    // TODO: shouldn't this be multiplied by duration?
     p.x += p.v.x;
     p.y += p.v.y;
+    pqt.add(p);
 
+    const neighbors = pqt.getNeighbors(p, 100);
+    const clusters = pqt.getGravitationalClusters(p, 100);
+    const neighborClusters: GravitySource[] = neighbors.map((p) => {
+      return {
+        ...p,
+        objectCount: 1,
+      };
+    });
+    const gravitySources = [...clusters, ...neighborClusters];
     const forceVector = addVectors(
-      particles.map((p2) => calculateGravitationalForce(p, p2))
+      gravitySources.map((g) => calculateGravitationalForce(p, g))
     );
     applyForce(p, forceVector, INTERVAL_SECONDS);
   }
 
-  return combineParticles(particles);
+  combineParticles(pqt);
 };
 
 const printParticles = (particles: Particle[]) => {
@@ -169,16 +204,16 @@ const printParticles = (particles: Particle[]) => {
   console.log("---");
 };
 
-let particles: Particle[] = [];
+const pqt = new ParticleQuadTree();
 for (let i = 0; i < NUM_PARTICLES; i++) {
-  particles.push(createRandomParticle());
+  pqt.add(createRandomParticle());
 }
 
 let interrupted = false;
 
 while (!interrupted) {
-  particles = updateParticles(particles);
-  printParticles(particles);
+  updateParticles(pqt);
+  printParticles(pqt.getAll());
 }
 
 const shutdown = () => {
@@ -186,3 +221,10 @@ const shutdown = () => {
 };
 
 process.on("SIGINT", shutdown);
+
+process.on("uncaughtException", (err) => {
+  console.error(err);
+  setTimeout(() => {
+    process.exit(1);
+  }, 1000);
+});

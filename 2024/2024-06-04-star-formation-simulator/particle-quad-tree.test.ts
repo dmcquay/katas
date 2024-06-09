@@ -4,9 +4,11 @@ import { Particle } from "./types";
 
 let x = 0;
 let y = 0;
+let nextParticleId = 0;
 
 const buildParticle = (obj: Partial<Particle> = {}): Particle => {
   return {
+    id: nextParticleId++,
     x: x++,
     y: y++,
     v: { x: 0, y: 0 },
