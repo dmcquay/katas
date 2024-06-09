@@ -171,7 +171,7 @@ function combineParticles(pqt: ParticleCollection) {
           cluster.mass;
 
         const combinedParticle: Particle = {
-          id: nextParticleId++,
+          id: particle1.mass > particle2.mass ? particle1.id : particle2.id, // preserve id of largest particle. useful for tracking.
           mass: cluster.mass,
           v: { x: combinedVx, y: combinedVy },
           x: cluster.centerOfMass?.x,

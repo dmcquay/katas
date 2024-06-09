@@ -5,6 +5,7 @@ import math
 # Constants
 WIDTH, HEIGHT = 1600, 1000
 BACKGROUND_COLOR = (0, 0, 0)
+DOUBLE_CLICK_THRESHOLD = 500
 
 # Initialize Pygame
 pygame.init()
@@ -41,7 +42,7 @@ def radius_from_area(area):
 
 # Render particles
 generation = 0
-def render_particles(particles, zoom_level, offset_x, offset_y):
+def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id):
     global generation
     generation += 1
     screen.fill(BACKGROUND_COLOR)
@@ -50,7 +51,8 @@ def render_particles(particles, zoom_level, offset_x, offset_y):
         screen_y = int((y - offset_y) * zoom_level + HEIGHT // 2)
         screen_radius = int(radius_from_area(mass) * zoom_level)
         if screen_radius >= 1:
-            pygame.draw.circle(screen, (255, 255, 255), (screen_x, screen_y), int(screen_radius))
+            color = (255, 255, 0) if id == tracking_id else (255, 255, 255)
+            pygame.draw.circle(screen, color, (screen_x, screen_y), int(screen_radius))
         else:
             c = int((screen_radius * 200)) + 55
             pygame.draw.circle(screen, (c,c,c), (screen_x, screen_y), 1)
@@ -80,6 +82,9 @@ def render_particles(particles, zoom_level, offset_x, offset_y):
     print_stat('objects: {}'.format(len(particles)))
     print_stat('largest objects: {}, {}, {}'.format(int(l1[3]), int(l2[3]), int(l3[3])))
 
+    if (tracking_id is not None):
+        print_stat('tracking object: {}'.format(tracking_id))
+
     pygame.display.flip()
 
 # Main loop
@@ -92,6 +97,8 @@ def main():
     last_mouse_pos = None
     running = True
     last_timestep = None
+    tracking_id = None
+    last_click_time = 0
 
     for timestep in read_next_timestep():
         last_timestep = timestep
@@ -103,15 +110,31 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                running = False
+                if tracking_id is not None:
+                    tracking_id = None
+                else:
+                    running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 4:  # Scroll up
                     zoom_level *= 1.1
                 elif event.button == 5:  # Scroll down
                     zoom_level /= 1.1
                 elif event.button == 1:  # Left mouse button
-                    dragging = True
-                    last_mouse_pos = pygame.mouse.get_pos()
+                    current_time = pygame.time.get_ticks()
+                    if current_time - last_click_time < DOUBLE_CLICK_THRESHOLD:
+                        mouse_x, mouse_y = pygame.mouse.get_pos()
+                        min_distance = float('inf')
+                        for particle_id, x, y, mass in timestep:
+                            screen_x = int((x - offset_x) * zoom_level + WIDTH // 2)
+                            screen_y = int((y - offset_y) * zoom_level + HEIGHT // 2)
+                            distance = (screen_x - mouse_x) ** 2 + (screen_y - mouse_y) ** 2
+                            if distance < min_distance:
+                                min_distance = distance
+                                tracking_id = particle_id
+                    else:
+                        dragging = True
+                        last_mouse_pos = pygame.mouse.get_pos()
+                    last_click_time = current_time
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     dragging = False
@@ -123,7 +146,14 @@ def main():
                         offset_y -= (mouse_y - last_mouse_pos[1]) / zoom_level
                     last_mouse_pos = (mouse_x, mouse_y)
 
-        render_particles(timestep, zoom_level, offset_x, offset_y)
+        if tracking_id is not None:
+            for particle_id, x, y, mass in timestep:
+                if particle_id == tracking_id:
+                    offset_x = x
+                    offset_y = y
+                    break
+
+        render_particles(timestep, zoom_level, offset_x, offset_y, tracking_id)
         clock.tick(10)
     
     print("ended main loop")
@@ -153,7 +183,7 @@ def main():
                         offset_y -= (mouse_y - last_mouse_pos[1]) / zoom_level
                     last_mouse_pos = (mouse_x, mouse_y)
             
-        render_particles(last_timestep, zoom_level, offset_x, offset_y)
+        render_particles(last_timestep, zoom_level, offset_x, offset_y, tracking_id)
         clock.tick(10)
 
     pygame.quit()
