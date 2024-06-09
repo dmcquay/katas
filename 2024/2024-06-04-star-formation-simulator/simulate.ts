@@ -1,5 +1,12 @@
-import type { Vector, Particle, GravitySource } from "./types";
+import type {
+  Vector,
+  Particle,
+  GravitySource,
+  ParticleCollection,
+} from "./types";
 import { ParticleQuadTree } from "./particle-quad-tree";
+import { ParticleList } from "./particle-list";
+import { ClusterStats } from "./cluster-stats";
 
 const randNum = (min: number, max: number) => {
   return Math.random() * (max - min) + min;
@@ -28,6 +35,9 @@ const NURSERY_HEIGHT_METERS = getInt("NURSERY_HEIGHT_METERS");
 const INTERVAL_SECONDS = getInt("INTERVAL_SECONDS");
 const NUM_PARTICLES = getInt("NUM_PARTICLES");
 const PARTICLE_MASS_KG = getInt("PARTICLE_MASS_KG");
+const ENABLE_GRAVITATIONAL_CLUSTERING = getInt(
+  "ENABLE_GRAVITATIONAL_CLUSTERING"
+);
 
 const G = 6.6743e-11;
 const MIN_COLLISION_DISTANCE_METERS = 1;
@@ -107,7 +117,7 @@ function radiusFromArea(area: number): number {
   return Math.sqrt(area / Math.PI);
 }
 
-function combineParticles(pqt: ParticleQuadTree) {
+function combineParticles(pqt: ParticleCollection) {
   const particles = pqt.getAll();
   const deletedParticleIds: Record<number, boolean> = {};
   const distance = Math.max(...particles.map((p) => radiusFromArea(p.mass)));
@@ -129,37 +139,43 @@ function combineParticles(pqt: ParticleQuadTree) {
       );
 
       if (distance < collisionDistance) {
-        console.error("collision detected");
         if (particle1.id === particle2.id) {
           throw new Error("these are the same particle");
         }
         pqt.remove(particle1);
         pqt.remove(particle2);
 
-        const totalMass = particle1.mass + particle2.mass;
+        const cluster = new ClusterStats();
+        cluster.addParticle(particle1);
+        cluster.addParticle(particle2);
+
+        if (cluster.centerOfMass == null) {
+          // just to make type system know this is not null
+          throw new Error("Unexpected");
+        }
+
         collisionCount++;
         particleCount--;
-        maxMass = Math.max(maxMass, totalMass);
-        console.error({
-          particleCount,
-          clusterStats: pqt.clusterStats,
-          collisionCount,
-          maxMass,
-        });
+        maxMass = Math.max(maxMass, cluster.mass);
+        // console.error({
+        //   particleCount,
+        //   collisionCount,
+        //   maxMass,
+        // });
 
         const combinedVx =
           (particle1.mass * particle1.v.x + particle2.mass * particle2.v.x) /
-          totalMass;
+          cluster.mass;
         const combinedVy =
           (particle1.mass * particle1.v.y + particle2.mass * particle2.v.y) /
-          totalMass;
+          cluster.mass;
 
         const combinedParticle: Particle = {
           id: nextParticleId++,
-          mass: totalMass,
+          mass: cluster.mass,
           v: { x: combinedVx, y: combinedVy },
-          x: particle1.x,
-          y: particle1.y,
+          x: cluster.centerOfMass?.x,
+          y: cluster.centerOfMass?.y,
         };
         pqt.add(combinedParticle);
 
@@ -170,7 +186,7 @@ function combineParticles(pqt: ParticleQuadTree) {
   }
 }
 
-const updateParticles = (pqt: ParticleQuadTree) => {
+const updateParticles = (pqt: ParticleCollection) => {
   const particles = pqt.getAll();
   for (const p of particles) {
     pqt.remove(p);
@@ -179,15 +195,7 @@ const updateParticles = (pqt: ParticleQuadTree) => {
     p.y += p.v.y;
     pqt.add(p);
 
-    const neighbors = pqt.getNeighbors(p, 100);
-    const clusters = pqt.getGravitationalClusters(p, 100);
-    const neighborClusters: GravitySource[] = neighbors.map((p) => {
-      return {
-        ...p,
-        objectCount: 1,
-      };
-    });
-    const gravitySources = [...clusters, ...neighborClusters];
+    const gravitySources = pqt.getGravitySources(p);
     const forceVector = addVectors(
       gravitySources.map((g) => calculateGravitationalForce(p, g))
     );
@@ -204,16 +212,21 @@ const printParticles = (particles: Particle[]) => {
   console.log("---");
 };
 
-const pqt = new ParticleQuadTree();
+let particleCollection: ParticleCollection;
+if (ENABLE_GRAVITATIONAL_CLUSTERING) {
+  particleCollection = new ParticleQuadTree();
+} else {
+  particleCollection = new ParticleList();
+}
 for (let i = 0; i < NUM_PARTICLES; i++) {
-  pqt.add(createRandomParticle());
+  particleCollection.add(createRandomParticle());
 }
 
 let interrupted = false;
 
 while (!interrupted) {
-  updateParticles(pqt);
-  printParticles(pqt.getAll());
+  updateParticles(particleCollection);
+  printParticles(particleCollection.getAll());
 }
 
 const shutdown = () => {
@@ -221,10 +234,3 @@ const shutdown = () => {
 };
 
 process.on("SIGINT", shutdown);
-
-process.on("uncaughtException", (err) => {
-  console.error(err);
-  setTimeout(() => {
-    process.exit(1);
-  }, 1000);
-});
