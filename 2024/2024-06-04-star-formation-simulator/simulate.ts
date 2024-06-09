@@ -190,9 +190,8 @@ const updateParticles = (pqt: ParticleCollection) => {
   const particles = pqt.getAll();
   for (const p of particles) {
     pqt.remove(p);
-    // TODO: shouldn't this be multiplied by duration?
-    p.x += p.v.x;
-    p.y += p.v.y;
+    p.x += p.v.x * INTERVAL_SECONDS;
+    p.y += p.v.y * INTERVAL_SECONDS;
     pqt.add(p);
 
     const gravitySources = pqt.getGravitySources(p);

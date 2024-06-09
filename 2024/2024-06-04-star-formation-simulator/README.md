@@ -36,11 +36,10 @@ Time to write >= 10MB
 
 - Screen resize. Fullscreen.
 - Render volume more accurrately (should not be equal to diameter)
-- Display timestep index and allow seeking
+- allow seeking
 - Pause
 - Change play speed
 - Step forward/back? Or just rewind? Or maybe seeking makes this unnecessary.
-- Object tracking
 - Detect/display orbits and related metrics (hard)
 - Single button stroke to save current view (pan, zoom, timestamp) to be able to return to an event.
 - When multiple particles share a pixel in the current display, increase brightness.
