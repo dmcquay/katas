@@ -31,10 +31,10 @@ def read_next_timestep():
             # adding a new line to the current batch
             parts = line.split(',')
             is_any_blank = any(part == "" for part in parts)
-            if len(parts) < 3 or is_any_blank:
+            if len(parts) < 4 or is_any_blank:
                 continue
-            x, y, mass = map(float, parts)
-            timestep.append((x, y, mass))
+            id, x, y, mass = map(float, parts)
+            timestep.append((id, x, y, mass))
 
 def radius_from_area(area):
     return math.sqrt(area / math.pi)
@@ -42,7 +42,7 @@ def radius_from_area(area):
 # Render particles
 def render_particles(particles, zoom_level, offset_x, offset_y):
     screen.fill(BACKGROUND_COLOR)
-    for x, y, mass in particles:
+    for id, x, y, mass in particles:
         screen_x = int((x - offset_x) * zoom_level + WIDTH // 2)
         screen_y = int((y - offset_y) * zoom_level + HEIGHT // 2)
         screen_radius = int(radius_from_area(mass) * zoom_level)
@@ -52,8 +52,8 @@ def render_particles(particles, zoom_level, offset_x, offset_y):
             c = int((screen_radius * 200)) + 55
             pygame.draw.circle(screen, (c,c,c), (screen_x, screen_y), 1)
     
-    (l1, l2, l3) = sorted(particles, key=lambda p: p[2], reverse=True)[:3]
-    text_surface = font.render('{} particles, l1 mass: {}, l2 mass: {}, l3 mass: {}'.format(len(particles), l1[2], l2[2], l3[2]), True, (255, 255, 255))
+    (l1, l2, l3) = sorted(particles, key=lambda p: p[3], reverse=True)[:3]
+    text_surface = font.render('{} particles, l1 mass: {}, l2 mass: {}, l3 mass: {}'.format(len(particles), l1[3], l2[3], l3[3]), True, (255, 255, 255))
     screen.blit(text_surface, (10, 10))
 
     pygame.display.flip()

@@ -207,7 +207,9 @@ const updateParticles = (pqt: ParticleCollection) => {
 
 const printParticles = (particles: Particle[]) => {
   for (let p of particles) {
-    console.log([p.x, p.y, p.mass].join(","));
+    console.log(
+      [p.id, Math.floor(p.x), Math.floor(p.y), Math.floor(p.mass)].join(",")
+    );
   }
   console.log("---");
 };
