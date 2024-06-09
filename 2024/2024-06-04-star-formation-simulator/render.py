@@ -52,7 +52,17 @@ def render_particles(particles, zoom_level, offset_x, offset_y):
             c = int((screen_radius * 200)) + 55
             pygame.draw.circle(screen, (c,c,c), (screen_x, screen_y), 1)
     
-    (l1, l2, l3) = sorted(particles, key=lambda p: p[3], reverse=True)[:3]
+    top_3 = [(None, -1), (None, -1), (None, -1)]
+    for particle in particles:
+        mass = particle[3]
+        if mass > top_3[0][1]:
+            top_3 = [(particle, mass)] + top_3[:2]
+        elif mass > top_3[1][1]:
+            top_3 = [top_3[0], (particle, mass)] + top_3[1:2]
+        elif mass > top_3[2][1]:
+            top_3[2] = (particle, mass)
+    l1, l2, l3 = top_3[0][0], top_3[1][0], top_3[2][0]
+
     text_surface = font.render('{} particles, l1 mass: {}, l2 mass: {}, l3 mass: {}'.format(len(particles), l1[3], l2[3], l3[3]), True, (255, 255, 255))
     screen.blit(text_surface, (10, 10))
 
