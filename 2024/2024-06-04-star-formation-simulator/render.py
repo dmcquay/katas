@@ -75,8 +75,10 @@ def render_particles(particles, zoom_level, offset_x, offset_y):
         text_idx += 1
 
     print_stat('generation: {}'.format(generation))
+    print_stat('zoom level: {:.2f}'.format(zoom_level))
+    print_stat('location: {}, {}'.format(int(offset_x), int(offset_y)))
     print_stat('objects: {}'.format(len(particles)))
-    print_stat('largest objects: {}, {}, {}'.format(l1[3], l2[3], l3[3]))
+    print_stat('largest objects: {}, {}, {}'.format(int(l1[3]), int(l2[3]), int(l3[3])))
 
     pygame.display.flip()
 
