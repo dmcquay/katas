@@ -8,6 +8,8 @@ BACKGROUND_COLOR = (0, 0, 0)
 
 # Initialize Pygame
 pygame.init()
+pygame.font.init()
+font = pygame.font.SysFont('Arial', 18)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Particle Simulation')
 
@@ -49,6 +51,11 @@ def render_particles(particles, zoom_level, offset_x, offset_y):
         else:
             c = int((screen_radius * 200)) + 55
             pygame.draw.circle(screen, (c,c,c), (screen_x, screen_y), 1)
+    
+    (l1, l2, l3) = sorted(particles, key=lambda p: p[2], reverse=True)[:3]
+    text_surface = font.render('{} particles, l1 mass: {}, l2 mass: {}, l3 mass: {}'.format(len(particles), l1[2], l2[2], l3[2]), True, (255, 255, 255))
+    screen.blit(text_surface, (10, 10))
+
     pygame.display.flip()
 
 # Main loop
