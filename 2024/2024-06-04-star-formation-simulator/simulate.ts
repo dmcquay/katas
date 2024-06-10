@@ -127,7 +127,7 @@ function combineParticles(pqt: ParticleCollection) {
   }, -Infinity);
 
   for (let i = 0; i < particles.length; i++) {
-    const particle1 = particles[i];
+    let particle1 = particles[i];
     if (deletedParticleIds[particle1.id]) continue;
     const neighbors = pqt.getNeighbors(particle1, distance);
     for (
@@ -167,10 +167,6 @@ function combineParticles(pqt: ParticleCollection) {
         particleCount--;
         maxMass = Math.max(maxMass, cluster.mass);
 
-        console.error(
-          `collisions per generation ${collisionCount / generation}`
-        );
-
         const combinedVx =
           (particle1.mass * particle1.v.x + particle2.mass * particle2.v.x) /
           cluster.mass;
@@ -189,6 +185,7 @@ function combineParticles(pqt: ParticleCollection) {
 
         deletedParticleIds[particle1.id] = true;
         deletedParticleIds[particle2.id] = true;
+        particle1 = combinedParticle;
       }
     }
   }
@@ -237,17 +234,22 @@ let interrupted = false;
 
 let generation = 0;
 const start = Date.now();
+let lastGenerationRateReport = 0;
 while (!interrupted) {
   updateParticles(particleCollection);
   printParticles(particleCollection.getAll());
   generation++;
-  // if (generation % 10 === 0) {
-  //   console.error(
-  //     `generation ${generation}: seconds per generation: ${
-  //       (Date.now() - start) / 1000 / generation
-  //     }`
-  //   );
-  // }
+
+  if (Date.now() - lastGenerationRateReport > 10000) {
+    console.error(
+      `generation ${generation}: seconds per generation: ${
+        (Date.now() - start) / 1000 / generation
+      }`
+    );
+    lastGenerationRateReport = Date.now();
+  }
+
+  // TODO: DON'T LEAVE THIS
   if (generation > 1000) {
     break;
   }
