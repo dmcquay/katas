@@ -227,14 +227,18 @@ for (let i = 0; i < NUM_PARTICLES; i++) {
 let interrupted = false;
 
 let generation = 0;
-// const start = Date.now();
+const start = Date.now();
 while (!interrupted) {
   updateParticles(particleCollection);
   printParticles(particleCollection.getAll());
   generation++;
-  // console.error(
-  //   "seconds per generation: " + (Date.now() - start) / 1000 / generation
-  // );
+  if (generation % 10 === 0) {
+    console.error(
+      `generation ${generation}: seconds per generation: ${
+        (Date.now() - start) / 1000 / generation
+      }`
+    );
+  }
 }
 
 const shutdown = () => {
