@@ -130,7 +130,11 @@ function combineParticles(pqt: ParticleCollection) {
     const particle1 = particles[i];
     if (deletedParticleIds[particle1.id]) continue;
     const neighbors = pqt.getNeighbors(particle1, distance);
-    for (let j = i + 1; j < neighbors.length; j++) {
+    for (
+      let j = particles === neighbors ? i + 1 : 0;
+      j < neighbors.length;
+      j++
+    ) {
       const particle2 = neighbors[j];
       if (deletedParticleIds[particle2.id]) continue;
 
@@ -146,6 +150,7 @@ function combineParticles(pqt: ParticleCollection) {
         if (particle1.id === particle2.id) {
           throw new Error("these are the same particle");
         }
+
         pqt.remove(particle1);
         pqt.remove(particle2);
 
@@ -161,6 +166,10 @@ function combineParticles(pqt: ParticleCollection) {
         collisionCount++;
         particleCount--;
         maxMass = Math.max(maxMass, cluster.mass);
+
+        console.error(
+          `collisions per generation ${collisionCount / generation}`
+        );
 
         const combinedVx =
           (particle1.mass * particle1.v.x + particle2.mass * particle2.v.x) /
@@ -232,12 +241,15 @@ while (!interrupted) {
   updateParticles(particleCollection);
   printParticles(particleCollection.getAll());
   generation++;
-  if (generation % 10 === 0) {
-    console.error(
-      `generation ${generation}: seconds per generation: ${
-        (Date.now() - start) / 1000 / generation
-      }`
-    );
+  // if (generation % 10 === 0) {
+  //   console.error(
+  //     `generation ${generation}: seconds per generation: ${
+  //       (Date.now() - start) / 1000 / generation
+  //     }`
+  //   );
+  // }
+  if (generation > 1000) {
+    break;
   }
 }
 

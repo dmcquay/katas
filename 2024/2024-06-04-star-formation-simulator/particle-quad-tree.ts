@@ -42,12 +42,15 @@ const DEFAULT_BOUNDS: Bounds = {
 };
 
 const boundsOverlap = (b1: Bounds, b2: Bounds): boolean => {
-  return (
+  const result =
     b1.right >= b2.left &&
     b1.left <= b2.right &&
     b1.top >= b2.bottom &&
-    b1.bottom <= b2.top
-  );
+    b1.bottom <= b2.top;
+  // if (result) {
+  //   console.log("bounds match", b1, b2);
+  // }
+  return result;
 };
 
 export class ParticleQuadTree implements ParticleCollection {
@@ -80,17 +83,17 @@ export class ParticleQuadTree implements ParticleCollection {
     if (!this.data.isDivided) throw new Error("not divided");
     const xDivide = this.getXDivide();
     const yDivide = this.getYDivide();
-    if (point.x <= xDivide) {
-      if (point.y >= yDivide) {
-        return this.data.topLeft;
-      } else {
-        return this.data.bottomLeft;
-      }
-    } else {
+    if (point.x >= xDivide) {
       if (point.y >= yDivide) {
         return this.data.topRight;
       } else {
         return this.data.bottomRight;
+      }
+    } else {
+      if (point.y >= yDivide) {
+        return this.data.topLeft;
+      } else {
+        return this.data.bottomLeft;
       }
     }
   }

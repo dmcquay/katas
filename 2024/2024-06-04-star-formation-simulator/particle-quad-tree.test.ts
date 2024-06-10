@@ -44,22 +44,44 @@ test("can add and remove", () => {
 });
 
 test("can return neighbors", () => {
-  const p1 = buildParticle({ x: 0, y: 0 });
-  const p2 = buildParticle({ x: 0, y: 10 });
-  const p3 = buildParticle({ x: 0, y: 11 });
-  const p4 = buildParticle({ x: -100, y: 100, mass: 10 });
-  const p5 = buildParticle({ x: -101, y: 100, mass: 20 });
-  const pqt = new ParticleQuadTree({ maxParticles: 2 });
-  pqt.add(p1);
-  pqt.add(p2);
-  pqt.add(p3);
-  pqt.add(p4);
-  pqt.add(p5);
+  const outLeft = buildParticle({ x: -11, y: 0 });
+  const inLeft = buildParticle({ x: -10, y: 0 });
+  const outRight = buildParticle({ x: 11, y: 0 });
+  const inRight = buildParticle({ x: 10, y: 0 });
+  const outTop = buildParticle({ x: 0, y: 11 });
+  const inTop = buildParticle({ x: 0, y: 10 });
+  const outBottom = buildParticle({ x: 0, y: -11 });
+  const inBottom = buildParticle({ x: 0, y: -10 });
+  const farOutTop = buildParticle({ x: 0, y: 1000 });
+  const farOutBottom = buildParticle({ x: 0, y: -1000 });
+  const farOutLeft = buildParticle({ x: -1000, y: 0 });
+  const farOutRight = buildParticle({ x: 1000, y: 0 });
 
-  const result = pqt.getNeighbors(p1, 10);
-  expect(result).toContain(p2);
-  expect(result).toContain(p3);
-  expect(result).toHaveLength(2);
+  //   const included = [inLeft, inRight, inTop, inBottom];
+  //   const excluded = [outLeft, outRight, outTop, outBottom];
+  const particle = buildParticle({ x: 2, y: 2 });
+  const included = [buildParticle({ x: 2, y: 3 })];
+  const excluded = [buildParticle({ x: -123, y: 4 })];
+
+  const farOut = [farOutTop, farOutBottom, farOutLeft, farOutRight];
+  const all = [particle, ...included, ...excluded, ...farOut];
+
+  const pqt = new ParticleQuadTree({ maxParticles: 1 });
+
+  for (let p of all) {
+    pqt.add(p);
+  }
+  //   pqt.add(farOutTop);
+  //   pqt.add(farOutBottom);
+  //   pqt.add(farOutLeft);
+
+  const result = pqt.getNeighbors(particle, 1);
+  for (let p of included) {
+    expect(result).toContain(p);
+  }
+  for (let p of farOut) {
+    expect(result).not.toContain(p);
+  }
 });
 
 test("can return gravitational clusters", () => {
