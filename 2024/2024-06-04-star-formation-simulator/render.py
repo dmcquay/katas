@@ -41,9 +41,7 @@ def radius_from_area(area):
     return math.sqrt(area / math.pi)
 
 # Render particles
-generation = 0
-def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id):
-    global generation
+def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, generation, complete):
     generation += 1
     screen.fill(BACKGROUND_COLOR)
     for id, x, y, mass in particles:
@@ -57,16 +55,16 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id):
             c = int((screen_radius * 200)) + 55
             pygame.draw.circle(screen, (c,c,c), (screen_x, screen_y), 1)
     
-    top_3 = [(None, -1), (None, -1), (None, -1)]
-    for particle in particles:
-        mass = particle[3]
-        if mass > top_3[0][1]:
-            top_3 = [(particle, mass)] + top_3[:2]
-        elif mass > top_3[1][1]:
-            top_3 = [top_3[0], (particle, mass)] + top_3[1:2]
-        elif mass > top_3[2][1]:
-            top_3[2] = (particle, mass)
-    l1, l2, l3 = top_3[0][0], top_3[1][0], top_3[2][0]
+    # top_3 = [(None, -1), (None, -1), (None, -1)]
+    # for particle in particles:
+    #     mass = particle[3]
+    #     if mass > top_3[0][1]:
+    #         top_3 = [(particle, mass)] + top_3[:2]
+    #     elif mass > top_3[1][1]:
+    #         top_3 = [top_3[0], (particle, mass)] + top_3[1:2]
+    #     elif mass > top_3[2][1]:
+    #         top_3[2] = (particle, mass)
+    # l1, l2, l3 = top_3[0][0], top_3[1][0], top_3[2][0]
 
     text_idx = 0
 
@@ -80,15 +78,21 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id):
     print_stat('zoom level: {:.2f}'.format(zoom_level))
     print_stat('location: {}, {}'.format(int(offset_x), int(offset_y)))
     print_stat('objects: {}'.format(len(particles)))
-    print_stat('largest objects: {}, {}, {}'.format(int(l1[3]), int(l2[3]), int(l3[3])))
+    # print_stat('largest objects: {}, {}, {}'.format(int(l1[3]), int(l2[3]), int(l3[3])))
 
     if (tracking_id is not None):
         print_stat('tracking object: {}'.format(tracking_id))
+    
+    if (complete == True):
+        print_stat('end of simulation')
 
     pygame.display.flip()
 
 # Main loop
+generation = 0
 def main():
+    global generation
+
     clock = pygame.time.Clock()
     zoom_level = 1.0
     offset_x = 0
@@ -153,7 +157,8 @@ def main():
                     offset_y = y
                     break
 
-        render_particles(timestep, zoom_level, offset_x, offset_y, tracking_id)
+        render_particles(timestep, zoom_level, offset_x, offset_y, tracking_id, generation, False)
+        generation += 1
         clock.tick(10)
     
     print("ended main loop")
@@ -183,8 +188,8 @@ def main():
                         offset_y -= (mouse_y - last_mouse_pos[1]) / zoom_level
                     last_mouse_pos = (mouse_x, mouse_y)
             
-        render_particles(last_timestep, zoom_level, offset_x, offset_y, tracking_id)
-        clock.tick(10)
+        render_particles(last_timestep, zoom_level, offset_x, offset_y, tracking_id, generation, True)
+        clock.tick(50)
 
     pygame.quit()
     sys.exit()
