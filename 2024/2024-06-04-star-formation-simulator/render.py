@@ -104,7 +104,7 @@ def main():
     last_timestep = None
     tracking_id = None
     last_click_time = 0
-    fps = 1
+    fps = 10
     fps_step = 10
 
     for timestep in read_next_timestep():

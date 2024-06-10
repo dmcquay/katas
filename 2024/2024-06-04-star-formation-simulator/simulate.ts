@@ -95,7 +95,7 @@ const createRandomParticle = (config: ClusterConfig): Particle => {
     id: nextParticleId++,
     x: Math.floor(config.center.x - config.size / 2 + randNum(0, config.size)),
     y: Math.floor(config.center.y - config.size / 2 + randNum(0, config.size)),
-    v: config.velocity,
+    v: { ...config.velocity },
     mass: PARTICLE_MASS_KG,
   };
 };
@@ -229,32 +229,16 @@ const updateParticles = (pqt: ParticleCollection) => {
   const particles = pqt.getAll();
 
   for (const p of particles) {
-    const pBefore = { ...p };
-
     pqt.mutateParticle(p, (p: Particle) => {
       p.x += p.v.x * INTERVAL_SECONDS;
       p.y += p.v.y * INTERVAL_SECONDS;
     });
-    console.error(JSON.stringify({ pBefore, p }, null, 2));
 
     const gravitySources = pqt.getGravitySources(p);
     const forceVector = addVectors(
       gravitySources.map((g) => calculateGravitationalForce(p, g))
     );
-    // const pBefore = { ...p };
     applyForce(p, forceVector, INTERVAL_SECONDS);
-    // console.error(
-    //   JSON.stringify(
-    //     {
-    //       forceVector,
-    //       gravitySources,
-    //       vBefore: pBefore.v,
-    //       vAfter: p.v,
-    //     },
-    //     null,
-    //     2
-    //   )
-    // );
   }
 
   combineParticles(pqt);
