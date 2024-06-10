@@ -47,9 +47,6 @@ const boundsOverlap = (b1: Bounds, b2: Bounds): boolean => {
     b1.left <= b2.right &&
     b1.top >= b2.bottom &&
     b1.bottom <= b2.top;
-  // if (result) {
-  //   console.log("bounds match", b1, b2);
-  // }
   return result;
 };
 
@@ -58,7 +55,6 @@ export class ParticleQuadTree implements ParticleCollection {
   public clusterStats: ClusterStats;
   private opts: ParticleQuadTreeOptions;
   private bounds: Bounds;
-  private log: Record<string, any>[];
 
   constructor(
     opts: ParticleQuadTreeOptions = DEFAULT_OPTIONS,
@@ -68,7 +64,6 @@ export class ParticleQuadTree implements ParticleCollection {
     this.bounds = bounds;
     this.opts = opts;
     this.clusterStats = new ClusterStats();
-    this.log = [];
   }
 
   private getXDivide() {
@@ -105,14 +100,10 @@ export class ParticleQuadTree implements ParticleCollection {
       particle.y < this.bounds.bottom ||
       particle.y > this.bounds.top
     ) {
-      throw new Error(
-        `tried to add out of bounds particle. bounds: ${JSON.stringify(
-          this.bounds
-        )}. point: ${JSON.stringify({ x: particle.x, y: particle.y })}`
-      );
+      console.error(`Ignoring out of bounds particle`);
+      return;
     }
 
-    // this.log.push({ action: "add", particle });
     this.clusterStats.addParticle(particle);
 
     if (this.data.isDivided) {
@@ -161,7 +152,6 @@ export class ParticleQuadTree implements ParticleCollection {
   }
 
   remove(particle: Particle): void {
-    // this.log.push({ action: "remove", particle });
     if (this.data.isDivided) {
       this.getSubTree(particle).remove(particle);
       if (this.clusterStats.count <= this.opts.maxParticles) {
@@ -173,13 +163,7 @@ export class ParticleQuadTree implements ParticleCollection {
     } else {
       const found = this.data.particles.find((p) => p === particle);
       if (found == null) {
-        throw new Error(
-          `Tried to remove particle that does not exist.\n${JSON.stringify(
-            this.log,
-            null,
-            2
-          )}`
-        );
+        throw new Error(`Tried to remove particle that does not exist.`);
       }
       this.data.particles = this.data.particles.filter((p) => p !== particle);
     }
@@ -266,10 +250,8 @@ export class ParticleQuadTree implements ParticleCollection {
 
     if (!this.data.isDivided) {
       if (boundsOverlap(bounds, this.bounds)) {
-        // console.log("not divided and not overlapping, return []");
         return [];
       } else {
-        // console.log("not divided, overlapping");
         return [
           {
             ...this.clusterStats.centerOfMass,
@@ -286,12 +268,10 @@ export class ParticleQuadTree implements ParticleCollection {
       this.data.bottomLeft,
       this.data.bottomRight,
     ];
+
     const nonOverlappingSubTrees = allSubTrees.filter(
       (t) => !boundsOverlap(bounds, t.bounds)
     );
-    // console.log(
-    //   `Non-overlapping subtree count: ${nonOverlappingSubTrees.length}`
-    // );
 
     if (nonOverlappingSubTrees.length === 4) {
       return [
@@ -306,7 +286,6 @@ export class ParticleQuadTree implements ParticleCollection {
     const nonEmptySubTrees = allSubTrees.filter(
       (t) => t.clusterStats.count > 0
     );
-    // console.log(`Non-empty subtree count: ${nonEmptySubTrees.length}`);
 
     return nonEmptySubTrees.flatMap((t) => {
       return t.getGravitationalClusters(point, minDistance);

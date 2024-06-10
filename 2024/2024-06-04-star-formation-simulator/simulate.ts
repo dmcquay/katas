@@ -275,20 +275,22 @@ for (let cluster of CLUSTERS) {
 let interrupted = false;
 
 let generation = 0;
-const start = Date.now();
-let lastGenerationRateReport = 0;
+let lastGenerationRateReport = Date.now();
+let genCounter = 0;
 while (!interrupted) {
   updateParticles(particleCollection);
   printParticles(particleCollection.getAll());
   generation++;
+  genCounter++;
 
   if (Date.now() - lastGenerationRateReport > 10000) {
     console.error(
       `generation ${generation}: seconds per generation: ${
-        (Date.now() - start) / 1000 / generation
+        (Date.now() - lastGenerationRateReport) / 1000 / genCounter
       }`
     );
     lastGenerationRateReport = Date.now();
+    genCounter = 0;
   }
 
   if (generation === MAXIMUM_GENERATIONS) {

@@ -104,8 +104,7 @@ def main():
     last_timestep = None
     tracking_id = None
     last_click_time = 0
-    fps = 10
-    fps_step = 10
+    fps = 9
 
     for timestep in read_next_timestep():
         last_timestep = timestep
@@ -118,9 +117,15 @@ def main():
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_KP_PLUS or event.key == pygame.K_EQUALS:
-                    fps += fps_step
+                    if (fps == 1):
+                        fps = 5
+                    else:
+                        fps += int(fps / 3)
                 if event.key == pygame.K_KP_MINUS or event.key == pygame.K_MINUS:
-                    fps -= fps_step
+                    if (fps <= 5):
+                        fps = 1
+                    else:
+                        fps -= int(fps / 3)
                 elif event.key == pygame.K_ESCAPE:
                     if tracking_id is not None:
                         tracking_id = None
