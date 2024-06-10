@@ -1,4 +1,4 @@
 #!/bin/bash
 
 filename=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
-bun run --env-file data/$1/config.env simulate.ts | gzip > data/$1/$filename.gz
+bun run --env-file data/$1/config.env simulate.ts > data/$1/$filename.data

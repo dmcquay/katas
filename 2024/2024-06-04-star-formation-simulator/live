@@ -1,3 +1,4 @@
 #!/bin/bash
 
-bun run --env-file data/$1/config.env simulate.ts | python3 render.py
+filename=`date -u +"%Y-%m-%dT%H:%M:%SZ"`.data
+bun run --env-file data/$1/config.env simulate.ts | tee data/$1/$filename | python3 render.py

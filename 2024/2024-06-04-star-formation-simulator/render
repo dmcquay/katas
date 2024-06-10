@@ -2,9 +2,9 @@
 
 file_path=$1
 if [[ ! -e "$file_path" ]]; then
-    file_path=`ls -1 data/$1/*.gz | sort -r | head -n 1`
+    file_path=`ls -1 data/$1/*.data | sort -r | head -n 1`
 fi
 
 echo "File path: $file_path"
 
-tail -n +1 $file_path | gunzip | python3 render.py
+tail -n +1 $file_path | python3 render.py
