@@ -23,6 +23,10 @@ export interface ParticleCollection {
   add: (particle: Particle) => void;
   getAll: () => Particle[];
   remove: (particle: Particle) => void;
+  mutateParticle: (
+    particle: Particle,
+    cb: (particle: Particle) => void
+  ) => void;
   getGravitySources: (particle: Particle) => GravitySource[];
   getNeighbors: (point: Point, distanceMeters: number) => Particle[];
 }

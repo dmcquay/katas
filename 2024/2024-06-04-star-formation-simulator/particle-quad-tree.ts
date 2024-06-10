@@ -170,6 +170,12 @@ export class ParticleQuadTree implements ParticleCollection {
     this.clusterStats.removeParticle(particle);
   }
 
+  mutateParticle(particle: Particle, cb: (particle: Particle) => void) {
+    this.remove(particle);
+    cb(particle);
+    this.add(particle);
+  }
+
   getAll(): Particle[] {
     if (this.data.isDivided) {
       return [

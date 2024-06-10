@@ -26,4 +26,8 @@ export class ParticleList implements ParticleCollection {
   remove(particle: Particle) {
     this.particles = this.particles.filter((p) => p.id !== particle.id);
   }
+
+  mutateParticle(particle: Particle, cb: (particle: Particle) => void) {
+    cb(particle);
+  }
 }

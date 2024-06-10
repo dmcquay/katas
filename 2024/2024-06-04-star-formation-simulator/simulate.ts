@@ -120,7 +120,11 @@ function radiusFromArea(area: number): number {
 function combineParticles(pqt: ParticleCollection) {
   const particles = pqt.getAll();
   const deletedParticleIds: Record<number, boolean> = {};
-  const distance = Math.max(...particles.map((p) => radiusFromArea(p.mass)));
+
+  const distance = particles.reduce((max, p) => {
+    const radius = radiusFromArea(p.mass);
+    return Math.max(max, radius);
+  }, -Infinity);
 
   for (let i = 0; i < particles.length; i++) {
     const particle1 = particles[i];
@@ -157,11 +161,6 @@ function combineParticles(pqt: ParticleCollection) {
         collisionCount++;
         particleCount--;
         maxMass = Math.max(maxMass, cluster.mass);
-        // console.error({
-        //   particleCount,
-        //   collisionCount,
-        //   maxMass,
-        // });
 
         const combinedVx =
           (particle1.mass * particle1.v.x + particle2.mass * particle2.v.x) /
@@ -188,11 +187,13 @@ function combineParticles(pqt: ParticleCollection) {
 
 const updateParticles = (pqt: ParticleCollection) => {
   const particles = pqt.getAll();
+
   for (const p of particles) {
-    pqt.remove(p);
-    p.x += p.v.x * INTERVAL_SECONDS;
-    p.y += p.v.y * INTERVAL_SECONDS;
-    pqt.add(p);
+    pqt.mutateParticle(p, (p: Particle) => {
+      p.x += p.v.x * INTERVAL_SECONDS;
+      p.y += p.v.y * INTERVAL_SECONDS;
+      return p;
+    });
 
     const gravitySources = pqt.getGravitySources(p);
     const forceVector = addVectors(
@@ -225,9 +226,15 @@ for (let i = 0; i < NUM_PARTICLES; i++) {
 
 let interrupted = false;
 
+let generation = 0;
+// const start = Date.now();
 while (!interrupted) {
   updateParticles(particleCollection);
   printParticles(particleCollection.getAll());
+  generation++;
+  // console.error(
+  //   "seconds per generation: " + (Date.now() - start) / 1000 / generation
+  // );
 }
 
 const shutdown = () => {
