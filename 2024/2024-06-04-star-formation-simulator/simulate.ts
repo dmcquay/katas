@@ -43,7 +43,8 @@ const getInt = (key: string): number => {
 // const HYDROGEN_MASS_KG = 1.67e-27;
 
 type ClusterConfig = {
-  size: number;
+  height: number;
+  width: number;
   particleCount: number;
   center: Point;
   velocity: Vector;
@@ -77,7 +78,8 @@ for (let i = 1; i <= CLUSTER_COUNT; i++) {
   }
 
   CLUSTERS.push({
-    size: getInt(`CLUSTER${i}_SIZE`),
+    height: getInt(`CLUSTER${i}_HEIGHT`),
+    width: getInt(`CLUSTER${i}_WIDTH`),
     particleCount: getInt(`CLUSTER${i}_PARTICLE_COUNT`),
     center: { x: center[0], y: center[1] },
     velocity: { x: velocity[0], y: velocity[1] },
@@ -93,8 +95,12 @@ let nextParticleId = 0;
 const createRandomParticle = (config: ClusterConfig): Particle => {
   return {
     id: nextParticleId++,
-    x: Math.floor(config.center.x - config.size / 2 + randNum(0, config.size)),
-    y: Math.floor(config.center.y - config.size / 2 + randNum(0, config.size)),
+    x: Math.floor(
+      config.center.x - config.width / 2 + randNum(0, config.width)
+    ),
+    y: Math.floor(
+      config.center.y - config.height / 2 + randNum(0, config.height)
+    ),
     v: { ...config.velocity },
     mass: PARTICLE_MASS_KG,
   };
