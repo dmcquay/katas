@@ -3,6 +3,7 @@ import type {
   Particle,
   GravitySource,
   ParticleCollection,
+  Point,
 } from "./types";
 import { ParticleQuadTree } from "./particle-quad-tree";
 import { ParticleList } from "./particle-list";
@@ -12,16 +13,27 @@ const randNum = (min: number, max: number) => {
   return Math.random() * (max - min) + min;
 };
 
-const getInt = (key: string): number => {
+const getStr = (key: string): string => {
   const strVal = process.env[key];
   if (strVal == null) {
     throw new Error(`Missing environment variable ${key}`);
   }
+  return strVal;
+};
+
+const getFloat = (key: string): number => {
+  const strVal = getStr(key);
   // parseFloat is compatible with scientific notation (e.g. 10e9), while parseInt is not
   const floatVal = parseFloat(strVal);
   if (isNaN(floatVal)) {
-    throw new Error(`Expected environment variable ${key} to be an integer`);
+    throw new Error(`Expected environment variable ${key} to be a number`);
   }
+  return floatVal;
+};
+
+const getInt = (key: string): number => {
+  // parseFloat is compatible with scientific notation (e.g. 10e9), while parseInt is not, so we get that first
+  const floatVal = getFloat(key);
   return Math.floor(floatVal);
 };
 
@@ -30,14 +42,47 @@ const getInt = (key: string): number => {
 // const MOON_LIKE_MASS_KG = 7.348e22;
 // const HYDROGEN_MASS_KG = 1.67e-27;
 
-const NURSERY_WIDTH_METERS = getInt("NURSERY_WIDTH_METERS");
-const NURSERY_HEIGHT_METERS = getInt("NURSERY_HEIGHT_METERS");
+type ClusterConfig = {
+  size: number;
+  particleCount: number;
+  center: Point;
+  velocity: Vector;
+};
+
 const INTERVAL_SECONDS = getInt("INTERVAL_SECONDS");
-const NUM_PARTICLES = getInt("NUM_PARTICLES");
 const PARTICLE_MASS_KG = getInt("PARTICLE_MASS_KG");
 const ENABLE_GRAVITATIONAL_CLUSTERING = getInt(
   "ENABLE_GRAVITATIONAL_CLUSTERING"
 );
+const MAXIMUM_GENERATIONS = getInt("MAXIMUM_GENERATIONS");
+const CLUSTER_COUNT = getInt("CLUSTER_COUNT");
+const CLUSTERS: ClusterConfig[] = [];
+for (let i = 1; i <= CLUSTER_COUNT; i++) {
+  const center = getStr(`CLUSTER${i}_CENTER`)
+    .split(",")
+    .map((x) => parseInt(x));
+  if (center.length != 2 || center.find((x) => isNaN(x))) {
+    throw new Error(
+      `Expected ${`CLUSTER${i}_CENTER`} to be a comma-separated list of ints`
+    );
+  }
+
+  const velocity = getStr(`CLUSTER${i}_VELOCITY`)
+    .split(",")
+    .map((x) => parseFloat(x));
+  if (velocity.length != 2 || velocity.find((x) => isNaN(x))) {
+    throw new Error(
+      `Expected ${`CLUSTER${i}_VELOCITY`} to be a comma-separated list of ints`
+    );
+  }
+
+  CLUSTERS.push({
+    size: getInt(`CLUSTER${i}_SIZE`),
+    particleCount: getInt(`CLUSTER${i}_PARTICLE_COUNT`),
+    center: { x: center[0], y: center[1] },
+    velocity: { x: velocity[0], y: velocity[1] },
+  });
+}
 
 const G = 6.6743e-11;
 const MIN_COLLISION_DISTANCE_METERS = 1;
@@ -45,17 +90,12 @@ const MINIMUM_FORCE_DISTANCE_METERS = 2;
 
 let nextParticleId = 0;
 
-const createRandomParticle = (): Particle => {
+const createRandomParticle = (config: ClusterConfig): Particle => {
   return {
     id: nextParticleId++,
-    x: randNum(NURSERY_WIDTH_METERS / -2, NURSERY_WIDTH_METERS / 2),
-    y: randNum(NURSERY_HEIGHT_METERS / -2, NURSERY_HEIGHT_METERS / 2),
-    v: {
-      //   x: randNum(-1, 1),
-      //   y: randNum(-1, 1),
-      x: 0,
-      y: 0,
-    },
+    x: Math.floor(config.center.x - config.size / 2 + randNum(0, config.size)),
+    y: Math.floor(config.center.y - config.size / 2 + randNum(0, config.size)),
+    v: config.velocity,
     mass: PARTICLE_MASS_KG,
   };
 };
@@ -109,10 +149,6 @@ const addVectors = (vectors: Vector[]): Vector => {
   };
 };
 
-let collisionCount = 0;
-let particleCount = NUM_PARTICLES;
-let maxMass = 0;
-
 function radiusFromArea(area: number): number {
   return Math.sqrt(area / Math.PI);
 }
@@ -136,6 +172,12 @@ function combineParticles(pqt: ParticleCollection) {
       j++
     ) {
       const particle2 = neighbors[j];
+
+      // ParticleList.getNeighbors does not exclude anything, including the target particle
+      if (particle1 === particle2) {
+        continue;
+      }
+
       if (deletedParticleIds[particle2.id]) continue;
 
       const dx = particle1.x - particle2.x;
@@ -147,10 +189,6 @@ function combineParticles(pqt: ParticleCollection) {
       );
 
       if (distance < collisionDistance) {
-        if (particle1.id === particle2.id) {
-          throw new Error("these are the same particle");
-        }
-
         pqt.remove(particle1);
         pqt.remove(particle2);
 
@@ -162,10 +200,6 @@ function combineParticles(pqt: ParticleCollection) {
           // just to make type system know this is not null
           throw new Error("Unexpected");
         }
-
-        collisionCount++;
-        particleCount--;
-        maxMass = Math.max(maxMass, cluster.mass);
 
         const combinedVx =
           (particle1.mass * particle1.v.x + particle2.mass * particle2.v.x) /
@@ -195,17 +229,32 @@ const updateParticles = (pqt: ParticleCollection) => {
   const particles = pqt.getAll();
 
   for (const p of particles) {
+    const pBefore = { ...p };
+
     pqt.mutateParticle(p, (p: Particle) => {
       p.x += p.v.x * INTERVAL_SECONDS;
       p.y += p.v.y * INTERVAL_SECONDS;
-      return p;
     });
+    console.error(JSON.stringify({ pBefore, p }, null, 2));
 
     const gravitySources = pqt.getGravitySources(p);
     const forceVector = addVectors(
       gravitySources.map((g) => calculateGravitationalForce(p, g))
     );
+    // const pBefore = { ...p };
     applyForce(p, forceVector, INTERVAL_SECONDS);
+    // console.error(
+    //   JSON.stringify(
+    //     {
+    //       forceVector,
+    //       gravitySources,
+    //       vBefore: pBefore.v,
+    //       vAfter: p.v,
+    //     },
+    //     null,
+    //     2
+    //   )
+    // );
   }
 
   combineParticles(pqt);
@@ -226,8 +275,11 @@ if (ENABLE_GRAVITATIONAL_CLUSTERING) {
 } else {
   particleCollection = new ParticleList();
 }
-for (let i = 0; i < NUM_PARTICLES; i++) {
-  particleCollection.add(createRandomParticle());
+
+for (let cluster of CLUSTERS) {
+  for (let i = 0; i < cluster.particleCount; i++) {
+    particleCollection.add(createRandomParticle(cluster));
+  }
 }
 
 let interrupted = false;
@@ -249,8 +301,7 @@ while (!interrupted) {
     lastGenerationRateReport = Date.now();
   }
 
-  // TODO: DON'T LEAVE THIS
-  if (generation > 1000) {
+  if (generation === MAXIMUM_GENERATIONS) {
     break;
   }
 }

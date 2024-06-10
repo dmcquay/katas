@@ -20,18 +20,8 @@ Time to write >= 10MB
 
 # simulate ideas
 
-- implement custom quadtree with total mass and center of mass caching. use to more efficiently compute collisions. also, when
-  computing gravitational interactions, only compute pairwise interactions for nearby objects. for more distant objects, treat
-  groups (sections of the quadtree) as though they were single objects, using their mass and center of mass.
-- reduce file size by reducing unnecessary location precision.
-- collision account for volume. larger particles should collide at greater distance from center.
-- Increase local volume and/or density
-- Decrease particle mass to more realistic value
-- Store env vars in separate files
 - Store config in simulation output file. Store the state when stopped. Support resume.
 - Better Numerical Methods: The Euler method is simple but can be inaccurate. Consider using more advanced methods like the Runge-Kutta method for better accuracy. (runga-katta-4)[https://www.npmjs.com/package/runge-kutta-4]
-- Performance Optimization: For many particles, optimize the force calculations using techniques like the Barnes-Hut algorithm to reduce computational complexity from 𝑂(𝑁^2) to 𝑂(𝑁 log 𝑁). This is equivalent to ParticleQuadTree.
-- quadtree iterator to avoid creating new data structure every time in getAll
 
 # render ideas
 

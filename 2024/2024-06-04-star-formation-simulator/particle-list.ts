@@ -15,12 +15,12 @@ export class ParticleList implements ParticleCollection {
     return this.particles;
   }
 
-  getGravitySources(_particle: Particle) {
-    return this.particles;
+  getGravitySources(particle: Particle) {
+    return this.particles.filter((p) => p !== particle);
   }
 
-  getNeighbors(_point: Point, _distanceMeters: number) {
-    return this.particles;
+  getNeighbors(point: Point, _distanceMeters: number) {
+    return this.particles.filter((p) => p !== point);
   }
 
   remove(particle: Particle) {

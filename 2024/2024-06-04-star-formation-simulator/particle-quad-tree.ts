@@ -31,14 +31,14 @@ type ParticleQuadTreeOptions = {
 };
 
 const DEFAULT_OPTIONS: ParticleQuadTreeOptions = {
-  maxParticles: 100,
+  maxParticles: 10,
 };
 
 const DEFAULT_BOUNDS: Bounds = {
-  top: 10000,
-  bottom: -10000,
-  right: 10000,
-  left: -10000,
+  top: 100000,
+  bottom: -100000,
+  right: 100000,
+  left: -100000,
 };
 
 const boundsOverlap = (b1: Bounds, b2: Bounds): boolean => {
@@ -99,6 +99,19 @@ export class ParticleQuadTree implements ParticleCollection {
   }
 
   add(particle: Particle): void {
+    if (
+      particle.x < this.bounds.left ||
+      particle.x > this.bounds.right ||
+      particle.y < this.bounds.bottom ||
+      particle.y > this.bounds.top
+    ) {
+      throw new Error(
+        `tried to add out of bounds particle. bounds: ${JSON.stringify(
+          this.bounds
+        )}. point: ${JSON.stringify({ x: particle.x, y: particle.y })}`
+      );
+    }
+
     // this.log.push({ action: "add", particle });
     this.clusterStats.addParticle(particle);
 
@@ -174,9 +187,14 @@ export class ParticleQuadTree implements ParticleCollection {
   }
 
   mutateParticle(particle: Particle, cb: (particle: Particle) => void) {
+    const prevPoint = { x: particle.x, y: particle.y };
     this.remove(particle);
     cb(particle);
-    this.add(particle);
+    try {
+      this.add(particle);
+    } catch (err: any) {
+      throw new Error(err.message + JSON.stringify(prevPoint));
+    }
   }
 
   getAll(): Particle[] {

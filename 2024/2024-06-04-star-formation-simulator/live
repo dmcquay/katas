@@ -1,0 +1,3 @@
+#!/bin/bash
+
+bun run --env-file data/$1/config.env simulate.ts | python3 render.py

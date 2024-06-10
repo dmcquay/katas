@@ -65,20 +65,24 @@ export class ClusterStats {
       );
     }
     const remainingMass = this.mass - particle.mass;
-    if (remainingMass < 0) {
-      throw new Error(
-        `The remaining mass cannot be less than 0. mass: ${
-          this.mass
-        }, particle mass: ${
-          particle.mass
-        }, remainingMass: ${remainingMass}\n${JSON.stringify(
-          this.log,
-          null,
-          2
-        )}`
-      );
-    }
-    if (remainingMass === 0) {
+
+    // can't protect against this because mass can be a float. float precision will make this
+    // not equal exactly 0 when empty.
+    // if (remainingMass < 0) {
+    // throw new Error(
+    //   `The remaining mass cannot be less than 0. mass: ${
+    //     this.mass
+    //   }, particle mass: ${
+    //     particle.mass
+    //   }, remainingMass: ${remainingMass}\n${JSON.stringify(
+    //     this.log,
+    //     null,
+    //     2
+    //   )}`
+    // );
+    // }
+
+    if (remainingMass <= 0) {
       this.centerOfMass = undefined;
       this.mass = 0;
     } else {
