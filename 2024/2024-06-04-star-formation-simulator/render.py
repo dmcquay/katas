@@ -7,7 +7,7 @@ import struct
 
 file_path = sys.argv[1]
 
-initial_frame = 0
+initial_frame = 1
 if (len(sys.argv) >= 3):
     initial_frame = int(sys.argv[2])
 
