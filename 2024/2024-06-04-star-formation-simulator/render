@@ -7,4 +7,4 @@ fi
 
 echo "File path: $file_path"
 
-python3 render.py $file_path $2
+python3 render.py $file_path $2 $3 $4

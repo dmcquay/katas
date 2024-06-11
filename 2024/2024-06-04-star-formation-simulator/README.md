@@ -35,3 +35,7 @@ Time to write >= 10MB
 - Detect/display orbits and related metrics (hard)
 - Single button stroke to save current view (pan, zoom, timestamp) to be able to return to an event.
 - When multiple particles share a pixel in the current display, increase brightness.
+
+# interesting shots
+
+- data/example/2024-06-11T06:56:49Z.bin 2218 0.68 7075

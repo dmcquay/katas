@@ -4,7 +4,21 @@ import math
 import msgpack
 import struct
 
-f = open(sys.argv[1], 'rb')
+file_path = sys.argv[1]
+
+initial_frame = 0
+if (len(sys.argv) >= 3):
+    initial_frame = int(sys.argv[2])
+
+initial_zoom = 1
+if (len(sys.argv) >= 4):
+    initial_zoom = float(sys.argv[3])
+
+initial_tracking_id = None
+if (len(sys.argv) >= 5):
+    initial_tracking_id = int(sys.argv[4])
+
+f = open(file_path, 'rb')
 position = 0
 frame = 1
 end = False
@@ -126,22 +140,22 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps
 
 # Main loop
 def main():
-    global end
+    global end, initial_zoom, initial_frame, initial_tracking_id
+
     clock = pygame.time.Clock()
-    zoom_level = 1.0
+    zoom_level = initial_zoom
     offset_x = 0
     offset_y = 0
     dragging = False
     last_mouse_pos = None
     running = True
     particles = None
-    tracking_id = None
+    tracking_id = initial_tracking_id
     last_click_time = 0
     fps = 9
     reverse = False
 
-    if (len(sys.argv) >= 3):
-        seek(int(sys.argv[2]))
+    seek(initial_frame)
 
     while True:
         next_particles = read()
