@@ -1,6 +1,56 @@
 import pygame
 import sys
 import math
+import msgpack
+import struct
+
+f = open(sys.argv[1], 'rb')
+position = 0
+frame = 1
+end = False
+
+def read_header():
+    header = f.read(8)
+    if len(header) < 8:
+        print('end of file')
+        return  # End of file
+    current_frame_size, previous_frame_size = struct.unpack('>II', header)
+    return current_frame_size, previous_frame_size
+
+def read():
+    global position, frame
+    f.seek(position)
+    current_frame_size, previous_frame_size = read_header()
+    frame_data = f.read(current_frame_size)
+    return msgpack.unpackb(frame_data)
+
+def next():
+    global position, frame, end
+    f.seek(position)
+    current_frame_size, previous_frame_size = read_header()
+    new_position = position + 8 + current_frame_size
+    f.seek(new_position)
+    header = f.read(8)
+    if len(header) == 8:
+        position = new_position
+        frame += 1
+        end = False
+    else:
+        end = True
+
+def prev():
+    global position, frame, end
+    end = False
+    f.seek(position)
+    current_frame_size, previous_frame_size = read_header()
+    position -= 8 + previous_frame_size
+    frame -= 1
+
+def seek(target_frame):
+    while (target_frame > frame):
+        next()
+    while (target_frame < frame):
+        prev()
 
 # Constants
 WIDTH, HEIGHT = 1600, 1000
@@ -14,44 +64,12 @@ font = pygame.font.SysFont('Arial', 18)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Particle Simulation')
 
-def seek(target_generation):
-    global generation
-    while generation < target_generation:
-        while True:
-            line = sys.stdin.readline()
-            if line.strip() == "---":
-                generation += 1
-                break
-
-def read_next_timestep():
-    timestep = []
-    while True:
-        line = sys.stdin.readline()
-        if not line:
-            # end of file reached
-            # this will cause the iterator to finish
-            return
-        elif line.strip() == "---":
-            # end of block
-            # in this case we want to yield the data we collected in this batch
-            ret = timestep
-            timestep = []
-            yield ret
-        else:
-            # adding a new line to the current batch
-            parts = line.split(',')
-            is_any_blank = any(part == "" for part in parts)
-            if len(parts) < 4 or is_any_blank:
-                continue
-            id, x, y, mass = map(float, parts)
-            timestep.append((id, x, y, mass))
-
 def radius_from_area(area):
     return math.sqrt(area / math.pi)
 
 # Render particles
-def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, generation, fps, complete):
-    generation += 1
+def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps, reverse):
+    global end
     screen.fill(BACKGROUND_COLOR)
     for id, x, y, mass in particles:
         screen_x = int((x - offset_x) * zoom_level + WIDTH // 2)
@@ -83,7 +101,7 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, gen
         screen.blit(text_surface, (10, 10 + (text_idx * 24)))
         text_idx += 1
 
-    print_stat('generation: {}'.format(generation))
+    print_stat('frame: {}'.format(frame))
     print_stat('fps: {}'.format(fps))
     print_stat('zoom level: {:.2f}'.format(zoom_level))
     print_stat('location: {}, {}'.format(int(offset_x), int(offset_y)))
@@ -93,16 +111,16 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, gen
     if (tracking_id is not None):
         print_stat('tracking object: {}'.format(tracking_id))
     
-    if (complete == True):
-        print_stat('end of simulation')
+    if (end == True):
+        print_stat('no more frames available')
+
+    if (reverse == True):
+        print_stat('reverse')
 
     pygame.display.flip()
 
 # Main loop
-generation = 0
 def main():
-    global generation
-
     clock = pygame.time.Clock()
     zoom_level = 1.0
     offset_x = 0
@@ -110,15 +128,20 @@ def main():
     dragging = False
     last_mouse_pos = None
     running = True
-    last_timestep = None
+    particles = None
     tracking_id = None
     last_click_time = 0
     fps = 9
+    reverse = False
 
-    seek(5)
+    seek(16)
 
-    for timestep in read_next_timestep():
-        last_timestep = timestep
+    while True:
+        particles = read()
+        if (reverse):
+            prev()
+        else:
+            next()
         
         if not running:
             break
@@ -142,6 +165,10 @@ def main():
                         tracking_id = None
                     else:
                         running = False
+                elif event.key == pygame.K_LEFT:
+                    reverse = True
+                elif event.key == pygame.K_RIGHT:
+                    reverse = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 4:  # Scroll up
                     zoom_level *= 1.1
@@ -152,7 +179,7 @@ def main():
                     if current_time - last_click_time < DOUBLE_CLICK_THRESHOLD:
                         mouse_x, mouse_y = pygame.mouse.get_pos()
                         min_distance = float('inf')
-                        for particle_id, x, y, mass in timestep:
+                        for particle_id, x, y, mass in particles:
                             screen_x = int((x - offset_x) * zoom_level + WIDTH // 2)
                             screen_y = int((y - offset_y) * zoom_level + HEIGHT // 2)
                             distance = (screen_x - mouse_x) ** 2 + (screen_y - mouse_y) ** 2
@@ -175,46 +202,16 @@ def main():
                     last_mouse_pos = (mouse_x, mouse_y)
 
         if tracking_id is not None:
-            for particle_id, x, y, mass in timestep:
+            for particle_id, x, y, mass in particles:
                 if particle_id == tracking_id:
                     offset_x = x
                     offset_y = y
                     break
 
-        render_particles(timestep, zoom_level, offset_x, offset_y, tracking_id, generation, fps, False)
-        generation += 1
+        render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps, reverse)
         clock.tick(fps)
-    
-    print("ended main loop")
-    
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 4:  # Scroll up
-                    zoom_level *= 1.1
-                elif event.button == 5:  # Scroll down
-                    zoom_level /= 1.1
-                elif event.button == 1:  # Left mouse button
-                    dragging = True
-                    last_mouse_pos = pygame.mouse.get_pos()
-            elif event.type == pygame.MOUSEBUTTONUP:
-                if event.button == 1:
-                    dragging = False
-            elif event.type == pygame.MOUSEMOTION:
-                if dragging:
-                    mouse_x, mouse_y = pygame.mouse.get_pos()
-                    if last_mouse_pos:
-                        offset_x -= (mouse_x - last_mouse_pos[0]) / zoom_level
-                        offset_y -= (mouse_y - last_mouse_pos[1]) / zoom_level
-                    last_mouse_pos = (mouse_x, mouse_y)
-            
-        render_particles(last_timestep, zoom_level, offset_x, offset_y, tracking_id, generation, fps, True)
-        clock.tick(50)
 
+    f.close()
     pygame.quit()
     sys.exit()
 

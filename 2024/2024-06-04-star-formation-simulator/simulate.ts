@@ -8,6 +8,10 @@ import type {
 import { ParticleQuadTree } from "./particle-quad-tree";
 import { ParticleList } from "./particle-list";
 import { ClusterStats } from "./cluster-stats";
+import MsgPack from "msgpack5";
+import * as fs from "fs";
+
+const msgpack = MsgPack();
 
 const randNum = (min: number, max: number) => {
   return Math.random() * (max - min) + min;
@@ -251,13 +255,25 @@ const updateParticles = (pqt: ParticleCollection) => {
   combineParticles(pqt);
 };
 
+let previousFrameSize = 0;
+const filePath = process.argv[2];
+const fd = fs.openSync(filePath, "w");
 const printParticles = (particles: Particle[]) => {
-  for (let p of particles) {
-    console.log(
-      [p.id, Math.floor(p.x), Math.floor(p.y), Math.floor(p.mass)].join(",")
-    );
-  }
-  console.log("---");
+  const frameData = msgpack.encode(
+    particles.map((p) => {
+      return [p.id, Math.floor(p.x), Math.floor(p.y), Math.floor(p.mass)];
+    })
+  );
+  const currentFrameSize = frameData.length;
+
+  const header = Buffer.alloc(8);
+  header.writeUInt32BE(currentFrameSize, 0); // Current frame size
+  header.writeUInt32BE(previousFrameSize, 4); // Previous frame size
+
+  fs.writeSync(fd, header);
+  fs.writeSync(fd, frameData as any);
+
+  previousFrameSize = currentFrameSize;
 };
 
 let particleCollection: ParticleCollection;
@@ -298,6 +314,7 @@ while (!interrupted) {
     break;
   }
 }
+fs.closeSync(fd);
 
 const shutdown = () => {
   interrupted = true;
