@@ -74,7 +74,7 @@ DOUBLE_CLICK_THRESHOLD = 500
 # Initialize Pygame
 pygame.init()
 pygame.font.init()
-font = pygame.font.SysFont('Arial', 18)
+font = pygame.font.SysFont('Arial', 16)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Particle Simulation')
 
@@ -114,7 +114,7 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps
     def print_stat(txt):
         nonlocal text_idx
         text_surface = font.render(txt, True, (255, 255, 255))
-        screen.blit(text_surface, (10, 10 + (text_idx * 24)))
+        screen.blit(text_surface, (10, 10 + (text_idx * 22)))
         text_idx += 1
 
     print_stat('frame: {}'.format(frame))
