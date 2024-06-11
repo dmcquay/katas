@@ -14,6 +14,15 @@ font = pygame.font.SysFont('Arial', 18)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Particle Simulation')
 
+def seek(target_generation):
+    global generation
+    while generation < target_generation:
+        while True:
+            line = sys.stdin.readline()
+            if line.strip() == "---":
+                generation += 1
+                break
+
 def read_next_timestep():
     timestep = []
     while True:
@@ -105,6 +114,8 @@ def main():
     tracking_id = None
     last_click_time = 0
     fps = 9
+
+    seek(5)
 
     for timestep in read_next_timestep():
         last_timestep = timestep

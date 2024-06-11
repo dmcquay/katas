@@ -22,6 +22,7 @@ Time to write >= 10MB
 
 - Store config in simulation output file. Store the state when stopped. Support resume.
 - Better Numerical Methods: The Euler method is simple but can be inaccurate. Consider using more advanced methods like the Runge-Kutta method for better accuracy. (runga-katta-4)[https://www.npmjs.com/package/runge-kutta-4]
+- Magnetic forces encouraging the formation of an accretion disc, planets, etc. https://chatgpt.com/share/a4601fe7-a05b-412d-be85-4aaf5d5d89f9
 
 # render ideas
 

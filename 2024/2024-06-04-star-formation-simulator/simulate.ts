@@ -46,12 +46,12 @@ type ClusterConfig = {
   height: number;
   width: number;
   particleCount: number;
+  particleMassKg: number;
   center: Point;
   velocity: Vector;
 };
 
 const INTERVAL_SECONDS = getInt("INTERVAL_SECONDS");
-const PARTICLE_MASS_KG = getInt("PARTICLE_MASS_KG");
 const ENABLE_GRAVITATIONAL_CLUSTERING = getInt(
   "ENABLE_GRAVITATIONAL_CLUSTERING"
 );
@@ -81,6 +81,7 @@ for (let i = 1; i <= CLUSTER_COUNT; i++) {
     height: getInt(`CLUSTER${i}_HEIGHT`),
     width: getInt(`CLUSTER${i}_WIDTH`),
     particleCount: getInt(`CLUSTER${i}_PARTICLE_COUNT`),
+    particleMassKg: getInt(`CLUSTER${i}_PARTICLE_MASS_KG`),
     center: { x: center[0], y: center[1] },
     velocity: { x: velocity[0], y: velocity[1] },
   });
@@ -102,7 +103,7 @@ const createRandomParticle = (config: ClusterConfig): Particle => {
       config.center.y - config.height / 2 + randNum(0, config.height)
     ),
     v: { ...config.velocity },
-    mass: PARTICLE_MASS_KG,
+    mass: config.particleMassKg,
   };
 };
 
