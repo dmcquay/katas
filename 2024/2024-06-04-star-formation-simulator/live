@@ -1,4 +1,24 @@
 #!/bin/bash
 
-filename=`date -u +"%Y-%m-%dT%H:%M:%SZ"`.data
-bun run --env-file data/$1/config.env simulate.ts | tee data/$1/$filename | python3 render.py
+# Function to handle the termination of both scripts
+cleanup() {
+  pkill -P $pid1
+  pkill -P $pid2
+  exit 1
+}
+
+# Trap SIGINT (Ctrl-C) and call cleanup function
+trap cleanup SIGINT
+
+# Run script1.sh and script2.sh in the background
+./simulate $1 &
+pid1=$!
+
+sleep 3
+
+./render $1 &
+pid2=$!
+
+# Wait for both scripts to finish
+wait $pid1
+wait $pid2

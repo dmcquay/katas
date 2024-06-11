@@ -12,8 +12,7 @@ end = False
 def read_header():
     header = f.read(8)
     if len(header) < 8:
-        print('end of file')
-        return  # End of file
+        return 0, 0
     current_frame_size, previous_frame_size = struct.unpack('>II', header)
     return current_frame_size, previous_frame_size
 
@@ -21,25 +20,26 @@ def read():
     global position, frame
     f.seek(position)
     current_frame_size, previous_frame_size = read_header()
+    if (current_frame_size == 0):
+        # print('incomplete header')
+        return None
     frame_data = f.read(current_frame_size)
+    if (len(frame_data) < current_frame_size):
+        # print(f"incomplete frame. {len(frame_data)} / {current_frame_size}")
+        return None
     return msgpack.unpackb(frame_data)
 
 def next():
     global position, frame, end
     f.seek(position)
     current_frame_size, previous_frame_size = read_header()
-    new_position = position + 8 + current_frame_size
-    f.seek(new_position)
-    header = f.read(8)
-    if len(header) == 8:
-        position = new_position
-        frame += 1
-        end = False
-    else:
-        end = True
+    position += 8 + current_frame_size
+    frame += 1
 
 def prev():
     global position, frame, end
+    if (frame == 1):
+        return
     end = False
     f.seek(position)
     current_frame_size, previous_frame_size = read_header()
@@ -71,16 +71,18 @@ def radius_from_area(area):
 def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps, reverse):
     global end
     screen.fill(BACKGROUND_COLOR)
-    for id, x, y, mass in particles:
-        screen_x = int((x - offset_x) * zoom_level + WIDTH // 2)
-        screen_y = int((y - offset_y) * zoom_level + HEIGHT // 2)
-        screen_radius = int(radius_from_area(mass) * zoom_level)
-        if screen_radius >= 1:
-            color = (255, 255, 0) if id == tracking_id else (255, 255, 255)
-            pygame.draw.circle(screen, color, (screen_x, screen_y), int(screen_radius))
-        else:
-            c = int((screen_radius * 200)) + 55
-            pygame.draw.circle(screen, (c,c,c), (screen_x, screen_y), 1)
+    
+    if particles is not None:
+        for id, x, y, mass in particles:
+            screen_x = int((x - offset_x) * zoom_level + WIDTH // 2)
+            screen_y = int((y - offset_y) * zoom_level + HEIGHT // 2)
+            screen_radius = int(radius_from_area(mass) * zoom_level)
+            if screen_radius >= 1:
+                color = (255, 255, 0) if id == tracking_id else (255, 255, 255)
+                pygame.draw.circle(screen, color, (screen_x, screen_y), int(screen_radius))
+            else:
+                c = int((screen_radius * 200)) + 55
+                pygame.draw.circle(screen, (c,c,c), (screen_x, screen_y), 1)
     
     # top_3 = [(None, -1), (None, -1), (None, -1)]
     # for particle in particles:
@@ -105,14 +107,17 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps
     print_stat('fps: {}'.format(fps))
     print_stat('zoom level: {:.2f}'.format(zoom_level))
     print_stat('location: {}, {}'.format(int(offset_x), int(offset_y)))
-    print_stat('objects: {}'.format(len(particles)))
+    
+    if particles is not None:
+        print_stat('objects: {}'.format(len(particles)))
+    
     # print_stat('largest objects: {}, {}, {}'.format(int(l1[3]), int(l2[3]), int(l3[3])))
 
     if (tracking_id is not None):
         print_stat('tracking object: {}'.format(tracking_id))
     
     if (end == True):
-        print_stat('no more frames available')
+        print_stat('waiting for frame data')
 
     if (reverse == True):
         print_stat('reverse')
@@ -121,6 +126,7 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps
 
 # Main loop
 def main():
+    global end
     clock = pygame.time.Clock()
     zoom_level = 1.0
     offset_x = 0
@@ -134,14 +140,20 @@ def main():
     fps = 9
     reverse = False
 
-    seek(16)
+    if (len(sys.argv) >= 3):
+        seek(int(sys.argv[2]))
 
     while True:
-        particles = read()
-        if (reverse):
-            prev()
+        next_particles = read()
+        if (next_particles is None):
+            end = True
         else:
-            next()
+            end = False
+            particles = next_particles
+            if (reverse):
+                prev()
+            else:
+                next()
         
         if not running:
             break
