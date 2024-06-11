@@ -3,6 +3,7 @@ import sys
 import math
 import msgpack
 import struct
+# import time
 
 file_path = sys.argv[1]
 
@@ -77,6 +78,7 @@ pygame.font.init()
 font = pygame.font.SysFont('Arial', 16)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Particle Simulation')
+visible_rect = pygame.Rect(-100, -100, WIDTH + 100, HEIGHT + 100)
 
 def radius_from_area(area):
     return math.sqrt(area / math.pi)
@@ -90,13 +92,14 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps
         for id, x, y, mass in particles:
             screen_x = int((x - offset_x) * zoom_level + WIDTH // 2)
             screen_y = int((y - offset_y) * zoom_level + HEIGHT // 2)
-            screen_radius = int(radius_from_area(mass) * zoom_level)
-            if screen_radius >= 1:
-                color = (255, 255, 0) if id == tracking_id else (255, 255, 255)
-                pygame.draw.circle(screen, color, (screen_x, screen_y), int(screen_radius))
-            else:
-                c = int((screen_radius * 200)) + 55
-                pygame.draw.circle(screen, (c,c,c), (screen_x, screen_y), 1)
+            if visible_rect.collidepoint(screen_x, screen_y):
+                screen_radius = int(radius_from_area(mass) * zoom_level)
+                if screen_radius >= 1:
+                    color = (255, 255, 0) if id == tracking_id else (255, 255, 255)
+                    pygame.draw.circle(screen, color, (screen_x, screen_y), int(screen_radius))
+                else:
+                    c = int((screen_radius * 200)) + 55
+                    pygame.draw.circle(screen, (c,c,c), (screen_x, screen_y), 1)
     
     # top_3 = [(None, -1), (None, -1), (None, -1)]
     # for particle in particles:
@@ -158,7 +161,11 @@ def main():
     seek(initial_frame)
 
     while True:
+        # start_time = time.time()
         next_particles = read()
+        # end_time = time.time()
+        # elapsed_time = end_time - start_time
+        # print(f"read: {elapsed_time} seconds")
         if (next_particles is None):
             end = True
         else:
@@ -234,7 +241,11 @@ def main():
                     offset_y = y
                     break
 
+        # start_time = time.time()
         render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps, reverse)
+        # end_time = time.time()
+        # elapsed_time = end_time - start_time
+        # print(f"render: {elapsed_time} seconds")
         clock.tick(fps)
 
     f.close()
