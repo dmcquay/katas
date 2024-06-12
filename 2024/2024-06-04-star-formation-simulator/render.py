@@ -125,10 +125,10 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps
     print_stat('zoom level: {:.2f}'.format(zoom_level))
     print_stat('location: {}, {}'.format(int(offset_x), int(offset_y)))
     
-    deep_link = f'f{frame},r{fps},z{zoom_level}'
-    if (tracking_id is not None):
-        deep_link += f',t{tracking_id}'
-    print_stat(deep_link)
+    # deep_link = f'f{frame},r{fps},z{zoom_level}'
+    # if (tracking_id is not None):
+    #     deep_link += f',t{tracking_id}'
+    # print_stat(deep_link)
     
     if particles is not None:
         print_stat('objects: {}'.format(len(particles)))
@@ -164,24 +164,26 @@ def main():
     last_click_time = 0
     fps = 9
     reverse = False
+    pause = False
 
     seek(initial_frame)
 
     while True:
-        # start_time = time.time()
-        next_particles = read()
-        # end_time = time.time()
-        # elapsed_time = end_time - start_time
-        # print(f"read: {elapsed_time} seconds")
-        if (next_particles is None):
-            end = True
-        else:
-            end = False
-            particles = next_particles
-            if (reverse):
-                prev()
+        if not pause:
+            # start_time = time.time()
+            next_particles = read()
+            # end_time = time.time()
+            # elapsed_time = end_time - start_time
+            # print(f"read: {elapsed_time} seconds")
+            if (next_particles is None):
+                end = True
             else:
-                next()
+                end = False
+                particles = next_particles
+                if (reverse):
+                    prev()
+                else:
+                    next()
         
         if not running:
             break
@@ -215,6 +217,10 @@ def main():
                         if (particle[3] > largest[3]):
                             largest = particle
                     tracking_id = largest[0]
+                elif event.key == pygame.K_p:
+                    pause = not pause
+                elif event.key == pygame.K_b:
+                    seek(1)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 4:  # Scroll up
                     zoom_level *= 1.1
