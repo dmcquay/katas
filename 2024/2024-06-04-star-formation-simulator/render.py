@@ -221,6 +221,10 @@ def main():
                     pause = not pause
                 elif event.key == pygame.K_b:
                     seek(1)
+                elif event.key == pygame.K_LEFTBRACKET:
+                    seek(max(0, frame - 1000))
+                elif event.key == pygame.K_RIGHTBRACKET:
+                    seek(frame + 1000)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 4:  # Scroll up
                     zoom_level *= 1.1
