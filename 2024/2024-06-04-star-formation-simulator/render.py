@@ -101,16 +101,16 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps
                     c = int((screen_radius * 200)) + 55
                     pygame.draw.circle(screen, (c,c,c), (screen_x, screen_y), 1)
     
-    # top_3 = [(None, -1), (None, -1), (None, -1)]
-    # for particle in particles:
-    #     mass = particle[3]
-    #     if mass > top_3[0][1]:
-    #         top_3 = [(particle, mass)] + top_3[:2]
-    #     elif mass > top_3[1][1]:
-    #         top_3 = [top_3[0], (particle, mass)] + top_3[1:2]
-    #     elif mass > top_3[2][1]:
-    #         top_3[2] = (particle, mass)
-    # l1, l2, l3 = top_3[0][0], top_3[1][0], top_3[2][0]
+    top_3 = [(None, -1), (None, -1), (None, -1)]
+    for particle in particles:
+        mass = particle[3]
+        if mass > top_3[0][1]:
+            top_3 = [(particle, mass)] + top_3[:2]
+        elif mass > top_3[1][1]:
+            top_3 = [top_3[0], (particle, mass)] + top_3[1:2]
+        elif mass > top_3[2][1]:
+            top_3[2] = (particle, mass)
+    l1, l2, l3 = top_3[0][0], top_3[1][0], top_3[2][0]
 
     text_idx = 0
 
@@ -125,13 +125,20 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps
     print_stat('zoom level: {:.2f}'.format(zoom_level))
     print_stat('location: {}, {}'.format(int(offset_x), int(offset_y)))
     
+    deep_link = f'f{frame},r{fps},z{zoom_level}'
+    if (tracking_id is not None):
+        deep_link += f',t{tracking_id}'
+    print_stat(deep_link)
+    
     if particles is not None:
         print_stat('objects: {}'.format(len(particles)))
+        if tracking_id is not None:
+            for particle_id, x, y, mass in particles:
+                if particle_id == tracking_id:
+                    print_stat(f'obj {tracking_id}: {mass} kg')
+                    break
     
-    # print_stat('largest objects: {}, {}, {}'.format(int(l1[3]), int(l2[3]), int(l3[3])))
-
-    if (tracking_id is not None):
-        print_stat('tracking object: {}'.format(tracking_id))
+    print_stat('largest objects: {}, {}, {}'.format(int(l1[3]), int(l2[3]), int(l3[3])))
     
     if (end == True):
         print_stat('waiting for frame data')
@@ -202,6 +209,12 @@ def main():
                     reverse = True
                 elif event.key == pygame.K_RIGHT:
                     reverse = False
+                elif event.key == pygame.K_l:
+                    largest = particles[0]
+                    for particle in particles:
+                        if (particle[3] > largest[3]):
+                            largest = particle
+                    tracking_id = largest[0]
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 4:  # Scroll up
                     zoom_level *= 1.1
