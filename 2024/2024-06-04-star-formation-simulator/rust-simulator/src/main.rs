@@ -16,7 +16,7 @@ use std::io::{BufReader, Write};
 use std::io;
 use std::env;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 struct ClusterConfig {
     height: i32,
     width: i32,
@@ -28,7 +28,7 @@ struct ClusterConfig {
 
 #[derive(Deserialize)]
 struct Config {
-    // interval_seconds: f64,
+    interval_seconds: f64,
     // max_frames: i64,
     // enable_gravitational_clustering: bool,
     clusters: Vec<ClusterConfig>
@@ -51,8 +51,8 @@ fn next_particle_id() -> usize {
 fn create_random_particle(config: &ClusterConfig) -> Particle {
     Particle {
         id: next_particle_id(),
-        x: config.center.x as f64 - config.width as f64 / 2.0 + rand_num(0.0, config.width as f64),
-        y: config.center.y as f64 - config.height as f64 / 2.0 + rand_num(0.0, config.height as f64),
+        x: (config.center.x as f64 - config.width as f64 / 2.0 + rand_num(0.0, config.width as f64)) as u32,
+        y: (config.center.y as f64 - config.height as f64 / 2.0 + rand_num(0.0, config.height as f64)) as u32,
         v: config.velocity.clone(),
         mass: config.particle_mass_kg,
     }
@@ -102,6 +102,24 @@ fn write_frame(mut file: &File, particles: &Box<dyn ParticleCollection>, prev_fr
     Ok(len)
 }
 
+fn update_particles(particles: &Box<dyn ParticleCollection>, interval_seconds: u64) -> Box<dyn ParticleCollection> {
+    let mut new_particles: Box<dyn ParticleCollection> = Box::new(ParticleList::new());
+    for p in particles.iter() {
+        let new_particle = Particle {
+            id: p.id,
+            mass: p.mass,
+            v: Vector {
+                x: p.v.x,
+                y: p.v.y
+            },
+            x: p.x + ((p.v.x * (interval_seconds as f64)) as u32),
+            y: p.y + ((p.v.y * (interval_seconds as f64)) as u32),
+        };
+        new_particles.add(new_particle);
+    }
+    new_particles
+}
+
 fn main() {
     let args = read_args();
     let config = read_config(args.config_path);
@@ -110,6 +128,7 @@ fn main() {
     create_initial_particles(&mut particles, &config.clusters);
     let mut prev_frame_size = 0 as u32;
     loop {
+        particles = update_particles(&particles, config.interval_seconds as u64);
         prev_frame_size = write_frame(&file, &particles, prev_frame_size).unwrap();
     }
 }
