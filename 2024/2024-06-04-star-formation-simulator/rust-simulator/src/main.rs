@@ -110,10 +110,13 @@ fn read_config(path: String) -> Config {
 }
 
 fn write_frame(mut file: &File, particles: &Vec<Particle>, prev_frame_size: u32) -> io::Result<u32> {
-    let buf = encode::to_vec(&particles).unwrap();
+    let mapped = &particles.iter()
+        .map(|p| (p.id, p.x as i32, p.y as i32, p.mass as i32))
+        .collect::<Vec<_>>();
+    let buf = encode::to_vec(&mapped).unwrap();
     let len = buf.len() as u32;
-    file.write_all(&(prev_frame_size).to_be_bytes()).unwrap();
     file.write_all(&(len).to_be_bytes()).unwrap();
+    file.write_all(&(prev_frame_size).to_be_bytes()).unwrap();
     file.write_all(&buf).unwrap();
     Ok(len)
 }
@@ -124,10 +127,8 @@ fn main() {
     let file = File::create(args.output_path).unwrap();
     let particles = create_initial_particles(&config.clusters);
     let mut prev_frame_size = 0 as u32;
-    prev_frame_size = write_frame(&file, &particles, prev_frame_size).unwrap();
-    prev_frame_size = write_frame(&file, &particles, prev_frame_size).unwrap();
 
-    // for particle in &particles {
-    //     println!("{:?}", particle);
-    // }
+    loop {
+        prev_frame_size = write_frame(&file, &particles, prev_frame_size).unwrap();
+    }
 }
