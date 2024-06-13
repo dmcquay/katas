@@ -1,10 +1,16 @@
+mod types;
+mod particle_collection;
+
+use types::{Particle, Point, Vector};
+use particle_collection::{ParticleCollection, ParticleList};
+
 extern crate serde;
 extern crate rmp_serde;
 
 use rand::Rng;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use serde::{Serialize, Deserialize};
-use rmp_serde::{encode};
+use serde::Deserialize;
+use rmp_serde::encode;
 use std::fs::File;
 use std::io::{BufReader, Write};
 use std::io;
@@ -22,36 +28,15 @@ struct ClusterConfig {
 
 #[derive(Deserialize)]
 struct Config {
-    interval_seconds: f64,
-    max_frames: i64,
-    enable_gravitational_clustering: bool,
+    // interval_seconds: f64,
+    // max_frames: i64,
+    // enable_gravitational_clustering: bool,
     clusters: Vec<ClusterConfig>
 }
 
 struct Args {
     config_path: String,
     output_path: String
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-struct Vector {
-    x: f64,
-    y: f64,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-struct Point {
-    x: i32,
-    y: i32,
-}
-
-#[derive(Debug, Serialize)]
-struct Particle {
-    id: usize,
-    x: f64,
-    y: f64,
-    v: Vector,
-    mass: f64,
 }
 
 fn rand_num(min: f64, max: f64) -> f64 {
@@ -73,16 +58,12 @@ fn create_random_particle(config: &ClusterConfig) -> Particle {
     }
 }
 
-fn create_initial_particles(clusters: &Vec<ClusterConfig>) -> Vec<Particle> {
-    let mut particles: Vec<Particle> = Vec::new();
-
+fn create_initial_particles(particles: &mut Box<dyn ParticleCollection>, clusters: &Vec<ClusterConfig>) {
     for cluster in clusters {
         for _ in 0..cluster.particle_count {
-            particles.push(create_random_particle(cluster));
+            particles.add(create_random_particle(cluster));
         }
     }
-
-    particles
 }
 
 fn read_args() -> Args {
@@ -109,9 +90,9 @@ fn read_config(path: String) -> Config {
     config
 }
 
-fn write_frame(mut file: &File, particles: &Vec<Particle>, prev_frame_size: u32) -> io::Result<u32> {
+fn write_frame(mut file: &File, particles: &Box<dyn ParticleCollection>, prev_frame_size: u32) -> io::Result<u32> {
     let mapped = &particles.iter()
-        .map(|p| (p.id, p.x as i32, p.y as i32, p.mass as i32))
+        .map(|p| (p.id, p.x as i32, p.y as i32, p.mass as u32))
         .collect::<Vec<_>>();
     let buf = encode::to_vec(&mapped).unwrap();
     let len = buf.len() as u32;
@@ -125,9 +106,9 @@ fn main() {
     let args = read_args();
     let config = read_config(args.config_path);
     let file = File::create(args.output_path).unwrap();
-    let particles = create_initial_particles(&config.clusters);
+    let mut particles: Box<dyn ParticleCollection> = Box::new(ParticleList::new());
+    create_initial_particles(&mut particles, &config.clusters);
     let mut prev_frame_size = 0 as u32;
-
     loop {
         prev_frame_size = write_frame(&file, &particles, prev_frame_size).unwrap();
     }
