@@ -1,0 +1,13 @@
+#!/bin/bash
+
+(
+    cd rust-simulator
+    cargo build --release
+)
+
+if [[ "$?" != "0" ]]; then
+    exit 1
+fi
+
+filename=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
+./rust-simulator/target/release/simulator data/$1/config.json data/$1/$filename.bin
