@@ -10,13 +10,17 @@
 
 # Simulation performance
 
-Time to write >= 10MB
+Time to write >= 10MB. I don't remember what the settings were. It was direct point comparison, no QuadTree. But I don't remember how many particles.
 
 | Runtime | Duration | Peak Mem |
 | ------- | -------: | -------: |
 | python3 |    14:00 |     15MB |
 | Nodejs  |     0:52 |    540MB |
 | Bun     |     0:32 |     82MB |
+
+Comparison betwen Bun and rust. Collisions disabled. Direct (no QuadTree). 3 frames.
+Bun: 502 seconds
+rust: 117 seconds (4.29x faster)
 
 # simulate ideas
 

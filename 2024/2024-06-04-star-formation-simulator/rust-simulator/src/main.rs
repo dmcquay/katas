@@ -15,6 +15,11 @@ use std::fs::File;
 use std::io::{BufReader, Write};
 use std::io;
 use std::env;
+use std::time::Instant;
+
+static G: f64 = 6.6743e-11;
+static MIN_COLLISION_DISTANCE_METERS: f64 = 1.0;
+static MINIMUM_FORCE_DISTANCE_METERS: f64 = 2.0;
 
 #[derive(Deserialize, Clone)]
 struct ClusterConfig {
@@ -51,8 +56,8 @@ fn next_particle_id() -> usize {
 fn create_random_particle(config: &ClusterConfig) -> Particle {
     Particle {
         id: next_particle_id(),
-        x: (config.center.x as f64 - config.width as f64 / 2.0 + rand_num(0.0, config.width as f64)) as u32,
-        y: (config.center.y as f64 - config.height as f64 / 2.0 + rand_num(0.0, config.height as f64)) as u32,
+        x: (config.center.x - config.width / 2 + rand_num(0.0, config.width as f64) as i32),
+        y: (config.center.y - config.height / 2 + rand_num(0.0, config.height as f64) as i32),
         v: config.velocity.clone(),
         mass: config.particle_mass_kg,
     }
@@ -102,18 +107,47 @@ fn write_frame(mut file: &File, particles: &Box<dyn ParticleCollection>, prev_fr
     Ok(len)
 }
 
+fn calculate_gravitational_force(p1: &Particle, p2: &Particle) -> Vector {
+    let dx = (p2.x - p1.x) as f64;
+    let dy = (p2.y - p1.y) as f64;
+    let distance = (dx * dx + dy * dy).sqrt();
+
+    if distance < MINIMUM_FORCE_DISTANCE_METERS {
+        return Vector { x: 0.0, y: 0.0 };
+    }
+
+    let force_magnitude = (G * p1.mass * p2.mass) / (distance * distance);
+    let force_x = (force_magnitude * dx) / distance;
+    let force_y = (force_magnitude * dy) / distance;
+
+    Vector { x: force_x, y: force_y }
+}
+
+fn add_vectors(vectors: &[Vector]) -> Vector {
+    vectors.iter().fold(Vector { x: 0.0, y: 0.0 }, |acc, v| Vector {
+        x: acc.x + v.x,
+        y: acc.y + v.y,
+    })
+}
+
 fn update_particles(particles: &Box<dyn ParticleCollection>, interval_seconds: u64) -> Box<dyn ParticleCollection> {
     let mut new_particles: Box<dyn ParticleCollection> = Box::new(ParticleList::new());
     for p in particles.iter() {
+        let force = add_vectors(&particles.iter()
+            .map(|g| calculate_gravitational_force(p, g))
+            .collect::<Vec<_>>());
+        let acceleration_x = force.x / p.mass;
+        let acceleration_y = force.y / p.mass;
+
         let new_particle = Particle {
             id: p.id,
             mass: p.mass,
             v: Vector {
-                x: p.v.x,
-                y: p.v.y
+                x: p.v.x + acceleration_x * interval_seconds as f64,
+                y: p.v.y + acceleration_y * interval_seconds as f64
             },
-            x: p.x + ((p.v.x * (interval_seconds as f64)) as u32),
-            y: p.y + ((p.v.y * (interval_seconds as f64)) as u32),
+            x: p.x + ((p.v.x * (interval_seconds as f64)) as i32),
+            y: p.y + ((p.v.y * (interval_seconds as f64)) as i32),
         };
         new_particles.add(new_particle);
     }
@@ -127,8 +161,25 @@ fn main() {
     let mut particles: Box<dyn ParticleCollection> = Box::new(ParticleList::new());
     create_initial_particles(&mut particles, &config.clusters);
     let mut prev_frame_size = 0 as u32;
+    let mut last_report_time = Instant::now();
+    let mut frame = 0;
+    let mut frames_since_last_report = 0;
+
     loop {
         particles = update_particles(&particles, config.interval_seconds as u64);
         prev_frame_size = write_frame(&file, &particles, prev_frame_size).unwrap();
+
+        frame += 1;
+        frames_since_last_report += 1;
+        let elapsed = last_report_time.elapsed();
+        if elapsed.as_millis() > 10000 {
+            println!(
+              "frame {}: seconds per generation: {}",
+              frame,
+              elapsed.as_millis() / 1000 / frames_since_last_report
+            );
+            last_report_time = Instant::now();
+            frames_since_last_report = 0;
+        }
     }
 }

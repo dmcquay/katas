@@ -15,8 +15,8 @@ pub struct Point {
 #[derive(Debug, Serialize)]
 pub struct Particle {
     pub id: usize,
-    pub x: u32,
-    pub y: u32,
+    pub x: i32,
+    pub y: i32,
     pub v: Vector,
     pub mass: f64,
 }
