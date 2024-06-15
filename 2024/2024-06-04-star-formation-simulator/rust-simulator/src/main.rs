@@ -2,7 +2,7 @@ mod types;
 mod particle_collection;
 
 use types::{Particle, Point, Vector};
-use particle_collection::{ParticleCollection, ParticleList};
+use particle_collection::{ParticleCollection, ParticleQuadTree};
 
 extern crate serde;
 extern crate rmp_serde;
@@ -131,7 +131,7 @@ fn add_vectors(vectors: &[Vector]) -> Vector {
 }
 
 fn update_particles(particles: &Box<dyn ParticleCollection>, interval_seconds: u64) -> Box<dyn ParticleCollection> {
-    let mut new_particles: Box<dyn ParticleCollection> = Box::new(ParticleList::new());
+    let mut new_particles: Box<dyn ParticleCollection> = Box::new(ParticleQuadTree::new());
     for p in particles.iter() {
         let force = add_vectors(&particles.iter()
             .map(|g| calculate_gravitational_force(p, g))
@@ -158,7 +158,7 @@ fn main() {
     let args = read_args();
     let config = read_config(args.config_path);
     let file = File::create(args.output_path).unwrap();
-    let mut particles: Box<dyn ParticleCollection> = Box::new(ParticleList::new());
+    let mut particles: Box<dyn ParticleCollection> = Box::new(ParticleQuadTree::new());
     create_initial_particles(&mut particles, &config.clusters);
     let mut prev_frame_size = 0 as u32;
     let mut last_report_time = Instant::now();
