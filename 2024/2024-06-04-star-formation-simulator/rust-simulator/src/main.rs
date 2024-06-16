@@ -174,9 +174,9 @@ fn main() {
         let elapsed = last_report_time.elapsed();
         if elapsed.as_millis() > 10000 {
             println!(
-              "frame {}: seconds per generation: {}",
+              "frame {}: seconds per frame: {:.3}",
               frame,
-              elapsed.as_millis() / 1000 / frames_since_last_report
+              elapsed.as_millis() as f64 / 1000f64 / frames_since_last_report as f64
             );
             last_report_time = Instant::now();
             frames_since_last_report = 0;
