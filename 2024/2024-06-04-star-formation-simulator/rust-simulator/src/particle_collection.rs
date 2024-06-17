@@ -1,39 +1,146 @@
 use crate::types::Particle;
 
-struct ParticleQuadTreeNodeUndivided {
+struct Bounds {
+    top: i32,
+    bottom: i32,
+    left: i32,
+    right: i32
+}
+
+struct ParticleQuadTreeNodeDataUndivided {
     particles: Vec<Particle>,
 }
 
-struct ParticleQuadTreeNodeDivided {
+struct ParticleQuadTreeNodeDataDivided {
     top_left: Box<ParticleQuadTreeNode>,
     top_right: Box<ParticleQuadTreeNode>,
     bottom_left: Box<ParticleQuadTreeNode>,
-    bottom_right: Box<ParticleQuadTreeNode>
+    bottom_right: Box<ParticleQuadTreeNode>,
 }
 
-enum ParticleQuadTreeNode {
-    Undivided(ParticleQuadTreeNodeUndivided),
-    Divided(ParticleQuadTreeNodeDivided),
+enum ParticleQuadTreeNodeData {
+    Undivided(ParticleQuadTreeNodeDataUndivided),
+    Divided(ParticleQuadTreeNodeDataDivided),
+}
+
+struct ParticleQuadTreeNode {
+    bounds: Bounds,
+    data: ParticleQuadTreeNodeData
 }
 
 pub struct ParticleQuadTree {
-    root: ParticleQuadTreeNode
+    root: ParticleQuadTreeNode,
+    max_particles_per_node: u32
 }
 
 impl ParticleQuadTree {
-    pub fn new() -> Self {
+    pub fn new(max_particles_per_node: u32) -> Self {
         ParticleQuadTree {
-            root: ParticleQuadTreeNode::Undivided(ParticleQuadTreeNodeUndivided {
-                particles: Vec::new()
-            })
+            root: ParticleQuadTreeNode {
+                bounds: Bounds {
+                    top: i32::MIN,
+                    bottom: i32::MAX,
+                    left: i32::MIN,
+                    right: i32::MAX
+                },
+                data: ParticleQuadTreeNodeData::Undivided(ParticleQuadTreeNodeDataUndivided {
+                    particles: Vec::new(),
+                }),
+            },
+            max_particles_per_node
         }
     }
 
     pub fn add(&mut self, particle: Particle) {
-        match self.root {
-            ParticleQuadTreeNode::Divided(ref divided) => {},
-            ParticleQuadTreeNode::Undivided(ref mut undivided) => {
-                undivided.particles.push(particle)
+        let mut current_node = &mut self.root;
+        let mut divide_opt: Option<Vec<Particle>> = None;
+        
+        loop {
+            match current_node.data {
+                ParticleQuadTreeNodeData::Undivided(ref mut undivided) => {
+                    undivided.particles.push(particle);
+                    if undivided.particles.len() > self.max_particles_per_node as usize {
+                        divide_opt = Some(undivided.particles.clone());
+                    }
+                    break;
+                }
+                ParticleQuadTreeNodeData::Divided(ref mut divided) => {
+                    let x_divide = current_node.bounds.left + (current_node.bounds.right - current_node.bounds.left) / 2;
+                    let y_divide = current_node.bounds.bottom + (current_node.bounds.top - current_node.bounds.bottom) / 2;
+                    if particle.location.x >= x_divide {
+                        if particle.location.y >= y_divide {
+                            current_node = &mut divided.top_right
+                        } else {
+                            current_node = &mut  divided.bottom_right
+                        }
+                    } else {
+                        if particle.location.y >= y_divide {
+                            current_node = &mut  divided.top_left
+                        } else {
+                            current_node = &mut  divided.bottom_left
+                        }
+                    }
+                }
+            }
+        }
+
+        match divide_opt {
+            None => {
+            },
+            Some(particles ) => {
+                let x_divide = current_node.bounds.left + (current_node.bounds.right - current_node.bounds.left) / 2;
+                let y_divide = current_node.bounds.bottom + (current_node.bounds.top - current_node.bounds.bottom) / 2;
+                
+                current_node.data = ParticleQuadTreeNodeData::Divided(ParticleQuadTreeNodeDataDivided {
+                    top_left: Box::new(ParticleQuadTreeNode {
+                        bounds: Bounds {
+                            top: current_node.bounds.top,
+                            bottom: y_divide,
+                            left: current_node.bounds.left,
+                            right: x_divide,
+                        },
+                        data: ParticleQuadTreeNodeData::Undivided(ParticleQuadTreeNodeDataUndivided {
+                            particles: Vec::new(),
+                        }),
+                    }),
+                    top_right: Box::new(ParticleQuadTreeNode {
+                        bounds: Bounds {
+                            top: current_node.bounds.top,
+                            bottom: y_divide,
+                            left: x_divide,
+                            right: current_node.bounds.right,
+                        },
+                        data: ParticleQuadTreeNodeData::Undivided(ParticleQuadTreeNodeDataUndivided {
+                            particles: Vec::new(),
+                        }),
+                    }),
+                    bottom_left: Box::new(ParticleQuadTreeNode {
+                        bounds: Bounds {
+                            top: y_divide,
+                            bottom: current_node.bounds.bottom,
+                            left: current_node.bounds.left,
+                            right: x_divide,
+                        },
+                        data: ParticleQuadTreeNodeData::Undivided(ParticleQuadTreeNodeDataUndivided {
+                            particles: Vec::new(),
+                        }),
+                    }),
+                    bottom_right: Box::new(ParticleQuadTreeNode {
+                        bounds: Bounds {
+                            top: y_divide,
+                            bottom: current_node.bounds.bottom,
+                            left: x_divide,
+                            right: current_node.bounds.right,
+                        },
+                        data: ParticleQuadTreeNodeData::Undivided(ParticleQuadTreeNodeDataUndivided {
+                            particles: Vec::new(),
+                        }),
+                    }),
+                });
+
+                for particle in particles.iter() {
+                    self.add(*particle)
+                }
             }
         }
     }
@@ -67,15 +174,19 @@ impl<'a> Iterator for ParticleQuadTreeIterator<'a> {
             let node = self.node_stack.pop();
         
             match node {
-                Some(ParticleQuadTreeNode::Divided(ref divided)) => {
-                    self.node_stack.push(&divided.top_left);
-                    self.node_stack.push(&divided.top_right);
-                    self.node_stack.push(&divided.bottom_left);
-                    self.node_stack.push(&divided.bottom_right);
-                }
-                Some(ParticleQuadTreeNode::Undivided(ref undivided)) => {
-                    self.particles = Some(&undivided.particles);
-                    self.current_particle_index = Some(0);
+                Some(some_node) => {
+                    match some_node.data {
+                        ParticleQuadTreeNodeData::Divided(ref divided) => {
+                            self.node_stack.push(&divided.top_left);
+                            self.node_stack.push(&divided.top_right);
+                            self.node_stack.push(&divided.bottom_left);
+                            self.node_stack.push(&divided.bottom_right);
+                        }
+                        ParticleQuadTreeNodeData::Undivided(ref undivided) => {
+                            self.particles = Some(&undivided.particles);
+                            self.current_particle_index = Some(0);
+                        }
+                    }
                 },
                 None => {}
             }
