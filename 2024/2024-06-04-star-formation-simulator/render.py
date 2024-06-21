@@ -11,7 +11,7 @@ initial_frame = 1
 if (len(sys.argv) >= 3):
     initial_frame = int(sys.argv[2])
 
-initial_zoom = 1
+initial_zoom = 0.25
 if (len(sys.argv) >= 4):
     initial_zoom = float(sys.argv[3])
 
@@ -76,9 +76,9 @@ DOUBLE_CLICK_THRESHOLD = 500
 pygame.init()
 pygame.font.init()
 font = pygame.font.SysFont('Arial', 16)
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption('Particle Simulation')
+screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 visible_rect = pygame.Rect(-100, -100, WIDTH + 100, HEIGHT + 100)
+pygame.display.set_caption('Particle Simulation')
 
 def radius_from_area(area):
     return math.sqrt(area / math.pi)
@@ -150,7 +150,7 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps
 
 # Main loop
 def main():
-    global end, initial_zoom, initial_frame, initial_tracking_id
+    global end, initial_zoom, initial_frame, initial_tracking_id, screen, visible_rect, WIDTH, HEIGHT
 
     clock = pygame.time.Clock()
     zoom_level = initial_zoom
@@ -162,7 +162,7 @@ def main():
     particles = None
     tracking_id = initial_tracking_id
     last_click_time = 0
-    fps = 9
+    fps = 20
     reverse = False
     pause = False
 
@@ -191,6 +191,11 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.VIDEORESIZE:
+                WIDTH = event.w
+                HEIGHT = event.h
+                screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+                visible_rect = pygame.Rect(-100, -100, WIDTH + 100, HEIGHT + 100)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_KP_PLUS or event.key == pygame.K_EQUALS:
                     if (fps == 1):
