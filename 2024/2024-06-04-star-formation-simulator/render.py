@@ -1,3 +1,4 @@
+import time
 import pygame
 import sys
 import math
@@ -48,8 +49,12 @@ def next():
     global position, frame, end
     f.seek(position)
     current_frame_size, previous_frame_size = read_header()
-    position += 8 + current_frame_size
-    frame += 1
+    candidate_position = position + 8 + current_frame_size
+    f.seek(candidate_position)
+    header = f.read(8)
+    if len(header) == 8:
+        position = candidate_position
+        frame += 1
 
 def prev():
     global position, frame, end
@@ -84,7 +89,7 @@ def radius_from_area(area):
     return math.sqrt(area / math.pi)
 
 # Render particles
-def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps, reverse):
+def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps, actual_fps, reverse):
     global end
     screen.fill(BACKGROUND_COLOR)
     
@@ -121,7 +126,7 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps
         text_idx += 1
 
     print_stat('frame: {}'.format(frame))
-    print_stat('fps: {}'.format(fps))
+    print_stat('fps: {}, actual: {}'.format(fps, round(actual_fps)))
     print_stat('zoom level: {:.2f}'.format(zoom_level))
     print_stat('location: {}, {}'.format(int(offset_x), int(offset_y)))
     
@@ -165,10 +170,33 @@ def main():
     fps = 20
     reverse = False
     pause = False
+    
+    # each bucket holds frame counts for frame_count_interval_seconds if value is no 0
+    # except first bucket duration is now - frame_count_start
+    frame_counts = [0,0,0]
+    frame_count_start_seconds = time.time()
+    actual_fps = 0
+    frame_count_interval_seconds = 3
 
     seek(initial_frame)
 
     while True:
+        if time.time() - frame_count_start_seconds > frame_count_interval_seconds:
+            frame_counts[2] = frame_counts[1]
+            frame_counts[1] = frame_counts[0]
+            frame_counts[0] = 0
+            frame_count_start_seconds = time.time()
+        
+        frame_counts[0] += 1
+
+        recent_frame_count = frame_counts[0] + frame_counts[1] + frame_counts[2]
+        recent_frame_count_seconds = time.time() - frame_count_start_seconds
+        if frame_counts[1] != 0:
+            recent_frame_count_seconds += frame_count_interval_seconds
+        if frame_counts[2] != 0:
+            recent_frame_count_seconds += frame_count_interval_seconds
+        actual_fps = recent_frame_count / recent_frame_count_seconds
+
         if not pause:
             # start_time = time.time()
             next_particles = read()
@@ -202,11 +230,15 @@ def main():
                         fps = 5
                     else:
                         fps += int(fps / 3)
+                    frame_counts = [0,0,0]
+                    frame_count_start_seconds = time.time()
                 if event.key == pygame.K_KP_MINUS or event.key == pygame.K_MINUS:
                     if (fps <= 5):
                         fps = 1
                     else:
                         fps -= int(fps / 3)
+                    frame_counts = [0,0,0]
+                    frame_count_start_seconds = time.time()
                 elif event.key == pygame.K_ESCAPE:
                     if tracking_id is not None:
                         tracking_id = None
@@ -270,7 +302,7 @@ def main():
                     break
 
         # start_time = time.time()
-        render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps, reverse)
+        render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps, actual_fps, reverse)
         # end_time = time.time()
         # elapsed_time = end_time - start_time
         # print(f"render: {elapsed_time} seconds")
