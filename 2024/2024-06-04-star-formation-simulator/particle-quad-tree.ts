@@ -35,10 +35,10 @@ const DEFAULT_OPTIONS: ParticleQuadTreeOptions = {
 };
 
 const DEFAULT_BOUNDS: Bounds = {
-  top: 100000,
-  bottom: -100000,
-  right: 100000,
-  left: -100000,
+  top: 1000000,
+  bottom: -1000000,
+  right: 1000000,
+  left: -1000000,
 };
 
 const boundsOverlap = (b1: Bounds, b2: Bounds): boolean => {

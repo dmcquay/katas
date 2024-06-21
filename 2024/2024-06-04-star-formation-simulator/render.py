@@ -4,7 +4,6 @@ import sys
 import math
 import msgpack
 import struct
-# import time
 
 file_path = sys.argv[1]
 
@@ -55,6 +54,9 @@ def next():
     if len(header) == 8:
         position = candidate_position
         frame += 1
+        end = False
+    else:
+        end = True
 
 def prev():
     global position, frame, end
@@ -155,7 +157,7 @@ def render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps
 
 # Main loop
 def main():
-    global end, initial_zoom, initial_frame, initial_tracking_id, screen, visible_rect, WIDTH, HEIGHT
+    global initial_zoom, initial_frame, initial_tracking_id, screen, visible_rect, WIDTH, HEIGHT
 
     clock = pygame.time.Clock()
     zoom_level = initial_zoom
@@ -198,20 +200,11 @@ def main():
         actual_fps = recent_frame_count / recent_frame_count_seconds
 
         if not pause:
-            # start_time = time.time()
-            next_particles = read()
-            # end_time = time.time()
-            # elapsed_time = end_time - start_time
-            # print(f"read: {elapsed_time} seconds")
-            if (next_particles is None):
-                end = True
+            particles = read()
+            if (reverse):
+                prev()
             else:
-                end = False
-                particles = next_particles
-                if (reverse):
-                    prev()
-                else:
-                    next()
+                next()
         
         if not running:
             break
@@ -300,12 +293,8 @@ def main():
                     offset_x = x
                     offset_y = y
                     break
-
-        # start_time = time.time()
+                    
         render_particles(particles, zoom_level, offset_x, offset_y, tracking_id, fps, actual_fps, reverse)
-        # end_time = time.time()
-        # elapsed_time = end_time - start_time
-        # print(f"render: {elapsed_time} seconds")
         clock.tick(fps)
 
     f.close()
