@@ -295,8 +295,8 @@ let generation = 0;
 let lastGenerationRateReport = Date.now();
 let genCounter = 0;
 while (!interrupted) {
-  updateParticles(particleCollection);
   printParticles(particleCollection.getAll());
+  updateParticles(particleCollection);
   generation++;
   genCounter++;
 

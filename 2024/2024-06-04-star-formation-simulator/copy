@@ -1,0 +1,4 @@
+#!/bin/bash
+
+mkdir -p data/$2
+cp data/$1/config.env data/$2/config.env
