@@ -2,7 +2,7 @@ mod types;
 mod particle_collection;
 
 use types::{Particle, Point, Vector};
-use particle_collection::ParticleQuadTree;
+use particle_collection::BarnesHutTree;
 
 extern crate serde;
 extern crate rmp_serde;
@@ -66,10 +66,12 @@ fn create_random_particle(config: &ClusterConfig) -> Particle {
     }
 }
 
-fn create_initial_particles(particles: &mut ParticleQuadTree, clusters: &Vec<ClusterConfig>) {
+fn create_initial_particles(particles: &mut BarnesHutTree, clusters: &Vec<ClusterConfig>) {
     for cluster in clusters {
         for _ in 0..cluster.particle_count {
-            particles.add(create_random_particle(cluster));
+            let particle = create_random_particle(cluster);
+            println!("adding particle {}", particle.id);
+            particles.add(particle);
         }
     }
 }
@@ -98,7 +100,7 @@ fn read_config(path: String) -> Config {
     config
 }
 
-fn write_frame(mut file: &File, particles: &ParticleQuadTree, prev_frame_size: u32) -> io::Result<u32> {
+fn write_frame(mut file: &File, particles: &BarnesHutTree, prev_frame_size: u32) -> io::Result<u32> {
     let mapped = &particles.iter()
         .map(|p| (p.id, p.location.x as i32, p.location.y as i32, p.mass as u32))
         .collect::<Vec<_>>();
@@ -133,8 +135,8 @@ fn add_vectors(vectors: &[Vector]) -> Vector {
     })
 }
 
-fn update_particles(particles: &ParticleQuadTree, interval_seconds: u64) -> ParticleQuadTree {
-    let mut new_particles: ParticleQuadTree = ParticleQuadTree::new(QUAD_TREE_MAX_PARTICLES_PER_NODE);
+fn update_particles(particles: &BarnesHutTree, interval_seconds: u64) -> BarnesHutTree {
+    let mut new_particles: BarnesHutTree = BarnesHutTree::new(QUAD_TREE_MAX_PARTICLES_PER_NODE);
     for p in particles.iter() {
         let force = add_vectors(&particles.iter()
             .map(|g| calculate_gravitational_force(p, g))
@@ -163,7 +165,7 @@ fn main() {
     let args = read_args();
     let config = read_config(args.config_path);
     let file = File::create(args.output_path).unwrap();
-    let mut particles: ParticleQuadTree = ParticleQuadTree::new(QUAD_TREE_MAX_PARTICLES_PER_NODE);
+    let mut particles: BarnesHutTree = BarnesHutTree::new(QUAD_TREE_MAX_PARTICLES_PER_NODE);
     create_initial_particles(&mut particles, &config.clusters);
     let mut prev_frame_size = 0 as u32;
     let mut last_report_time = Instant::now();

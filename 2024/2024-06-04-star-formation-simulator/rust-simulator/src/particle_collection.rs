@@ -1,4 +1,4 @@
-use crate::types::Particle;
+use crate::types::{Particle, Point};
 
 struct Bounds {
     top: i32,
@@ -28,14 +28,84 @@ struct ParticleQuadTreeNode {
     data: ParticleQuadTreeNodeData
 }
 
-pub struct ParticleQuadTree {
+pub struct BarnesHutTree {
     root: ParticleQuadTreeNode,
     max_particles_per_node: u32
 }
 
-impl ParticleQuadTree {
+fn is_within_bounds(_bounds: &Bounds, _point: &Point) -> bool {
+    unimplemented!();
+}
+
+fn split(node: &mut ParticleQuadTreeNode) {
+    let x_divide = node.bounds.left + (node.bounds.right - node.bounds.left) / 2;
+    let y_divide = node.bounds.bottom + (node.bounds.top - node.bounds.bottom) / 2;
+    node.data = ParticleQuadTreeNodeData::Divided(ParticleQuadTreeNodeDataDivided {
+        top_left: Box::new(ParticleQuadTreeNode {
+            bounds: Bounds {
+                top: node.bounds.top,
+                bottom: y_divide,
+                left: node.bounds.left,
+                right: x_divide,
+            },
+            data: ParticleQuadTreeNodeData::Undivided(ParticleQuadTreeNodeDataUndivided {
+                particles: Vec::new(),
+            }),
+        }),
+        top_right: Box::new(ParticleQuadTreeNode {
+            bounds: Bounds {
+                top: node.bounds.top,
+                bottom: y_divide,
+                left: x_divide,
+                right: node.bounds.right,
+            },
+            data: ParticleQuadTreeNodeData::Undivided(ParticleQuadTreeNodeDataUndivided {
+                particles: Vec::new(),
+            }),
+        }),
+        bottom_left: Box::new(ParticleQuadTreeNode {
+            bounds: Bounds {
+                top: y_divide,
+                bottom: node.bounds.bottom,
+                left: node.bounds.left,
+                right: x_divide,
+            },
+            data: ParticleQuadTreeNodeData::Undivided(ParticleQuadTreeNodeDataUndivided {
+                particles: Vec::new(),
+            }),
+        }),
+        bottom_right: Box::new(ParticleQuadTreeNode {
+            bounds: Bounds {
+                top: y_divide,
+                bottom: node.bounds.bottom,
+                left: x_divide,
+                right: node.bounds.right,
+            },
+            data: ParticleQuadTreeNodeData::Undivided(ParticleQuadTreeNodeDataUndivided {
+                particles: Vec::new(),
+            }),
+        }),
+    });
+}
+
+fn add_to_children(nodes: &mut Vec<ParticleQuadTreeNode>, particles: &Vec<Particle>) {
+    for particle in particles {
+        for node in nodes.iter_mut() {
+            if is_within_bounds(&node.bounds, &particle.location) {
+                match node.data {
+                    ParticleQuadTreeNodeData::Undivided(mut undivided) => {
+                        undivided.particles.push(*particle);
+                    },
+                    _ => {}
+                }
+            }
+        }
+    }
+}
+
+impl BarnesHutTree {
     pub fn new(max_particles_per_node: u32) -> Self {
-        ParticleQuadTree {
+        BarnesHutTree {
             root: ParticleQuadTreeNode {
                 bounds: Bounds {
                     top: i32::MIN,
@@ -51,16 +121,43 @@ impl ParticleQuadTree {
         }
     }
 
+    pub fn add2(&mut self, particle: Particle) {
+        let mut stack: Vec<&mut ParticleQuadTreeNode> = vec![&mut self.root];
+        while stack.len() > 0 {
+            let node = stack.pop().unwrap();
+            if is_within_bounds(&node.bounds, &particle.location) {
+                if let ParticleQuadTreeNodeData::Undivided(undivided) = &mut node.data {
+                    if undivided.particles.len() < self.max_particles_per_node as usize {
+                        undivided.particles.push(particle);
+                    } else {
+                        let particles_clone = undivided.particles.clone();
+                        split(node);
+                        
+                    }
+                } else {
+                    
+
+                }
+            }
+        }
+    }
+
+
+
     pub fn add(&mut self, particle: Particle) {
         let mut current_node = &mut self.root;
-        let mut divide_opt: Option<Vec<Particle>> = None;
+        let mut divide_needed = false;
+        let mut particles_to_add: Vec<Particle> = Vec::new();
+        particles_to_add.push(particle);
         
         loop {
             match current_node.data {
                 ParticleQuadTreeNodeData::Undivided(ref mut undivided) => {
                     undivided.particles.push(particle);
                     if undivided.particles.len() > self.max_particles_per_node as usize {
-                        divide_opt = Some(undivided.particles.clone());
+                        println!("detected node that needs to be divided");
+                        particles_to_add = undivided.particles.clone();
+                        divide_needed = true;
                     }
                     break;
                 }
@@ -88,6 +185,7 @@ impl ParticleQuadTree {
             None => {
             },
             Some(particles ) => {
+                println!("dividing node");
                 let x_divide = current_node.bounds.left + (current_node.bounds.right - current_node.bounds.left) / 2;
                 let y_divide = current_node.bounds.bottom + (current_node.bounds.top - current_node.bounds.bottom) / 2;
                 
@@ -139,6 +237,7 @@ impl ParticleQuadTree {
                 });
 
                 for particle in particles.iter() {
+                    println!("adding particle to new node");
                     self.add(*particle)
                 }
             }
