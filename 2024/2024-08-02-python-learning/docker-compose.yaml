@@ -1,0 +1,14 @@
+services:
+  pg:
+    image: postgres:15-alpine
+    ports:
+      - target: 5432
+        published: 5432
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
+
+volumes:
+  db_data:
