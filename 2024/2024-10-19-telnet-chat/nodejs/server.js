@@ -19,7 +19,7 @@ const server = net.createServer(async (socket) => {
   let firstMessage = true
 
   socket.on('data', (data) => {
-    message = data.toString().trim()
+    const message = data.toString().trim()
     if (message === 'leave') {
         socket.end()
         return
