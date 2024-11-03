@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+      "target": "ES2020", // Target modern JavaScript syntax
+      "module": "Node16", // Use CommonJS modules (default for Node.js)
+      "strict": true, // Enable all strict type-checking options
+      "esModuleInterop": true, // Allow default imports from CommonJS modules
+      "skipLibCheck": true, // Skip type checking for all declaration files
+      "forceConsistentCasingInFileNames": true, // Ensure file casing consistency
+      "types": ["node"] // Include Node.js type definitions
+    },
+    "include": [
+      "./**/*.ts" // Include all TypeScript files in your project
+    ],
+    "exclude": [
+      "node_modules" // Exclude node_modules
+    ]
+  }
+  

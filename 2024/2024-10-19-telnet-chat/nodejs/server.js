@@ -1,4 +1,4 @@
-const net = require('node:net');
+import net from 'node:net';
 
 const clients = new Set();
 
@@ -58,7 +58,7 @@ const server = net.createServer(async (socket) => {
   });
 });
 
-const PORT = 23; // Standard telnet port
+const PORT = 9999; // Standard telnet port
 server.listen(PORT, () => {
   console.log(`Chat server running on port ${PORT}`);
 });
