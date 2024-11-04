@@ -228,80 +228,83 @@ const luke: World = {
           },
         },
         {
-          name: 'Look next to the table',
-          found: ['table'],
+          name: "Look next to the table",
+          found: ["table"],
           response: {
-            find: ['safe'],
-            message: 'You found a safe.'
-          }
-        }
+            find: ["safe"],
+            message: "You found a safe.",
+          },
+        },
       ],
     },
     shop: {
       initial: "You go down a hallway. Along the hallway, there is a shop.",
       actions: [
         {
-          name: 'Ask the shopkeeper what is for sale',
+          name: "Ask the shopkeeper what is for sale",
           response: {
-            message: 'Healing food, Fire power up',
-            find: ['product list']
-          }
+            message: "Healing food, Fire power up",
+            find: ["product list"],
+          },
         },
         {
-          name: 'Buy healing food',
-          found: ['product list'],
+          name: "Buy healing food",
+          found: ["product list"],
           required: {
-            items: ['block of gold'],
-            message: `You need something valuable to trade with`
+            items: ["block of gold"],
+            message: `You need something valuable to trade with`,
           },
           response: {
-            acquireItem: 'healing food',
-            message: `You acquired healing food!`
-          }
+            acquireItem: "healing food",
+            message: `You acquired healing food!`,
+          },
         },
         {
-          name: 'Continue down the hall',
+          name: "Continue down the hall",
           response: {
-            moveToRoom: 'power_room',
-            message: 'You go to the power room'
-          }
-        }
+            moveToRoom: "power_room",
+            message: "You go to the power room",
+          },
+        },
       ],
     },
     power_room: {
-      initial: 'There is a box with wires. There is also a door on the other side of the room.',
+      initial:
+        "There is a box with wires. There is also a door on the other side of the room.",
       actions: [
         {
-          name: 'Inspect box with wires',
+          name: "Inspect box with wires",
           response: {
-            message: `There are three wires. It looks like we need to cut one of them.`,
-            find: ['wires']
-          }
+            message:
+              `There are three wires. It looks like we need to cut one of them.`,
+            find: ["wires"],
+          },
         },
         {
-          name: 'Cut the red wire',
-          found: ['wires'],
+          name: "Cut the red wire",
+          found: ["wires"],
           response: {
-            message: 'The door across the room creaks open. You walk through the door.',
-            find: ['open door']
-          }
+            message:
+              "The door across the room creaks open. You walk through the door.",
+            find: ["open door"],
+          },
         },
         {
-          name: 'Cut the blue wire',
-          found: ['wires'],
+          name: "Cut the blue wire",
+          found: ["wires"],
           response: {
-            message: 'You got zapped! Try another wire.'
-          }
+            message: "You got zapped! Try another wire.",
+          },
         },
         {
-          name: 'Cut the yellow wire',
-          found: ['wires'],
+          name: "Cut the yellow wire",
+          found: ["wires"],
           response: {
-            message: 'You got zapped! Try another wire.'
-          }
-        }
-      ]
-    }
+            message: "You got zapped! Try another wire.",
+          },
+        },
+      ],
+    },
   },
 };
 
@@ -380,27 +383,93 @@ type Socket = {
   writeLine: (msg: string) => void;
 };
 
-const buildClient = (socket: Socket) => {
-  const state: State = {
-    worlds: {},
-  };
+const loadSavefile = (file: string):State => {
+  const rawData = Deno.readTextFileSync('./savefiles/' + file)
+  return JSON.parse(rawData)
+}
 
-  socket.writeLine(
-    `Select a world: \n\t${
-      Object.values(worlds).map((world) => world.name).join("\n\t")
-    }`,
-  );
+const saveToSavefile = (state: State, file: string) => {
+  Deno.writeTextFileSync('./savefiles/' + file, JSON.stringify(state))
+}
+
+const buildClient = async (socket: Socket) => {
+  let state: State | undefined = undefined
+
+  socket.writeLine("Select a save file:");
+  const savefiles: string[] = [];
+  for await (const file of Deno.readDirSync("./savefiles")) {
+    savefiles.push(file.name);
+    socket.writeLine("\t" + file.name);
+  }
+  socket.writeLine("\tnew");
+
+  let savefile: string | undefined = undefined;
+  let collectSavefileName = false;
+
+  let selectingWorld = false
+  const selectWorld = () => { 
+    selectingWorld = true
+    socket.writeLine(
+      `Select a world: \n\t${
+        Object.values(worlds).map((world) => world.name).join("\n\t")
+      }`,
+    );
+  }
 
   return {
     handleInput(msg: string) {
+      if (state == null) {
+        if (collectSavefileName) {
+          savefile = msg;
+          socket.writeLine(`Creating new savefile "${savefile}"`)
+          state = {
+            worlds: {},
+          };
+          selectWorld()
+          return;
+        }
+
+        if (msg === "new") {
+          socket.writeLine("Please enter a name for the save file");
+          collectSavefileName = true;
+          return;
+        }
+        if (savefiles.includes(msg)) {
+          savefile = msg;
+          socket.writeLine(`Loading savefile "${savefile}"`);
+          state = loadSavefile(savefile)
+          selectWorld()
+          return;
+        }
+        socket.writeLine("That was not a valid save file");
+      }
+
+      if (state == null) {
+        throw new Error('state should not be null anymore')
+      }
+      if (savefile == null) {
+        throw new Error('savefile should not be null anymore')
+      }
+
+      if (msg === 'save') {
+        saveToSavefile(state, savefile)
+        socket.writeLine('Saved')
+        return
+      }
+
       let writeInitial = false;
-      if (state.currentWorld == null) {
+      if (selectingWorld) {
         if (worlds[msg] == null) {
           socket.writeLine(`${msg} is not a valid world`);
           return;
         }
         state.currentWorld = msg;
+        selectingWorld = false;
         writeInitial = true;
+      }
+
+      if (state.currentWorld == null) {
+        throw new Error('state.currentWorld should not be null at this point')
       }
 
       const world = worlds[state.currentWorld];
@@ -503,24 +572,28 @@ const buildClient = (socket: Socket) => {
 };
 
 const config = {
-  port: Deno.env.has('PORT') ? parseInt(Deno.env.get('PORT')!) : 9999
-}
+  port: Deno.env.has("PORT") ? parseInt(Deno.env.get("PORT")!) : 9999,
+};
 
 const listener = Deno.listen({ port: config.port });
-console.log(`Listening on port ${config.port}`)
+console.log(`Listening on port ${config.port}`);
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 
 for await (const conn of listener) {
-  const client = buildClient({
-    writeLine: (msg: string) => {
-      conn.write(encoder.encode(msg + "\n"));
-    },
+  const writeLine = (msg: string) => {
+    conn.write(encoder.encode(msg + "\n"));
+  };
+
+  const client = await buildClient({
+    writeLine,
   });
 
   for await (const chunk of conn.readable) {
     const data = decoder.decode(chunk).trim();
     client.handleInput(data);
   }
+
+  console.log('shutting down')
 }
