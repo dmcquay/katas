@@ -29,21 +29,21 @@ type World = {
 
 type RoomState = {
   found: string[];
-}
+};
 
 type WorldState = {
   room: string;
   items: string[];
   rooms: Record<string, RoomState>;
-}
+};
 
 type State = {
-  currentWorld?: string
-  worlds: Record<string, WorldState>
+  currentWorld?: string;
+  worlds: Record<string, WorldState>;
 };
 
 const dustin: World = {
-  name: 'Dustin',
+  name: "Dustin",
   firstRoom: "room1",
   rooms: {
     room1: {
@@ -79,11 +79,15 @@ const dustin: World = {
       initial: "You are in another dark room",
       actions: [],
     },
+    finish: {
+      initial: "Contratulations! You are outside and you are now free!",
+      actions: [],
+    },
   },
 };
 
 const gavin: World = {
-  name: 'Gavin',
+  name: "Gavin",
   firstRoom: "storage",
   rooms: {
     storage: {
@@ -176,7 +180,7 @@ const gavin: World = {
 };
 
 const luke: World = {
-  name: 'Luke',
+  name: "Luke",
   firstRoom: "main",
   rooms: {
     main: {
@@ -232,10 +236,60 @@ const luke: World = {
   },
 };
 
+const cloneRoom = (
+  room: Room,
+  nextRoom: string,
+  additionalActions: Action[],
+): Room => {
+  return {
+    ...room,
+    actions: [
+      ...room.actions.map((action) => {
+        if (action.response.moveToRoom != null) {
+          return {
+            ...action,
+            response: {
+              ...action.response,
+              moveToRoom: nextRoom,
+            },
+          };
+        } else {
+          return action;
+        }
+      }),
+      ...additionalActions,
+    ],
+  };
+};
+
+const combined: World = {
+  firstRoom: "dustin_room1",
+  name: "Combined",
+  rooms: {
+    dustin_room1: cloneRoom(dustin.rooms.room1, "gavin_storage", []),
+    gavin_storage: cloneRoom(gavin.rooms.storage, "luke_main", [{
+      name: "Go back to previous room",
+      response: {
+        moveToRoom: "dustin_room1",
+        message: "You went back to the first room",
+      },
+    }]),
+    luke_main: cloneRoom(luke.rooms.main, "dustin_finish", [{
+      name: "Go back to storage room",
+      response: {
+        moveToRoom: "gavin_storage",
+        message: "You went through the door back to the storage room",
+      },
+    }]),
+    dustin_finish: cloneRoom(dustin.rooms.finish, "na", []),
+  },
+};
+
 const worlds = {
   [dustin.name]: dustin,
   [luke.name]: luke,
   [gavin.name]: gavin,
+  [combined.name]: combined,
 };
 
 // validate references
@@ -259,46 +313,50 @@ type Socket = {
 
 const buildClient = (socket: Socket) => {
   const state: State = {
-    worlds: {}
+    worlds: {},
   };
 
-  socket.writeLine(`Select a world: \n\t${Object.values(worlds).map(world => world.name).join('\n\t')}`)
+  socket.writeLine(
+    `Select a world: \n\t${
+      Object.values(worlds).map((world) => world.name).join("\n\t")
+    }`,
+  );
 
   return {
     handleInput(msg: string) {
-      let writeInitial = false
+      let writeInitial = false;
       if (state.currentWorld == null) {
         if (worlds[msg] == null) {
-          socket.writeLine(`${msg} is not a valid world`)
-          return
+          socket.writeLine(`${msg} is not a valid world`);
+          return;
         }
-        state.currentWorld = msg
-        writeInitial = true
+        state.currentWorld = msg;
+        writeInitial = true;
       }
 
-      const world = worlds[state.currentWorld]
-      
+      const world = worlds[state.currentWorld];
+
       if (state.worlds[state.currentWorld] == null) {
         state.worlds[state.currentWorld] = {
           items: [],
           room: world.firstRoom,
-          rooms: {}
-        }
+          rooms: {},
+        };
       }
-      const worldState = state.worlds[state.currentWorld]
-      
-      const room = world.rooms[worldState.room]
+      const worldState = state.worlds[state.currentWorld];
+
+      const room = world.rooms[worldState.room];
 
       if (worldState.rooms[worldState.room] == null) {
         worldState.rooms[worldState.room] = {
-          found: []
-        }
+          found: [],
+        };
       }
-      const roomState = worldState.rooms[worldState.room]
-      
+      const roomState = worldState.rooms[worldState.room];
+
       if (writeInitial) {
-        socket.writeLine(room.initial)
-        return
+        socket.writeLine(room.initial);
+        return;
       }
 
       const availableActions = room.actions.filter((a) => {
@@ -310,15 +368,15 @@ const buildClient = (socket: Socket) => {
         }
         return true;
       });
-      const extendedAvailableActions:Action[] = [
+      const extendedAvailableActions: Action[] = [
         ...availableActions,
-        {
-          name: 'Switch worlds',
-          response: {
-            message: 'Not implemented yet'
-          }
-        }
-      ]
+        // {
+        //   name: "Switch worlds",
+        //   response: {
+        //     message: "Not implemented yet",
+        //   },
+        // },
+      ];
 
       const actions: Action[] = [
         ...extendedAvailableActions,
@@ -334,7 +392,7 @@ const buildClient = (socket: Socket) => {
       const scoredActions = actions.map((action) => {
         return {
           action,
-          distance: distance(msg, action.name),
+          distance: distance(msg.toLowerCase(), action.name.toLowerCase()),
         };
       });
       const action: Action =
@@ -375,7 +433,13 @@ const buildClient = (socket: Socket) => {
   };
 };
 
-const listener = Deno.listen({ port: 9999 });
+const config = {
+  port: Deno.env.has('PORT') ? parseInt(Deno.env.get('PORT')!) : 9999
+}
+
+const listener = Deno.listen({ port: config.port });
+console.log(`Listening on port ${config.port}`)
+
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 
