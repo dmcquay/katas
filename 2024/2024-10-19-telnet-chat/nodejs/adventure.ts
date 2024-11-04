@@ -173,9 +173,139 @@ const gavin: World = {
       ],
     },
     basement: {
-      initial: "You are now in the basement. It is light here.",
-      actions: [],
+      initial: "You are now in the basement. It is light here. There is a picture on the wall with patterns. Underneath the picture is a table with a board that has a spot for patterns. You see some drawers.",
+      actions: [
+        {
+          name: 'Open the top drawer',
+          response: {
+            acquireItem: 'switch remotes',
+            message: 'You found 2 Nintendo Switch remotes'
+          }
+        },
+        {
+          name: 'Open the second drawer',
+          response: {
+            message: 'This drawer is locked.'
+          }
+        },
+        {
+          name: 'Open the third drawer',
+          response: {
+            message: 'This drawer is locked.'
+          }
+        },
+        {
+          name: 'Inspect the picture',
+          response: {
+            message: 'The picture is actually a door. Behind the door is a little cubby containing three blocks, each of a unique shape.',
+            acquireItem: 'blocks'
+          }
+        },
+        {
+          name: 'Inspect the table',
+          response: {
+            find: ['button'],
+            message: 'On the table there is a small button. What does it do?'
+          }
+        },
+        {
+          name: 'Push button',
+          found: ['button'],
+          response: {
+            message: 'The top of the table opens up and a board with three slots is revealed.',
+            find: ['pattern board']
+          }
+        },
+        {
+          name: 'Put blocks into pattern board',
+          found: ['pattern board'],
+          required: {
+            items: ['blocks'],
+            message: `You don't have any blocks. Can you find some in the room?`
+          },
+          response: {
+            message: `You try different combinations until you find the right slot for each block. The pattern board opens, revealing a battery. A second table comes out from the floor.`,
+            acquireItem: 'battery',
+            find: ['second table']
+          }
+        },
+        {
+          name: 'Inspect second table',
+          response: {
+            message: 'You find a remote',
+            find: ['remote']
+          }
+        },
+        {
+          name: 'Push remote button',
+          found: ['remote'],
+          required: {
+            items: ['remote_with_battery'],
+            message: 'The battery is dead.'
+          },
+          response: {
+            message: 'TBD'
+          }
+        },
+        {
+          name: 'Put battery in remote',
+          found: ['remote_with_open_battery_door'],
+          required: {
+            items: ['battery'],
+            message: `You don't have a battery`
+          },
+          response: {
+            message: 'The remote is now usable',
+            find: ['remote_with_battery']
+          }
+        },
+        {
+          name: 'Open remote battery door',
+          found: ['remote'],
+          required: {
+            items: ['screwdriver'],
+            message: 'The battery door is secured with a screw.'
+          },
+          response: {
+            find: ['remote_with_open_battery_door'],
+            message: 'You have opened the remote battery door. There is no battery in the remote.'
+          }
+        },
+        {
+          name: 'Examine the ground',
+          response: {
+            message: 'You find a hole in the ground and a ladder going down',
+            find: ['hole in floor']
+          }
+        },
+        {
+          name: 'Go down hole in floor',
+          response: {
+            message: 'You go through the hole in the floor. You climb down the ladder.',
+            moveToRoom: 'subbasement'
+          }
+        }
+      ],
     },
+    subbasement: {
+      initial: 'You are now in the subbasement. You a scredriver on a shelf.',
+      actions: [
+        {
+          name: 'Pick up screwdriver',
+          response: {
+            acquireItem: 'screwdriver',
+            message: 'You have acquired a screwdriver'
+          }
+        },
+        {
+          name: 'Go back up the ladder',
+          response: {
+            message: "You climb up the ladder",
+            moveToRoom: 'basement'
+          }
+        }
+      ]
+    }
   },
 };
 
