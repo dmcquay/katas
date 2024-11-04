@@ -223,16 +223,85 @@ const luke: World = {
             message: "The door is locked",
           },
           response: {
-            moveToRoom: "next",
+            moveToRoom: "shop",
             message: "You opened the door and went through it",
           },
         },
+        {
+          name: 'Look next to the table',
+          found: ['table'],
+          response: {
+            find: ['safe'],
+            message: 'You found a safe.'
+          }
+        }
       ],
     },
-    next: {
-      initial: "You are in the next room",
-      actions: [],
+    shop: {
+      initial: "You go down a hallway. Along the hallway, there is a shop.",
+      actions: [
+        {
+          name: 'Ask the shopkeeper what is for sale',
+          response: {
+            message: 'Healing food, Fire power up',
+            find: ['product list']
+          }
+        },
+        {
+          name: 'Buy healing food',
+          found: ['product list'],
+          required: {
+            items: ['block of gold'],
+            message: `You need something valuable to trade with`
+          },
+          response: {
+            acquireItem: 'healing food',
+            message: `You acquired healing food!`
+          }
+        },
+        {
+          name: 'Continue down the hall',
+          response: {
+            moveToRoom: 'power_room',
+            message: 'You go to the power room'
+          }
+        }
+      ],
     },
+    power_room: {
+      initial: 'There is a box with wires. There is also a door on the other side of the room.',
+      actions: [
+        {
+          name: 'Inspect box with wires',
+          response: {
+            message: `There are three wires. It looks like we need to cut one of them.`,
+            find: ['wires']
+          }
+        },
+        {
+          name: 'Cut the red wire',
+          found: ['wires'],
+          response: {
+            message: 'The door across the room creaks open. You walk through the door.',
+            find: ['open door']
+          }
+        },
+        {
+          name: 'Cut the blue wire',
+          found: ['wires'],
+          response: {
+            message: 'You got zapped! Try another wire.'
+          }
+        },
+        {
+          name: 'Cut the yellow wire',
+          found: ['wires'],
+          response: {
+            message: 'You got zapped! Try another wire.'
+          }
+        }
+      ]
+    }
   },
 };
 
