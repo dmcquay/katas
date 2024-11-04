@@ -285,8 +285,8 @@ const luke: World = {
           found: ["wires"],
           response: {
             message:
-              "The door across the room creaks open. You walk through the door.",
-            find: ["open door"],
+              "The door across the room creaks open. Behind it is a tunnel. It is too short to walk through. You have to crawl. At the end of the tunnel you find a block of gold.",
+            acquireItem: 'block of gold',
           },
         },
         {
@@ -303,8 +303,70 @@ const luke: World = {
             message: "You got zapped! Try another wire.",
           },
         },
+        {
+          name: 'Go back to shop',
+          response: {
+            moveToRoom: 'shop',
+            message: 'You go back the way you came to the shop'
+          }
+        },
+        {
+          name: "Go through the second door",
+          response: {
+            moveToRoom: 'power_to_pipes_hall',
+            message: 'You go through the door'
+          }
+        }
       ],
     },
+    power_to_pipes_hall: {
+      initial: 'You are in a short hallway. You see three pipes.',
+      actions: [
+        {
+          name: 'Go into first pipe',
+          response: {
+            message: 'You crawl in to the pipe. You find a hole in the pipe and you are able to jump into another broken pipe a few feet away. You crawl to the end of the broken pipe and enter a room.',
+            moveToRoom: 'pipe_room'
+          }
+        },
+        {
+          name: 'Go into second pipe',
+          response: {
+            message: `You can't do that. It is closed.`
+          }
+        },
+        {
+          name: 'Go into third pipe',
+          response: {
+            message: `You crawl to the end of the piep and it is a dead end. You go back.`
+          }
+        }
+      ]
+    },
+    pipe_room: {
+      initial: 'You are in a room which several pipes lead to. There is a chair. There is also a vent in the ceiling.',
+      actions: [
+        {
+          name: 'Stand on the chair',
+          response: {
+            find: ['vent'],
+            message: 'The vent can be opened.'
+          }
+        },
+        {
+          name: 'Climb up into the vent',
+          found: ['vent'],
+          response: {
+            moveToRoom: 'building_room',
+            message: "It is difficult, but you manage to climb up into the vent. The vent takes you into another room."
+          }
+        }
+      ]
+    },
+    building_room: {
+      initial: 'You are in the building room',
+      actions: []
+    }
   },
 };
 
