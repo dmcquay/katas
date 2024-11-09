@@ -306,19 +306,32 @@ console.log(`Listening on port ${config.port}`);
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 
-for await (const conn of listener) {
+const buildTcpConnectionManager = (conn: Deno.TcpConn) => {
   const writeLine = (msg: string) => {
     conn.write(encoder.encode(msg + "\n"));
   };
 
-  const client = await buildClient({
-    writeLine,
-  });
+  return {
+    start: () => {
+      (async () => {
+        const client = await buildClient({
+          writeLine,
+        });
 
-  for await (const chunk of conn.readable) {
-    const data = decoder.decode(chunk).trim();
-    client.handleInput(data);
-  }
+        for await (const chunk of conn.readable) {
+          const data = decoder.decode(chunk).trim();
+          client.handleInput(data);
+        }
+      })();
+    },
+  };
+};
 
-  console.log("shutting down");
+const connMgrs:ReturnType<typeof buildTcpConnectionManager>[] = []
+
+for await (const conn of listener) {
+  const connMgr = buildTcpConnectionManager(conn)
+  connMgr.start()
+  connMgrs.push(connMgr)
+  // TODO: handle shutdown, disconnects, etc
 }
