@@ -793,8 +793,15 @@ const violet: World = {
       ],
     },
     escape: {
-      initial: "There is a big red brick wall in this room",
-      actions: [],
+      initial: "There is a big red brick wall in this room (incomplete)",
+      actions: [
+        {
+          name: 'There is nothing left to do',
+          response: {
+            message: 'This is not a real action. Violet needs to finish this.'
+          }
+        }
+      ],
     },
   },
 };
