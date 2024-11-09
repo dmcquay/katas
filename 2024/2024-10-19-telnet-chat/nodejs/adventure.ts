@@ -990,14 +990,44 @@ const buildClient = async (socket: Socket) => {
       }
 
       const availableActions = room.actions.filter((a) => {
-        if (a.found == null) return true;
-        for (const requiredToBeFound of a.found) {
-          if (!roomState.found.includes(requiredToBeFound)) {
-            return false;
+        // if this action requires and item to be found that has not been found yet, exclude
+        if (a.found != null) {
+          for (const requiredToBeFound of a.found) {
+            if (!roomState.found.includes(requiredToBeFound)) {
+              console.log(`Excluding ${a.name} because one of theses hasn't been found yet: ${a.found.join(',')}`)
+              return false;
+            }
           }
         }
+
+        // if user has already found the things that this action will find, exclude
+        let nothingToFind = false;
+        let nothingToAcquire = false;
+        if (a.response.find != null) {
+          const notFoundYet = a.response.find.find((x) =>
+            !roomState.found.includes(x)
+          );
+          nothingToFind = notFoundYet == null;
+        }
+        if (a.response.acquireItem != null) {
+          nothingToAcquire = worldState.items.includes(
+            a.response.acquireItem,
+          );
+        }
+        if (nothingToFind && nothingToAcquire) {
+          console.dir({
+            msg:`Excluding ${a.name} because there's nothing left fo find or acquire`,
+            thisActionFinds: a.response.find,
+            thisUserHasFound: roomState.found,
+            thisActionAcquires: a.response.acquireItem,
+            thisUserHasItems: worldState.items
+          }, {depth: null});
+          return false;
+        }
+
         return true;
       });
+
       const extendedAvailableActions: Action[] = [
         ...availableActions,
         // {
@@ -1007,6 +1037,10 @@ const buildClient = async (socket: Socket) => {
         //   },
         // },
       ];
+
+      if (msg === "") {
+        msg = "What can I do";
+      }
 
       const actions: Action[] = [
         ...extendedAvailableActions,
