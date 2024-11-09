@@ -244,7 +244,8 @@ const gavin: World = {
             message: 'The battery is dead.'
           },
           response: {
-            message: 'TBD'
+            message: 'A third table comes out of the floor. On the table is a puzzle board.',
+            find: ['third table', 'puzzle board']
           }
         },
         {
