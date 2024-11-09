@@ -366,14 +366,14 @@ const luke: World = {
             message: "You opened the door and went through it",
           },
         },
-        {
-          name: "Look next to the table",
-          found: ["table"],
-          response: {
-            find: ["safe"],
-            message: "You found a safe.",
-          },
-        },
+        // {
+        //   name: "Look next to the table",
+        //   found: ["table"],
+        //   response: {
+        //     find: ["safe"],
+        //     message: "You found a safe.",
+        //   },
+        // },
       ],
     },
     shop: {
@@ -1001,35 +1001,50 @@ const buildClient = async (socket: Socket) => {
         if (a.found != null) {
           for (const requiredToBeFound of a.found) {
             if (!roomState.found.includes(requiredToBeFound)) {
-              console.log(`Excluding ${a.name} because one of theses hasn't been found yet: ${a.found.join(',')}`)
+              // console.log(`Excluding ${a.name} because one of theses hasn't been found yet: ${a.found.join(',')}`)
               return false;
             }
           }
         }
 
         // if user has already found the things that this action will find, exclude
-        let nothingToFind = false;
-        let nothingToAcquire = false;
+        const actionAcquiresOrFindsSomething = a.response.find != null || a.response.acquireItem != null
+        let somethingToFind = false;
+        let somethingToAcquire = false;
         if (a.response.find != null) {
           const notFoundYet = a.response.find.find((x) =>
             !roomState.found.includes(x)
           );
-          nothingToFind = notFoundYet == null;
+          somethingToFind = notFoundYet != null;
         }
         if (a.response.acquireItem != null) {
-          nothingToAcquire = worldState.items.includes(
+          somethingToAcquire = !worldState.items.includes(
             a.response.acquireItem,
           );
         }
-        if (nothingToFind && nothingToAcquire) {
-          console.dir({
-            msg:`Excluding ${a.name} because there's nothing left fo find or acquire`,
-            thisActionFinds: a.response.find,
-            thisUserHasFound: roomState.found,
-            thisActionAcquires: a.response.acquireItem,
-            thisUserHasItems: worldState.items
-          }, {depth: null});
+        if (actionAcquiresOrFindsSomething && !(somethingToAcquire || somethingToFind)) {
+          // console.dir({
+          //   msg:`Excluding ${a.name} because there's nothing left fo find or acquire`,
+          //   actionAcquiresOrFindsSomething,
+          //   somethingToFind,
+          //   somethingToAcquire,
+          //   thisActionFinds: a.response.find,
+          //   thisUserHasFound: roomState.found,
+          //   thisActionAcquires: a.response.acquireItem,
+          //   thisUserHasItems: worldState.items
+          // }, {depth: null});
           return false;
+        } else {
+          // console.dir({
+          //   msg:`Including ${a.name} because there's something left fo find or acquire`,
+          //   actionAcquiresOrFindsSomething,
+          //   somethingToFind,
+          //   somethingToAcquire,
+          //   thisActionFinds: a.response.find,
+          //   thisUserHasFound: roomState.found,
+          //   thisActionAcquires: a.response.acquireItem,
+          //   thisUserHasItems: worldState.items
+          // }, {depth: null});
         }
 
         return true;
@@ -1061,7 +1076,7 @@ const buildClient = async (socket: Socket) => {
         },
       ];
 
-      let action: Action;
+      let action: Action | null;
 
       if (/^\d+$/.test(msg)) {
         const idx = parseInt(msg) - 1;
@@ -1074,12 +1089,21 @@ const buildClient = async (socket: Socket) => {
         action = extendedAvailableActions[idx];
       } else {
         const scoredActions = actions.map((action) => {
+          const dist = distance(msg.toLowerCase(), action.name.toLowerCase())
+          const score = 1 - (dist / action.name.length)
+          // console.log(`${score}: ${action.name} <=> ${msg}`)
           return {
             action,
-            distance: distance(msg.toLowerCase(), action.name.toLowerCase()),
+            distance: dist,
+            score
           };
         });
-        action = R.sortBy(R.prop("distance"))(scoredActions)[0].action;
+        const winner = R.reverse(R.sortBy(R.prop("score"))(scoredActions))[0];
+        if (winner.score > 0.5) {
+          action = winner.action
+        } else {
+          action = null
+        }
       }
 
       if (action == null) {
