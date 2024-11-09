@@ -357,6 +357,7 @@ const luke: World = {
         },
         {
           name: "Open the door",
+          found: ['door'],
           required: {
             items: ["main key"],
             message: "The door is locked",
@@ -664,6 +665,13 @@ const luke: World = {
       initial: `There is a huge monster. It notices you and starts to attack.`,
       actions: [
         {
+          name: 'Go back to the previous room',
+          response: {
+            moveToRoom: 'pre_boss_room',
+            message: ''
+          }
+        },
+        {
           name: "Hit monster with your fist",
           response: {
             message: "Your fist is no match for this monster.",
@@ -693,7 +701,7 @@ const luke: World = {
     },
     last_room: {
       initial:
-        "You are in the last room. You find a diamond. Go through the exit. You are now a free person and a diamon richer!",
+        "You are in the last room. You find a diamond. Go through the exit. You are now a free person and a diamond richer!",
       actions: [
         {
           name: "Exit",
