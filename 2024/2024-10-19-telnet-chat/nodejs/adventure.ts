@@ -941,6 +941,7 @@ const buildClient = async (socket: Socket) => {
           return;
         }
         socket.writeLine("That was not a valid save file");
+        return;
       }
 
       if (state == null) {
