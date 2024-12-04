@@ -1,0 +1,6 @@
+{
+  "name": "@my-org/design-system",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.js"
+}

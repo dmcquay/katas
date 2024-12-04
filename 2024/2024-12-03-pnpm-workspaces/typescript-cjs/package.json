@@ -1,0 +1,24 @@
+{
+  "name": "esm-typescript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:ts": "ts-node src/index.ts",
+    "start:tsx": "tsx src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2"
+  }
+}

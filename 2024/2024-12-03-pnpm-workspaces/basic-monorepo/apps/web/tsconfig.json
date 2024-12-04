@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+      "target": "ESNext",
+      "module": "NodeNext",
+      "strict": true,
+      "baseUrl": "./src",
+      "moduleResolution": "NodeNext",
+    //   "allowImportingTsExtensions": true,
+      "resolveJsonModule": true,
+      "isolatedModules": true
+    },
+    "include": ["src"]
+  }
+  
