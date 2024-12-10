@@ -8,6 +8,10 @@ basic, you still have to figure out many different configuration options and mak
 So I'd like to document a handful of common configuration combinations that are valid and well suited for
 a few common use cases.
 
+See also
+
+- https://nodejs.org/api/packages.html#exports
+
 # Module Systems
 
 ECMA Script didn't specify a module system until ES6. When nodejs was created, they had to create their own
@@ -69,6 +73,12 @@ tsx uses esbuild and seems to "just work" in a lot more cases.
 ts-node uses tsc by default, but can be configured to use SWC. And it seems to not work in a lot more cases. I assume
 I could resolve these cases with configuration tweaks, but why not just use tsx?
 
-## Experiment: Basic monorepo with pnpm workspaces
+## mono-cjs-main: Basic monorepo with pnpm workspaces
 
-This is a WIP and is not working yet.
+lib and app use cjs.
+lib uses main, not exports.
+pnpm workspaces allow sources to be consumed directly.
+
+## mono-cjs-exports and mono-cjs-exports-sub
+
+lib uses exports, including subpaths with wildcards.

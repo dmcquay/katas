@@ -1,0 +1,8 @@
+{
+  "name": "@my-org/design-system",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "exports": {
+    "./icons/*": "./src/icons/*.js"
+  }
+}
