@@ -1,0 +1,17 @@
+{
+  "version": "4",
+  "remote": {
+    "https://deno.land/std@0.117.0/encoding/base64.ts": "0b58bd6477214838bf711eef43eac21e47ba9e5c81b2ce185fe25d9ecab3ebb3",
+    "https://deno.land/std@0.117.0/encoding/hex.ts": "5bc7df19af498c315cdaba69e2fce1b2aef5fc57344e8c21c08991aa8505a260",
+    "https://deno.land/std@0.117.0/hash/_wasm/hash.ts": "021e1d98319edaf4bd57cf114e858f16c483d21c1057ef3bec8e329e61207c80",
+    "https://deno.land/std@0.117.0/hash/_wasm/wasm.js": "3090298996605a5545d89a46becd3d5e0ffb81aaaf5af5b010cd037b30278ca6",
+    "https://deno.land/std@0.117.0/hash/mod.ts": "e06f28bf9a212529cfb90f7f67f0840ad3eae1441d29210972e8224002382047"
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@types/node@22"
+      ]
+    }
+  }
+}

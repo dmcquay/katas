@@ -61,7 +61,13 @@ deno and node were similar with deno slightly slower.
 
 bun was consistently the winner by around 30%.
 
-The workload was almost entirely computation of sha256 hashes which is delegated to the highly optimized
-crypto module. Perhaps that is why bun and deno didn't outshine node as much as expected. Also, maybe
-deno would get better performance by using Deno stdlib rather than node's crypto lib? Does bun have a
-similar concept?
+This is much different than reported in [this article](https://medium.com/deno-the-complete-reference/who-hashes-the-fastest-bun-node-js-or-deno-6bf6260dff9f) so perhaps bun has made some optimizations since.
+
+## Bonus: Optimized versions
+
+I created `app-deno.ts` which is optimized (basically just uses crypto from deno stdlib instead of node's).
+This resulted in much slower performance. [This article](https://medium.com/deno-the-complete-reference/who-hashes-the-fastest-bun-node-js-or-deno-6bf6260dff9f) claims this is due to deno's implementation not
+blocking the event loop while node's does block. Does this mean that when importing via `node:crypto` we
+actually get node's implementation, not just a wrapped version of Deno's implementation?
+
+I did the same thing for bun with `app-bun.ts` and got about the same results as the unoptimized `app.ts`.
