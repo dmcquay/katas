@@ -35,3 +35,33 @@ real    0m11.438s
 user    0m11.424s
 sys     0m0.149s
 ```
+
+## Compiling with deno
+
+```sh
+deno compile -o dist/deno-app app.ts
+time ./dist/deno-app
+```
+
+I only did a couple runs, but the compiled version didn't seem to be any faster. The benefit seems
+to be more just around zero runtime dependencies, code signing and potential for desktop app distribution.
+
+## Compiling with bun
+
+```sh
+bun build app.ts --compile --outfile dist/bun-app
+time ./dist/bun-app
+```
+
+Again, this didn't seem to improve runtime performance.
+
+## Winner
+
+deno and node were similar with deno slightly slower.
+
+bun was consistently the winner by around 30%.
+
+The workload was almost entirely computation of sha256 hashes which is delegated to the highly optimized
+crypto module. Perhaps that is why bun and deno didn't outshine node as much as expected. Also, maybe
+deno would get better performance by using Deno stdlib rather than node's crypto lib? Does bun have a
+similar concept?
