@@ -43,7 +43,7 @@ function createNextBlock(previousBlock: Block, data: string): Block {
 
 const blockchain: Block[] = [createGenesisBlock()];
  
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 100; i++) {
     blockchain.push(createNextBlock(blockchain[blockchain.length - 1], `Transaction Data ${i}...`));
-    console.log(`Block ${i + 1} has been added to the blockchain! Nonce: ${blockchain[blockchain.length - 1].nonce}`);
+    // console.log(`Block ${i + 1} has been added to the blockchain! Nonce: ${blockchain[blockchain.length - 1].nonce}`);
 }

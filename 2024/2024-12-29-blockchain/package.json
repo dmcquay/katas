@@ -4,7 +4,9 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "start": "node --experimental-strip-types app.ts"
+    "start": "node --experimental-strip-types app.ts",
+    "start:bun": "bun run app.ts",
+    "start:deno": "deno run app.ts"
   },
   "keywords": [],
   "author": "",
