@@ -178,28 +178,7 @@ const buildClient = async (socket: Socket) => {
           actionAcquiresOrFindsSomething &&
           !(somethingToAcquire || somethingToFind)
         ) {
-          // console.dir({
-          //   msg:`Excluding ${a.name} because there's nothing left fo find or acquire`,
-          //   actionAcquiresOrFindsSomething,
-          //   somethingToFind,
-          //   somethingToAcquire,
-          //   thisActionFinds: a.response.find,
-          //   thisUserHasFound: roomState.found,
-          //   thisActionAcquires: a.response.acquireItem,
-          //   thisUserHasItems: worldState.items
-          // }, {depth: null});
           return false;
-        } else {
-          // console.dir({
-          //   msg:`Including ${a.name} because there's something left fo find or acquire`,
-          //   actionAcquiresOrFindsSomething,
-          //   somethingToFind,
-          //   somethingToAcquire,
-          //   thisActionFinds: a.response.find,
-          //   thisUserHasFound: roomState.found,
-          //   thisActionAcquires: a.response.acquireItem,
-          //   thisUserHasItems: worldState.items
-          // }, {depth: null});
         }
 
         return true;
