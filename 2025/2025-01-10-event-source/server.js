@@ -32,7 +32,8 @@ const server = createServer(async (req, res) => {
         res.statusCode = 200;
         for (let i = 0; i < 100; i++) {
             res.write('event: whatever\n');
-            res.write('data: named event (whatever)\n\n');
+            res.write('data: named event \n');
+            res.write('data: (whatever)\n\n');
             res.write('data: pure data event\n\n');
             await new Promise(resolve => setTimeout(resolve, 100));
             // res.write('event: ping\n\n');
