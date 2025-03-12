@@ -10,7 +10,7 @@ async function main() {
     }
 }
 
-async function* withStuff(genCb: () => AsyncGenerator<string, void, unknown>) {
+async function* withStuff<T>(genCb: () => AsyncGenerator<T, void, unknown>) {
     const result = await asyncLocalStorage.run({a: 'a'}, async function() {
         return async function*() {
             for await (const value of genCb()) {    
@@ -18,7 +18,7 @@ async function* withStuff(genCb: () => AsyncGenerator<string, void, unknown>) {
             }
         }
     })
-    const accumulatedValues: string[] = []
+    const accumulatedValues: T[] = []
     for await (const value of result()) {
         yield value
         accumulatedValues.push(value)
