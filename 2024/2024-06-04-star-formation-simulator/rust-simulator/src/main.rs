@@ -70,7 +70,6 @@ fn create_initial_particles(particles: &mut BarnesHutTree, clusters: &Vec<Cluste
     for cluster in clusters {
         for _ in 0..cluster.particle_count {
             let particle = create_random_particle(cluster);
-            println!("adding particle {}", particle.id);
             particles.add(particle);
         }
     }
@@ -172,7 +171,8 @@ fn main() {
     let mut frame = 0;
     let mut frames_since_last_report = 0;
 
-    loop {
+    let max_frames = 100; // Limit frames for performance testing
+    while frame < max_frames {
         particles = update_particles(&particles, config.interval_seconds as u64);
         prev_frame_size = write_frame(&file, &particles, prev_frame_size).unwrap();
 
@@ -189,4 +189,5 @@ fn main() {
             frames_since_last_report = 0;
         }
     }
+    println!("Simulation complete: {} frames written", frame);
 }
