@@ -1,0 +1,16 @@
+{
+  "name": "2025-05-05-nodejs-vm-includes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --experimental-strip-types app.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^22.15.9",
+    "ramda": "^0.30.1"
+  }
+}
